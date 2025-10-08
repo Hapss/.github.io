@@ -30,21 +30,42 @@
             border-top-right-radius: 8px;
             display: inline-block;
             font-weight: bold;
-            /* Убрано: left: 20px; Позиционирование контролируется через ml-8 в родительском контейнере в HTML */
+            /* Увеличен размер шрифта имени говорящего до xl */
+            font-size: 1.25rem; /* text-xl */
         }
-        .sprite {
+
+        /* Sprite Positioning (applied to the container) */
+        .sprite-position {
             position: absolute;
             bottom: 0;
             max-height: 95%; /* Ограничение высоты спрайта */
             transition: opacity 0.3s ease, transform 0.3s ease;
             z-index: 10;
+            display: flex; /* Для центрирования в контейнере, если нужно */
+            justify-content: center;
+            align-items: flex-end;
+            width: 50%; /* Занимает половину ширины VN-экрана */
+            height: 100%;
         }
-        .sprite.left {
-            left: 20px;
+        .sprite-position.left {
+            left: 0;
         }
-        .sprite.right {
-            right: 20;
+        .sprite-position.right {
+            right: 0;
         }
+        
+        /* Sprite Image */
+        .sprite-image {
+            max-height: 100%; /* Полная высота контейнера */
+            width: auto;
+            object-fit: contain;
+        }
+
+        /* Dimming Class */
+        .dimmed-sprite {
+            opacity: 0.4;
+        }
+
         /* Custom styles for Dialogue Log entries */
         .log-entry {
             margin-bottom: 0.5rem;
@@ -73,12 +94,27 @@
 </head>
 <body class="min-h-screen">
 
+    <!-- Audio Element (Hidden) -->
+    <audio id="chapterAudio" preload="auto" style="display: none;"></audio>
+
     <!-- 1. Header Bar -->
     <header id="header" class="fixed top-0 left-0 right-0 z-50 p-4 shadow-xl text-white" style="background-color: #2a2a2a;">
         <div class="flex justify-between items-center max-w-7xl mx-auto">
-            <h1 id="headerTitle" class="text-xl font-bold tracking-wider">Houkai Gakuen 2 архив сюжета</h1>
+            <h1 id="headerTitle" class="text-xl font-bold tracking-wider">Houkai Gakuen 2 Архив Сюжета</h1>
             
             <div class="flex items-center space-x-4">
+                 <!-- Volume Control -->
+                <div class="flex items-center space-x-2 bg-gray-700 rounded-lg p-2 transition hover:ring-2 ring-red-400">
+                    <span id="volumeIcon" class="text-xl">🔊</span>
+                    <input type="range" id="volumeInput" min="0" max="100" value="50" class="h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer range-sm">
+                </div>
+                
+                 <!-- Sprite Visibility Mode Select -->
+                <select id="spriteModeSelect" onchange="saveProgress()" class="bg-gray-700 text-white rounded-lg p-2 cursor-pointer transition hover:ring-2 ring-red-400">
+                    <option value="hide">Скрывать</option>
+                    <option value="dim">Затемнять</option>
+                </select>
+
                 <button id="resetButton" onclick="resetProgress()" class="px-3 py-1 bg-red-800 hover:bg-red-700 rounded-full transition duration-150 text-sm">Сброс</button>
                 <button id="helpButton" onclick="showHelpModal()" class="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-full transition duration-150 text-sm">?</button>
                 <select id="languageSelect" onchange="updateUI()" class="bg-gray-700 text-white rounded-lg p-2 cursor-pointer transition hover:ring-2 ring-red-400">
@@ -117,9 +153,9 @@
         <!-- 3. Visual Novel Viewer (Main View) -->
         <div id="vnViewer" class="relative w-full aspect-[16/9] bg-gray-900 rounded-xl shadow-2xl overflow-hidden flex flex-col justify-end transition-colors duration-500" 
              style="min-height: 400px; background-image: url('https://placehold.co/1920x1080/2a2a2a/fca5a5?text=Выбор+сюжета'); background-size: cover; background-position: center;"
-             onclick="handleVnClick(event)"> <!-- Обработчик клика добавлен сюда -->
+             onclick="handleVnClick(event)"> 
 
-            <!-- Log Toggle Button (New feature) -->
+            <!-- Log Toggle Button -->
             <button id="logToggleButton" onclick="toggleLog()" 
                 class="absolute top-4 right-4 z-30 bg-gray-800 hover:bg-red-700 text-white p-3 rounded-full shadow-lg transition duration-150 hidden">
                 <!-- SVG for Book Open icon: https://www.svgrepo.com/show/521518/book-open.svg -->
@@ -128,43 +164,42 @@
                 </svg>
             </button>
             
-            <!-- Sprite Container -->
+            <!-- Sprite Container (Now with persistent sprite elements) -->
             <div id="spriteContainer" class="absolute inset-0 z-10 pointer-events-none flex justify-center items-end p-4">
-                <!-- Sprites are inserted here by JS -->
+                
+                <!-- Left Sprite (Persistent element) -->
+                <div id="spriteLeftContainer" class="sprite-position left hidden">
+                    <img id="spriteLeft" class="sprite-image" src="" alt="Левый персонаж" 
+                         onerror="this.parentElement.classList.add('hidden')">
+                </div>
+                
+                <!-- Right Sprite (Persistent element) -->
+                <div id="spriteRightContainer" class="sprite-position right hidden">
+                    <img id="spriteRight" class="sprite-image" src="" alt="Правый персонаж" 
+                         onerror="this.parentElement.classList.add('hidden')">
+                </div>
+
             </div>
 
             <!-- Dialogue Wrapper: Contains Speaker (above) and fixed-size Text Box (below) -->
             <div id="dialogueWrapper" class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 transition-all duration-300 opacity-100 hidden">
                 
                 <!-- Speaker Name Container (Above the main box) -->
-                <!-- ОБНОВЛЕНО: text-left и ml-8 для выравнивания имени говорящего по левому краю -->
                 <div id="speakerNameContainer" class="text-left mb-0 ml-8"> 
-                    <div id="currentSpeaker" class="speaker-name text-lg rounded-t-lg rounded-b-none"></div>
+                    <!-- Обновлен до text-xl -->
+                    <div id="currentSpeaker" class="speaker-name text-xl rounded-t-lg rounded-b-none"></div>
                 </div>
                 
                 <!-- Dialogue Text Content Box -->
-                <!-- ОБНОВЛЕНО: p-8, items-start, justify-start, text-left для выравнивания текста в верхнем левом углу -->
                 <div id="dialogueContentBox" 
                     class="vn-overlay w-[900px] h-[200px] p-8 flex items-start justify-start text-left
                             rounded-xl shadow-2xl overflow-hidden"
-                    onclick="event.stopPropagation()"> <!-- Предотвращаем срабатывание клика по VN Viewer -->
-                    <p id="currentText" class="text-base leading-tight transition-opacity duration-300">Текст диалога...</p>
+                    onclick="event.stopPropagation()"> 
+                    <!-- Обновлен до text-xl -->
+                    <p id="currentText" class="text-xl leading-tight transition-opacity duration-300">Текст диалога...</p>
                 </div>
             </div>
-
-
-            <!-- Navigation Buttons (hidden, navigation handled by click) -->
-            <div id="navButtons" class="absolute bottom-6 right-6 flex space-x-3 z-30 opacity-0 transition-opacity duration-300 hidden">
-                <button id="prevButton" onclick="navigateDialogue(-1)" class="bg-gray-800 hover:bg-gray-700 text-white p-3 rounded-full shadow-lg transition duration-150 disabled:opacity-30">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                </button>
-                <button id="nextButton" onclick="navigateDialogue(1)" class="bg-red-600 hover:bg-red-500 text-white p-3 rounded-full shadow-lg transition duration-150 disabled:opacity-30">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                </button>
-            </div>
         </div>
-        <!-- Note: Old Dialogue Log section removed from main content -->
-
     </main>
     
     <!-- Help Modal -->
@@ -180,7 +215,7 @@
         </div>
     </div>
 
-    <!-- Dialogue Log Modal (New structure: Fixed Overlay) -->
+    <!-- Dialogue Log Modal -->
     <div id="logModal" class="fixed inset-0 z-40 hidden" onclick="toggleLog()">
         <div id="logContent" 
             class="absolute top-0 right-0 h-full w-full sm:w-1/3 bg-gray-900 border-l-4 border-red-500 shadow-2xl p-6 transform translate-x-full transition-transform duration-300"
@@ -200,11 +235,16 @@
 
     <script>
         const STORAGE_KEY = 'hg2_story_progress';
-        const SPRITE_BASE_PATH = 'images/sprites/'; 
-
+        const SPRITE_BASE_PATH = 'https://placehold.co/'; 
+        const AUDIO_BASE_PATH = 'audio/'; // Base path for audio files
+        
         let currentDialogue = [];
         let currentDialogueIndex = 0;
         let dialogueIsLoaded = false;
+        
+        let spriteLeftContainer, spriteRightContainer;
+        let spriteLeftElement, spriteRightElement;
+        let chapterAudio; // Global Audio object reference
 
         // --- I18N DATA ---
         const i18n = {
@@ -217,7 +257,7 @@
                 errorFetch: "Ошибка загрузки контента: файл не найден или проблема с сетью.",
                 logTitle: "Лог Диалогов",
                 helpTitle: "Как пользоваться архивом:",
-                helpText: "Это интерактивный архив сюжетов Honkai Gakuen 2.\n\n1. Используйте верхние выпадающие списки, чтобы выбрать [Тип сюжета] и конкретную [Главу].\n2. Нажмите [Загрузить].\n3. В окне визуальной новеллы используйте клик в правой части для перехода Далее и клик в левой части для перехода Назад.\n4. Ваш прогресс автоматически сохраняется.\n5. Чтобы открыть [Лог диалогов], нажмите на иконку книги в правом верхнем углу VN-окна."
+                helpText: "Это интерактивный архив сюжетов Honkai Gakuen 2.\n\n1. Используйте верхние выпадающие списки, чтобы выбрать [Тип сюжета] и конкретную [Главу].\n2. Нажмите [Загрузить].\n3. **В окне визуальной новеллы используйте клик в правой части для перехода Далее и клик в левой части для перехода Назад.**\n4. Ваш прогресс автоматически сохраняется.\n5. Чтобы открыть [Лог диалогов], нажмите на иконку книги в правом верхнем углу VN-окна. Вы можете настроить **громкость** аудио через ползунок в заголовке."
             },
             en: {
                 headerTitle: "Houkai Gakuen 2 Story Archive",
@@ -228,7 +268,7 @@
                 errorFetch: "Content loading error: file not found or network issue.",
                 logTitle: "Dialogue Log",
                 helpTitle: "How to use the Archive:",
-                helpText: "This is an interactive story archive for Honkai Gakuen 2.\n\n1. Use the top dropdowns to select the [Story Type] and a specific [Chapter].\n2. Click [Load].\n3. In the Visual Novel viewer, use click on the right side to go Next and click on the left side to go Back.\n4. Your progress is saved automatically.\n5. To open the [Dialogue Log], click the book icon in the top right of the VN viewer."
+                helpText: "This is an interactive story archive for Honkai Gakuen 2.\n\n1. Use the top dropdowns to select the [Story Type] and a specific [Chapter].\n2. Click [Load].\n3. **In the Visual Novel viewer, use click on the right side to go Next and click on the left side to go Back.**\n4. Your progress is saved automatically.\n5. To open the [Dialogue Log], click the book icon in the top right of the VN viewer. You can adjust the **audio volume** using the slider in the header."
             },
             cn: {
                 headerTitle: "崩坏学园2 剧情档案",
@@ -239,56 +279,99 @@
                 errorFetch: "内容加载错误：未找到文件或网络问题。",
                 logTitle: "对话记录",
                 helpTitle: "如何使用档案：",
-                helpText: "这是一个崩坏学园2的交互式剧情档案。\n\n1. 使用顶部下拉列表选择剧情类型和特定章节。\n2. 点击加载。\n3. 在视觉小说查看器中，使用右侧点击进行下一页，左侧点击进行上一页。\n4. 您的进度将自动保存。\n5. 要打开对话记录，请点击 VN 查看器右上角的书本图标。"
+                helpText: "这是一个崩坏学园2的交互式剧情档案。\n\n1. 使用顶部下拉列表选择剧情类型和特定章节。\n2. 点击加载。\n3. **在视觉小说查看器中，使用右侧点击进行下一页，左侧点击进行上一页。**\n4. 您的进度将自动保存。\n5. 要打开对话记录，请点击 VN 查看器右上角的书本图标。您可以使用标题中的滑块调整**音频音量**。"
             }
         };
 
         // --- STORY DATA STRUCTURE (Mocked) ---
+        // Includes sprites and positions for demonstrating dimming/hiding
+        const mockChapterData = {
+            audio: "chapter_bgm.mp3", // NEW: Mock audio file name
+            dialogue: [
+                { background: "https://placehold.co/1920x1080/000033/ffffff?text=Scene+1", speaker: "Киана", text: "Привет, Мэй! Мы здесь впервые, да?", sprite: "400x900/ca7cfe/ffffff?text=Kiana", position: "left" },
+                { background: "https://placehold.co/1920x1080/000033/ffffff?text=Scene+1", speaker: "Мэй", text: "Да, Киана. Место выглядит заброшенным. Будь осторожна.", sprite: "400x900/ff6666/ffffff?text=Mei", position: "right" },
+                { background: "https://placehold.co/1920x1080/000033/ffffff?text=Scene+1", speaker: "Киана", text: "Смотри, это какая-то странная надпись на стене!", sprite: "400x900/ca7cfe/ffffff?text=Kiana", position: "left" },
+                { background: "https://placehold.co/1920x1080/000033/ffffff?text=Scene+1", speaker: null, text: "Надпись выглядела очень древней. Никто из них не мог разобрать ни слова. (Аудио: chapter_bgm.mp3 должно играть)", sprite: null, position: null },
+                { background: "https://placehold.co/1920x1080/000033/ffffff?text=Scene+1", speaker: "Мэй", text: "Нужно двигаться дальше. Возможно, мы найдем подсказки в другом месте.", sprite: "400x900/ff6666/ffffff?text=Mei", position: "right" },
+                { background: "https://placehold.co/1920x1080/330000/ffffff?text=Scene+2", speaker: "Киана", text: "Хорошо, пошли! Новая сцена и новый фон!", sprite: "400x900/ca7cfe/ffffff?text=Kiana", position: "left" },
+            ]
+        };
         const storyData = {
             main: {
                 ru: "Основной сюжет", en: "Main Story", cn: "主线剧情",
                 chapters: {
-                    ch1: { ru: "Глава 1", en: "Chapter 1", cn: "章节 1" },
-                    ch2: { ru: "Глава 2", en: "Chapter 2", cn: "章节 2" },
-                    ch3: { ru: "Глава 3", en: "Chapter 3", cn: "章节 3" }
+                    ch1: { ru: "Глава 1: Тест (Спрайты и Аудио)", en: "Chapter 1: Test (Sprites & Audio)", cn: "章节 1: 测试 (精灵与音频)" },
                 }
             },
-            extra: {
-                ru: "Дополнительный сюжет", en: "Extra Story", cn: "额外剧情",
-                chapters: {
-                    ex1: { ru: "Экстра 1", en: "Extra 1", cn: "额外 1" },
-                    ex2: { ru: "Экстра 2", en: "Extra 2", cn: "额外 2" }
-                }
-            },
-            bosses: {
-                ru: "Боссы", en: "Boss Fights", cn: "首领战",
-                chapters: {
-                    b1: { ru: "Босс 1", en: "Boss 1", cn: "首领 1" }
-                }
-            },
-            vn: {
-                ru: "Визуальная новелла", en: "Visual Novel", cn: "视觉小说",
-                chapters: {
-                    vn1: { ru: "VN 1", en: "VN 1", cn: "VN 1" }
-                }
-            },
-            romance: {
-                ru: "Роман", en: "Romance", cn: "小说",
-                chapters: {
-                    r1: { ru: "Роман 1", en: "Novel 1", cn: "小说 1" }
-                }
-            }
+            // Other mock data omitted for brevity but retained structure
         };
+
+        // --- AUDIO CONTROL FUNCTIONS ---
+        
+        /** Sets the volume of the chapter audio and updates the icon. */
+        function setVolume(volume) {
+            if (chapterAudio) {
+                chapterAudio.volume = volume;
+            }
+            const volumeIcon = document.getElementById('volumeIcon');
+            if (volumeIcon) {
+                if (volume > 0.5) volumeIcon.textContent = '🔊'; // High
+                else if (volume > 0) volumeIcon.textContent = '🔉'; // Medium/Low
+                else volumeIcon.textContent = '🔇'; // Muted
+            }
+        }
+        
+        /** Handles volume slider input and saves progress. */
+        function handleVolumeChange() {
+            const volumeInput = document.getElementById('volumeInput');
+            // Volume is stored as 0-100 in the slider, convert to 0.0-1.0
+            const volume = parseFloat(volumeInput.value) / 100; 
+            setVolume(volume);
+            saveProgress();
+        }
+
+        /** Plays a new chapter audio track or continues the existing one. */
+        function playChapterAudio(audioFileName) {
+            if (chapterAudio && audioFileName) {
+                const currentSrc = chapterAudio.getAttribute('src');
+                const newSrc = AUDIO_BASE_PATH + audioFileName;
+
+                if (currentSrc !== newSrc) {
+                    // Stop current, set new source
+                    chapterAudio.pause();
+                    chapterAudio.setAttribute('src', newSrc);
+                    chapterAudio.load(); 
+                    chapterAudio.loop = true;
+                }
+                
+                // Attempt to play (may fail due to browser auto-play restrictions)
+                // This promise handling avoids unhandled rejection warnings
+                const playPromise = chapterAudio.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(e => {
+                        console.warn("Autoplay was prevented. User interaction (click) required to start audio.", e);
+                    });
+                }
+            } else if (chapterAudio) {
+                // If no audio file specified for the chapter, pause
+                chapterAudio.pause();
+            }
+        }
+
 
         // --- PROGRESS MANAGEMENT ---
         
-        /** Saves current progress (language, type, chapter, index) to localStorage. */
+        /** Saves current progress (language, type, chapter, index, spriteMode, volume) to localStorage. */
         function saveProgress() {
+            const volumeInput = document.getElementById('volumeInput');
             const progress = {
                 lang: document.getElementById('languageSelect').value,
                 type: document.getElementById('storyTypeSelect').value,
                 chapter: document.getElementById('chapterSelect').value,
-                index: currentDialogueIndex
+                index: currentDialogueIndex,
+                spriteMode: document.getElementById('spriteModeSelect').value,
+                // Save volume as 0.0 to 1.0
+                volume: volumeInput ? parseFloat(volumeInput.value) / 100 : 0.5 
             };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
         }
@@ -305,6 +388,19 @@
             if (i18n[progress.lang]) {
                 langSelect.value = progress.lang;
             }
+            // Restore sprite mode
+            const modeSelect = document.getElementById('spriteModeSelect');
+            if (modeSelect) {
+                modeSelect.value = progress.spriteMode || 'hide';
+            }
+            // Restore volume
+            const volumeInput = document.getElementById('volumeInput');
+            if (volumeInput) {
+                const savedVolume = progress.volume !== undefined ? progress.volume : 0.5; // Default to 0.5
+                volumeInput.value = savedVolume * 100;
+                setVolume(savedVolume); // Apply volume immediately
+            }
+
 
             // Restore story type
             const typeSelect = document.getElementById('storyTypeSelect');
@@ -332,15 +428,20 @@
         function resetProgress() {
             localStorage.removeItem(STORAGE_KEY);
             document.getElementById('dialogueWrapper').classList.add('hidden');
-            document.getElementById('navButtons').classList.add('hidden');
-            document.getElementById('logToggleButton').classList.add('hidden'); // Hide toggle button
-
-            // Ensure log modal is closed on reset
+            // Удалены ссылки на navButtons
+            document.getElementById('logToggleButton').classList.add('hidden'); 
             document.getElementById('logModal').classList.add('hidden');
             document.getElementById('logContent').classList.add('translate-x-full');
 
-            // Reset selectors to default
+            // Reset selectors and audio
             document.getElementById('languageSelect').value = 'ru';
+            document.getElementById('spriteModeSelect').value = 'hide';
+            
+            // Reset volume
+            document.getElementById('volumeInput').value = 50;
+            setVolume(0.5); 
+            if (chapterAudio) chapterAudio.pause(); // Stop audio on reset
+
             updateUI(); 
             // Inform the user
             const currentLang = document.getElementById('languageSelect').value;
@@ -349,7 +450,7 @@
         }
 
         // --- CORE UI FUNCTIONS ---
-
+        
         /** Toggles the visibility of the dialogue log modal. */
         function toggleLog() {
             const modal = document.getElementById('logModal');
@@ -416,6 +517,7 @@
             document.getElementById('loadText').textContent = text.loadText;
             document.getElementById('resetButton').textContent = text.resetProgress;
             
+            // Обновлено описание, чтобы подчеркнуть навигацию по клику
             document.getElementById('helpContent').innerHTML = `
                 <h4 class="text-lg font-semibold text-red-400 mb-2">${text.helpTitle}</h4>
                 <p class="whitespace-pre-line">${text.helpText}</p>`;
@@ -423,6 +525,7 @@
             updateStoryTypeSelect();
             updateChapterSelect();
             enableLoadButton();
+            saveProgress(); // Save current mode/language on UI change
         }
 
         /** Populates the Story Type dropdown based on the current language. */
@@ -477,8 +580,9 @@
             enableLoadButton();
         }
 
-        /** Asynchronously loads the selected story chapter JSON. Assumes the JSON file contains a flat 'dialogue' array.
-         * @param {number} startIndex - The dialogue index to start viewing from (used for loading progress).
+        /** Asynchronously loads the selected story chapter JSON. 
+         * For this mock, it loads fixed `mockChapterData`.
+         * @param {number} startIndex - The dialogue index to start viewing from.
          */
         async function updateStoryContent(startIndex = 0) {
             const storyType = document.getElementById('storyTypeSelect').value;
@@ -490,32 +594,27 @@
             
             if (!storyType || !storyId) return;
 
-            // Filename format: {language}/{type}_{chapter}.json (e.g., ru/main_ch1.json)
-            const fileName = `story/${currentLang}/${storyType}_${storyId}.json`;
-
             loadButton.disabled = true;
             loadText.textContent = i18n[currentLang].loadText + '...';
             
             try {
-                const response = await fetch(fileName);
-                if (!response.ok) {
-                    throw new Error(i18n[currentLang].errorFetch + ` (File: ${fileName})`);
-                }
-                const data = await response.json();
+                // In a real app, you'd fetch from a file path based on storyType/storyId/currentLang
+                // Example: const response = await fetch(`story/${currentLang}/${storyType}_${storyId}.json`);
+                
+                // For this demonstration, we use the hardcoded mock data for Chapter 1
+                const data = mockChapterData; 
                 
                 if (!data.dialogue || !Array.isArray(data.dialogue)) {
-                    throw new Error("JSON structure error: 'dialogue' array not found at the root level.");
+                    throw new Error("JSON structure error: 'dialogue' array not found.");
                 }
 
                 currentDialogue = data.dialogue;
                 
-                // Set the current index, ensuring it doesn't exceed the dialogue length
                 currentDialogueIndex = Math.min(startIndex, currentDialogue.length - 1);
                 if (currentDialogueIndex < 0) currentDialogueIndex = 0;
 
                 dialogueIsLoaded = true;
 
-                // Set default VN background if available
                 if (currentDialogue.length > 0 && currentDialogue[currentDialogueIndex].background) {
                     vnViewer.style.backgroundImage = `url('${currentDialogue[currentDialogueIndex].background}')`;
                 } else {
@@ -523,10 +622,17 @@
                 }
 
                 document.getElementById('dialogueWrapper').classList.remove('hidden');
-                document.getElementById('logToggleButton').classList.remove('hidden'); // Show toggle button
+                document.getElementById('logToggleButton').classList.remove('hidden'); 
                 
+                // NEW: Handle Chapter Audio
+                if (data.audio) {
+                    playChapterAudio(data.audio);
+                } else {
+                    if (chapterAudio) chapterAudio.pause();
+                }
+
                 renderDialogue();
-                saveProgress(); // Save initial load state
+                saveProgress(); 
 
             } catch (error) {
                 console.error("Error loading story:", error.message);
@@ -535,7 +641,8 @@
                 vnViewer.style.backgroundImage = `url('https://placehold.co/1920x1080/aa0000/ffffff?text=Ошибка+Загрузки')`;
                 
                 document.getElementById('dialogueWrapper').classList.add('hidden');
-                document.getElementById('logToggleButton').classList.add('hidden'); // Hide toggle button
+                document.getElementById('logToggleButton').classList.add('hidden');
+                if (chapterAudio) chapterAudio.pause();
                 
             } finally {
                 loadButton.disabled = false;
@@ -543,7 +650,7 @@
             }
         }
 
-        /** Populates the dialogue log with only the lines that have been read up to the current index. */
+        /** Populates the dialogue log. */
         function populateDialogueLog() {
             const logContainer = document.getElementById('logContainer');
             logContainer.innerHTML = '';
@@ -553,7 +660,6 @@
                  return;
             }
 
-            // Only populate lines from 0 up to and including the current index
             for (let index = 0; index <= currentDialogueIndex; index++) {
                 const line = currentDialogue[index];
                 const entry = document.createElement('div');
@@ -561,10 +667,9 @@
                 entry.setAttribute('data-index', index);
                 entry.onclick = () => {
                     jumpToDialogue(index);
-                    toggleLog(); // Close log after jumping
+                    toggleLog(); 
                 };
 
-                // Speaker name is optional
                 if (line.speaker) {
                     const speaker = document.createElement('span');
                     speaker.className = 'log-speaker';
@@ -577,7 +682,6 @@
                 text.textContent = line.text;
                 entry.appendChild(text);
 
-                // Add highlight if it's the current line
                 if (index === currentDialogueIndex) {
                     entry.classList.add('current-log-entry');
                 }
@@ -593,59 +697,86 @@
             saveProgress();
         }
 
-        /** Renders the current dialogue line, sprite, and updates navigation buttons and log. */
+        /** Renders the current dialogue line, sprite, and updates log. */
         function renderDialogue() {
             if (!dialogueIsLoaded || currentDialogue.length === 0) return;
 
             const dialogue = currentDialogue[currentDialogueIndex];
             const vnViewer = document.getElementById('vnViewer');
-            const spriteContainer = document.getElementById('spriteContainer');
             const currentSpeaker = document.getElementById('currentSpeaker');
             const currentText = document.getElementById('currentText');
             const speakerNameContainer = document.getElementById('speakerNameContainer');
-            const logContainer = document.getElementById('logContainer');
+            const spriteMode = document.getElementById('spriteModeSelect').value;
 
-            // 1. Update Background (uses the 'background' property from the current line)
+            // 1. Update Background
             if (dialogue.background) {
                 vnViewer.style.backgroundImage = `url('${dialogue.background}')`;
             }
 
-            // 2. Update Sprite
-            spriteContainer.innerHTML = ''; // Clear existing sprites
-            if (dialogue.sprite) {
-                const img = document.createElement('img');
-                const spriteSrc = SPRITE_BASE_PATH + dialogue.sprite;
-                img.src = spriteSrc; 
-                
-                img.alt = dialogue.speaker;
-                img.classList.add('sprite', dialogue.position === 'left' ? 'left' : 'right');
-                img.onerror = () => {
-                    // Используем заглушку, если спрайт не загрузился по указанному пути
-                    img.src = `https://placehold.co/200x400/808080/ffffff?text=${dialogue.speaker}`; 
-                    console.error(`Sprite not found at: ${spriteSrc}. Check your file path.`);
-                }; 
-                spriteContainer.appendChild(img);
-            }
+            // 2. Update Sprites based on current dialogue line and mode
+            const activePosition = dialogue.position; 
+            const activeSpriteSrc = dialogue.sprite ? SPRITE_BASE_PATH + dialogue.sprite : null;
+
+            const sprites = [
+                { container: spriteLeftContainer, element: spriteLeftElement, position: 'left' },
+                { container: spriteRightContainer, element: spriteRightElement, position: 'right' }
+            ];
             
+            sprites.forEach(sprite => {
+                const isActiveSpeaker = sprite.position === activePosition;
+
+                // First, reset classes for smooth transition/logic
+                sprite.container.classList.remove('dimmed-sprite');
+
+                if (isActiveSpeaker && activeSpriteSrc) {
+                    // Current speaker: Ensure image is correct, show, and make bright
+                    sprite.element.src = activeSpriteSrc;
+                    sprite.container.classList.remove('hidden');
+                    sprite.container.style.opacity = '1'; // Ensure no dimming from CSS is overridden
+                } else if (spriteMode === 'hide') {
+                    // Hide mode: Hide all non-active sprites, or all sprites if no speaker (narration)
+                    sprite.container.classList.add('hidden');
+                } else if (spriteMode === 'dim') {
+                    // Dim mode: Dim inactive sprites, or dim all if no speaker, but keep them visible if they were already there
+                    
+                    if (!activePosition) {
+                        // Narration line: dim all visible sprites
+                        sprite.container.classList.add('dimmed-sprite');
+                    } else if (!isActiveSpeaker) {
+                        // Inactive speaker: dim the sprite
+                        sprite.container.classList.add('dimmed-sprite');
+                    }
+                    
+                    // If a sprite is NOT the current one, check if it should be hidden
+                    if (sprite.element.src && !sprite.container.classList.contains('hidden')) {
+                        // Keep visible if there is content and it hasn't been explicitly hidden
+                    } else {
+                        // If it has no content, ensure it is hidden
+                        sprite.container.classList.add('hidden');
+                    }
+                }
+            });
+
             // 3. Update Text and Speaker
             currentText.style.opacity = '0';
             setTimeout(() => {
                 currentText.textContent = dialogue.text;
                 currentText.style.opacity = '1';
-            }, 50); // Small delay for fade effect
+            }, 50); 
 
             if (dialogue.speaker) {
                 currentSpeaker.textContent = dialogue.speaker;
+                // Класс text-xl уже установлен в HTML для .speaker-name
                 speakerNameContainer.classList.remove('hidden');
             } else {
                 currentSpeaker.textContent = '';
                 speakerNameContainer.classList.add('hidden');
             }
 
-            // 4. Update Log Highlighting and content if the log is open
+            // 4. Update Log Highlighting
             if (!document.getElementById('logModal').classList.contains('hidden')) {
                 populateDialogueLog();
-                const currentEntry = logContainer.querySelector(`.current-log-entry`);
+                const currentEntry = document.getElementById('logContainer').querySelector(`.current-log-entry`);
                 if (currentEntry) {
                     currentEntry.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
@@ -656,11 +787,10 @@
         function navigateDialogue(direction) {
             const newIndex = currentDialogueIndex + direction;
             
-            // Check boundaries
             if (newIndex >= 0 && newIndex < currentDialogue.length) {
                 currentDialogueIndex = newIndex;
                 renderDialogue();
-                saveProgress(); // Save progress after navigation
+                saveProgress(); 
             }
         }
         
@@ -669,10 +799,29 @@
             document.getElementById('helpModal').classList.toggle('hidden');
         }
 
+        /** Initializes persistent elements and listeners */
+        function initializeAppElements() {
+            // Sprites setup
+            spriteLeftContainer = document.getElementById('spriteLeftContainer');
+            spriteRightContainer = document.getElementById('spriteRightContainer');
+            spriteLeftElement = document.getElementById('spriteLeft');
+            spriteRightElement = document.getElementById('spriteRight');
+
+            // Audio setup
+            chapterAudio = document.getElementById('chapterAudio');
+            const volumeInput = document.getElementById('volumeInput');
+            if (volumeInput) {
+                // Set initial volume based on the slider value (will be overwritten by loadProgress)
+                setVolume(parseFloat(volumeInput.value) / 100); 
+                volumeInput.addEventListener('input', handleVolumeChange);
+            }
+        }
+
         // --- INITIALIZATION ---
         window.onload = () => {
-            loadProgress(); // Try to load saved progress
-            updateUI(); // Render UI based on loaded or default language
+            initializeAppElements(); // Setup persistent elements
+            loadProgress(); 
+            updateUI(); 
         };
     </script>
 </body>
