@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Houkai Gakuen 2 Архив Сюжета</title>
+    <title>Архив Сюжета ВН</title>
     <!-- Подключение Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -187,7 +187,7 @@
         // Настройки повторной загрузки контента (Exponential Backoff)
         const INITIAL_DELAY_MS = 2000;
         const MAX_DELAY_MS = 30000;
-        const RETRY_LIMIT_FOR_MOCK = 3; // Вводим мок-данные после 3 неудач
+        // УДАЛЕНО: RETRY_LIMIT_FOR_MOCK 
         
         // Настройки постоянной загрузки изображений (спрайтов/фонов)
         const MAX_PERSISTENT_IMAGE_RETRIES = 50; // Высокий лимит для "бесконечной" загрузки
@@ -445,36 +445,7 @@
                     console.warn(`[Content] Загрузка главы не удалась (Попытка ${attempt}).`);
                 }
 
-                // 2. Внедрение мок-данных после лимита неудачных попыток
-                if (!success && attempt >= RETRY_LIMIT_FOR_MOCK) {
-                    console.warn(`[Content] Достигнут лимит попыток (${RETRY_LIMIT_FOR_MOCK}). Загрузка мок-данных для демонстрации спрайтов.`);
-                    success = true;
-                    data = {
-                        "title": "Мок-Сюжет (Для Демонстрации)",
-                        "dialogue": [
-                            {
-                                "speaker": "Киана",
-                                "text": "Теперь и спрайты, и фоны загружаются постоянно, пока не появятся! Мы гарантируем видимость!",
-                                "background": "https://placehold.co/1920x1080/4F46E5/ffffff?text=ФОН+СЦЕНА",
-                                "sprite": "kiana_default",
-                                "position": "left"
-                            },
-                            {
-                                "speaker": "Мэй",
-                                "text": "Это должно решить проблему со строгими сетевыми ограничениями.",
-                                "background": "https://placehold.co/1920x1080/4F46E5/ffffff?text=ФОН+СЦЕНА",
-                                "sprite": "mei_default",
-                                "position": "right"
-                            },
-                            {
-                                "speaker": null,
-                                "text": "Нажимай, чтобы листать!",
-                                "background": "https://placehold.co/1920x1080/4F46E5/ffffff?text=ФОН+СЦЕНА"
-                            }
-                        ]
-                    };
-                }
-
+                // УДАЛЕНО: Блок мок-данных
 
                 if (success && data) {
                     // --- УСПЕХ: Обновление глобального состояния ---
