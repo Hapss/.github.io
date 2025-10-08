@@ -1,10 +1,10 @@
-<!-- Выбранная палитра: Темные нейтральные тона (Черный, Серый) с акцентами Honkai Red/Purple. -->
+<!-- Визуальный Просмотрщик Новелл с упрощенной логикой загрузки локальных файлов. -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Архив Сюжета ВН</title>
+    <title>Архив Сюжета Houkai Gakuen 2</title>
     <!-- Подключение Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -54,7 +54,6 @@
         .dimmed-sprite {
             opacity: 0.4;
         }
-        /* Гарантируем, что плейсхолдер фона виден и центрирован */
         #vnViewer {
             background-repeat: no-repeat;
             background-color: #1a1a1a; 
@@ -186,14 +185,11 @@
             STORAGE: {
                 KEY: 'vn_story_progress_v4',
             },
+            // Настройки для загрузки JSON-файлов глав (используем Backoff для надежности)
             BACKOFF: {
-                INITIAL_DELAY_MS: 2000, // Начальная задержка перед повтором (2 сек)
-                MAX_DELAY_MS: 30000,    // Максимальная задержка (30 сек)
-                MAX_ATTEMPTS: 5,        // Максимальное количество попыток загрузки главы
-            },
-            IMAGE_LOAD: {
-                MAX_RETRIES: 50,        // Максимальное количество повторов для изображений
-                RETRY_DELAY_MS: 2000,   // Задержка перед повторной загрузкой изображения
+                INITIAL_DELAY_MS: 2000, 
+                MAX_DELAY_MS: 30000,    
+                MAX_ATTEMPTS: 5,        
             },
             // Base64-кодированные SVG для мгновенных плейсхолдеров
             PLACEHOLDERS: {
@@ -313,39 +309,29 @@
             return fileName; 
         };
         
-        /** * Загружает ВНЕШНЕЕ изображение с механизмом постоянного повтора (критично для слабого интернета).
-         * Использует агрессивный обход кэша.
+        /** * Загружает ЛОКАЛЬНОЕ изображение с агрессивным обходом кэша.
+         * Используется для гарантированной загрузки актуальной версии из папки.
          */
-        function loadExternalImageWithPersistence(url, element, isBackground = false, attempt = 1) {
-            const { MAX_RETRIES, RETRY_DELAY_MS } = CONFIG.IMAGE_LOAD;
-
-            if (attempt > MAX_RETRIES) {
-                 if (!isBackground) element.parentElement.classList.add('hidden');
-                 return;
-            }
-            
-            const cacheBuster = `?t=${Date.now()}_${attempt}`;
+        function loadLocalImage(url, element, isBackground = false) {
+            // Агрессивный обход кэша
+            const cacheBuster = `?t=${Date.now()}`;
             const finalUrl = url + cacheBuster;
-
-            const retryLoad = (err) => {
-                setTimeout(() => loadExternalImageWithPersistence(url, element, isBackground, attempt + 1), RETRY_DELAY_MS);
-            };
 
             if (!isBackground) {
                 // Логика для спрайтов (<img>)
-                element.onload = () => {};
-                element.onerror = () => retryLoad("Sprite Load Error");
                 element.src = finalUrl; 
-
             } else {
                 // Логика для фона (CSS background-image)
                 const tempImg = new Image();
                 tempImg.onload = () => {
                     element.style.backgroundImage = `url('${finalUrl}')`;
-                    currentBackgroundUrl = finalUrl; // Обновляем персистентный фон
+                    currentBackgroundUrl = finalUrl; 
                 };
                 
-                tempImg.onerror = () => retryLoad("Background Load Error");
+                // Если фон не загрузился (например, 404), просто оставляем текущий.
+                tempImg.onerror = () => {
+                     console.warn(`[Local Image Load] Не удалось загрузить фон: ${url}. Используется текущий фон/плейсхолдер.`);
+                }; 
                 tempImg.src = finalUrl;
             }
         }
@@ -368,7 +354,7 @@
             if (bgFileName) { 
                 if (!bgFileName.startsWith('data:')) {
                     const finalBgUrl = CONFIG.PATHS.BACKGROUND_BASE + bgFileName; 
-                    loadExternalImageWithPersistence(finalBgUrl, vnViewerElement, true);
+                    loadLocalImage(finalBgUrl, vnViewerElement, true);
                 } else {
                     vnViewerElement.style.backgroundImage = `url('${bgFileName}')`;
                     currentBackgroundUrl = bgFileName; 
@@ -404,7 +390,7 @@
                 } else {
                     const finalSpriteUrl = CONFIG.PATHS.SPRITE_BASE + spriteFileNameOrB64; 
                     imageElement.src = ""; // Сброс для принудительной перерисовки
-                    loadExternalImageWithPersistence(finalSpriteUrl, imageElement, false);
+                    loadLocalImage(finalSpriteUrl, imageElement, false);
                 }
             } 
             
@@ -429,9 +415,7 @@
             currentText.textContent = step.text || "";
         }
         
-        /** * Асинхронно пытается загрузить выбранную главу, используя Exponential Backoff 
-         * (повышенная надежность при сетевых сбоях).
-         */
+        /** * Асинхронно пытается загрузить выбранную главу, используя Exponential Backoff. */
         async function updateStoryContent(startIndex = 0) {
             const lang = elements.languageSelect.value; 
             const fullStoryKey = elements.chapterSelect.value; 
@@ -450,7 +434,9 @@
                 let data = null;
 
                 try {
-                    const response = await fetch(expectedFilePath);
+                    // Используем агрессивный обход кэша и для JSON-файлов
+                    const cacheBuster = `?t=${Date.now()}_${attempt}`;
+                    const response = await fetch(expectedFilePath + cacheBuster);
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     data = await response.json();
                     success = true;
@@ -464,7 +450,7 @@
                     currentDialogueIndex = Math.min(startIndex, currentDialogue.length - 1);
                     currentDialogueIndex = Math.max(0, currentDialogueIndex); 
                     dialogueIsLoaded = true;
-                    currentBackgroundUrl = null; // Сброс перед рендерингом первого шага
+                    currentBackgroundUrl = null; 
                     
                     loadText.textContent = "Загружено";
                     renderDialogueStep();
@@ -475,7 +461,7 @@
                     }, 1500);
 
                 } else {
-                    // --- ПОВТОРНАЯ ПОПЫТКА ---
+                    // --- ПОВТОРНАЯ ПОПЫТКА (Exponential Backoff) ---
                     if (attempt >= MAX_ATTEMPTS) {
                         loadText.textContent = "Ошибка загрузки";
                         loadButton.disabled = false;
