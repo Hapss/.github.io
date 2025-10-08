@@ -232,34 +232,63 @@
 
     <script>
         const STORAGE_KEY = 'hg2_story_progress';
+        const STORY_BASE_PATH = 'story/'; // НОВЫЙ БАЗОВЫЙ ПУТЬ ДЛЯ ВСЕХ JSON-ФАЙЛОВ
         const SPRITE_BASE_PATH = 'https://placehold.co/'; 
         const AUDIO_BASE_PATH = 'audio/'; // Base path for audio files
-        const DEFAULT_BG_URL = 'https://placehold.co/1920x1080/2a2a2a/fca5a5?text=Выберите+сюжет+и+нажмите+Загрузить'; // New constant for default background
+        const DEFAULT_BG_URL = 'https://placehold.co/1920x1080/2a2a2a/fca5a5?text=Выберите+сюжет+и+нажмите+Загрузить';
         
-        let currentDialogue = []; // Start with an empty dialogue array
+        let currentDialogue = []; 
         let currentDialogueIndex = 0;
         let dialogueIsLoaded = false;
         
         let spriteLeftContainer, spriteRightContainer;
         let spriteLeftElement, spriteRightElement;
-        let chapterAudio; // Global Audio object reference
+        let chapterAudio; 
         
         // --- STORY METADATA (Синхронно доступные названия глав) ---
-        const STORY_METADATA_SOURCE = {
-            // Переименованная Глава 1 теперь соответствует нашему файлу main_ch1.json
-            "ch1": { ru: "Глава 1: Выброс Хоукая", en: "Chapter 1: The Honkai Eruption", cn: "章节 1: 崩坏爆发" }, 
-            "ch2": { ru: "Глава 2: Заражение", en: "Chapter 2: The Infection", cn: "章节 2: 感染" },
-            "ch3": { ru: "Глава 3: Возвращение", en: "Chapter 3: The Return", cn: "章节 3: 归来" },
-            "ex1": { ru: "Экстра 1: Летний пляж", en: "Extra 1: Summer Beach", cn: "额外 1: 夏日沙滩" },
-            "ex2": { ru: "Экстра 2: Зимняя сказка", en: "Extra 2: Winter Tale", cn: "额外 2: 冬日童话" },
-            "b1": { ru: "Босс 1: Херувим", en: "Boss 1: Cherubim", cn: "首领 1: 智天使" },
-            "vn1": { ru: "VN 1: Пролог Кианы", en: "VN 1: Kiana's Prologue", cn: "VN 1: 琪亚娜序章" },
-            "r1": { ru: "Роман 1: Признание", en: "Novel 1: Confession", cn: "小说 1: 告白" }
+        // Ключи теперь соответствуют полному имени файла без расширения (например, main_ch1)
+        // ВАЖНО: Поскольку мы не можем сканировать файловую систему, здесь перечислены ВСЕ ИЗВЕСТНЫЕ главы.
+        const KNOWN_CHAPTERS = {
+            // Main Story (main_ch)
+            "main_ch1": { ru: "Глава 1: Выброс Хоукая", en: "Chapter 1: The Honkai Eruption", cn: "章节 1: 崩坏爆发" }, 
+            "main_ch2": { ru: "Глава 2: Заражение", en: "Chapter 2: The Infection", cn: "章节 2: 感染" },
+            // Extra Story (extra_)
+            "extra_ex1": { ru: "Экстра 1: Летний пляж", en: "Extra 1: Summer Beach", cn: "额外 1: 夏日沙滩" },
+            "extra_ex2": { ru: "Экстра 2: Зимняя сказка", en: "Extra 2: Winter Tale", cn: "额外 2: 冬日童话" },
+            // Bosses (boss_)
+            "boss_b1": { ru: "Босс 1: Херувим", en: "Boss 1: Cherubim", cn: "首领 1: 智天使" },
+            // Visual Novel (vn_)
+            "vn_vn1": { ru: "VN 1: Пролог Кианы", en: "VN 1: Kiana's Prologue", cn: "VN 1: 琪亚娜序章" },
+            // Novel / Romance (ln_)
+            "ln_r1": { ru: "Роман 1: Признание", en: "Novel 1: Confession", cn: "小说 1: 告白" }
         };
-        // Глобальный кеш для метаданных - теперь это просто прямое присвоение
-        let storyMetadata = STORY_METADATA_SOURCE; 
 
-        // --- I18N DATA ---
+        // Группировка сюжетов по типу (используется для формирования выпадающего списка "Тип сюжета")
+        const STORY_GROUPS = {
+            main: {
+                ru: "Основной сюжет", en: "Main Story", cn: "主线剧情",
+                prefix: "main_" // Префикс для фильтрации KNOWN_CHAPTERS
+            },
+            extra: {
+                ru: "Дополнительный сюжет", en: "Extra Story", cn: "额外剧情",
+                prefix: "extra_"
+            },
+            bosses: {
+                ru: "Боссы", en: "Boss Fights", cn: "首领战",
+                prefix: "boss_"
+            },
+            vn: {
+                ru: "Визуальная новелла", en: "Visual Novel", cn: "视觉小说",
+                prefix: "vn_"
+            },
+            romance: {
+                ru: "Роман", en: "Romance", cn: "小说",
+                prefix: "ln_" // Используем ln_ для романов
+            }
+        };
+
+
+        // --- I18N DATA (Без изменений) ---
         const i18n = {
             ru: {
                 headerTitle: "Houkai Gakuen 2 Архив Сюжета",
@@ -293,30 +322,6 @@
                 logTitle: "对话记录",
                 helpTitle: "如何使用档案：",
                 helpText: "这是一个崩坏学园2的交互式剧情档案。\n\n1. 使用顶部下拉列表选择剧情类型和特定章节。\n2. 点击加载。\n3. **在视觉小说查看器中，使用右侧点击进行下一页，左侧点击进行上一页。**\n4. 您的进度将自动保存。网站会记住选择的章节和您停止的对话行。\n5. 要打开对话记录，请点击 VN 查看器右上角的书本图标。您可以使用标题中的滑块调整**音频音量**。"
-            }
-        };
-
-        // --- STORY DATA STRUCTURE (Только ключи, названия из метаданных) ---
-        const storyData = {
-            main: {
-                ru: "Основной сюжет", en: "Main Story", cn: "主线剧情",
-                chapters: ["ch1", "ch2", "ch3"]
-            },
-            extra: {
-                ru: "Дополнительный сюжет", en: "Extra Story", cn: "额外剧情",
-                chapters: ["ex1", "ex2"]
-            },
-            bosses: {
-                ru: "Боссы", en: "Boss Fights", cn: "首领战",
-                chapters: ["b1"]
-            },
-            vn: {
-                ru: "Визуальная новелла", en: "Visual Novel", cn: "视觉小说",
-                chapters: ["vn1"]
-            },
-            romance: {
-                ru: "Роман", en: "Romance", cn: "小说",
-                chapters: ["r1"]
             }
         };
 
@@ -380,7 +385,7 @@
             const progress = {
                 lang: document.getElementById('languageSelect').value,
                 type: document.getElementById('storyTypeSelect').value,
-                chapter: document.getElementById('chapterSelect').value,
+                chapter: document.getElementById('chapterSelect').value, // Сохраняем полный ключ (напр., main_ch1)
                 index: currentDialogueIndex,
                 volume: volumeInput ? parseFloat(volumeInput.value) / 100 : 0.5 
             };
@@ -418,14 +423,15 @@
             }
 
             // 3. Restore Story Type
-            if (storyData[progress.type]) {
+            if (progress.type && STORY_GROUPS[progress.type]) {
                 typeSelect.value = progress.type;
                 // Populate chapters for the selected type, skip side effects
-                updateChapterSelect(true); // Теперь синхронный вызов
+                updateChapterSelect(true); 
             }
             
             // 4. Restore Chapter
-            if (typeSelect.value && storyData[typeSelect.value] && storyData[typeSelect.value].chapters.includes(progress.chapter)) {
+            // Проверяем, существует ли сохраненный полный ключ главы
+            if (typeSelect.value && progress.chapter && KNOWN_CHAPTERS[progress.chapter]) {
                 chapterSelect.value = progress.chapter;
                 shouldAutoLoad = true;
             }
@@ -566,10 +572,10 @@
             defaultOption.textContent = "---";
             select.appendChild(defaultOption);
 
-            for (const key in storyData) {
+            for (const key in STORY_GROUPS) {
                 const option = document.createElement('option');
                 option.value = key;
-                option.textContent = storyData[key][lang];
+                option.textContent = STORY_GROUPS[key][lang];
                 if (key === currentType) {
                     option.selected = true;
                 }
@@ -584,7 +590,7 @@
             const typeKey = document.getElementById('storyTypeSelect').value;
             const select = document.getElementById('chapterSelect');
             const lang = document.getElementById('languageSelect').value;
-            const currentChapter = select.value;
+            const currentChapterKey = select.value; // Это полный ключ (например, 'main_ch1')
 
             select.innerHTML = '';
             
@@ -592,35 +598,36 @@
             defaultOption.value = "";
             defaultOption.textContent = "---";
             select.appendChild(defaultOption);
+            select.disabled = true;
 
-            if (typeKey && storyData[typeKey] && storyData[typeKey].chapters) {
-                const chapterKeys = storyData[typeKey].chapters;
+            if (typeKey && STORY_GROUPS[typeKey]) {
+                const prefix = STORY_GROUPS[typeKey].prefix;
                 
-                for (const key of chapterKeys) {
-                    // Используем синхронно доступные метаданные для получения перевода
-                    const chapterData = storyMetadata[key]; 
+                // Фильтруем KNOWN_CHAPTERS по префиксу выбранного типа сюжета
+                const filteredChapters = Object.keys(KNOWN_CHAPTERS).filter(key => key.startsWith(prefix));
+                
+                for (const fullChapterKey of filteredChapters) {
+                    const chapterData = KNOWN_CHAPTERS[fullChapterKey];
 
                     if (chapterData && chapterData[lang]) {
                         const option = document.createElement('option');
-                        option.value = key;
-                        // Используем динамически загруженное название
+                        option.value = fullChapterKey; // Полный ключ используется как value
                         option.textContent = chapterData[lang]; 
                         
-                        // Re-select the current chapter if it still exists
-                        if (key === currentChapter) {
+                        if (fullChapterKey === currentChapterKey) {
                              option.selected = true;
                         }
                         select.appendChild(option);
                     }
                 }
-                select.disabled = false;
-            } else {
-                select.disabled = true;
-            }
+                if (filteredChapters.length > 0) {
+                     select.disabled = false;
+                }
+            } 
 
             if (!skipSideEffects) {
                 enableLoadButton();
-                saveProgress(); // Save selected type/chapter state
+                saveProgress(); 
             }
         }
 
@@ -628,24 +635,16 @@
          * @param {number} startIndex - Индекс диалога, с которого начать просмотр.
          */
         async function updateStoryContent(startIndex = 0) {
-            const storyType = document.getElementById('storyTypeSelect').value;
-            const storyId = document.getElementById('chapterSelect').value;
+            // fullStoryKey - это полный ключ главы, например, "main_ch1" или "extra_ex1"
+            const fullStoryKey = document.getElementById('chapterSelect').value; 
             
-            if (!storyType || !storyId) {
-                console.error("Story type or ID is not selected.");
+            if (!fullStoryKey) {
+                console.error("Story chapter is not selected.");
                 return;
             }
 
-            // ОПРЕДЕЛЕНИЕ ИМЕНИ ФАЙЛА в соответствии с конвенцией
-            let fileName;
-            if (storyType === 'main') {
-                // СТРОГАЯ КОНВЕНЦИЯ: Основной сюжет всегда ищет main_[ID_главы].json
-                fileName = `main_${storyId}.json`;
-            } else {
-                // Общая конвенция для других типов: [тип_сюжета]_[ID_главы].json
-                fileName = `${storyType}_${storyId}.json`;
-            }
-            const filePath = fileName;
+            // ФОРМИРОВАНИЕ ПУТИ К ФАЙЛУ: story/[полный_ключ].json
+            const filePath = `${STORY_BASE_PATH}${fullStoryKey}.json`;
 
             document.getElementById('loadText').textContent = "Загрузка...";
 
@@ -697,7 +696,6 @@
 
             } catch (e) {
                 console.error("Failed to load dialogue data:", e);
-                // Заменил alert на более мягкое уведомление в консоли для среды Canvas
                 document.getElementById('loadText').textContent = "Ошибка!";
                 setTimeout(() => {
                     document.getElementById('loadText').textContent = i18n[document.getElementById('languageSelect').value].loadText;
@@ -733,44 +731,7 @@
                  vnViewer.style.backgroundImage = `url('${DEFAULT_BG_URL}')`;
             } // Otherwise keep the current background
 
-            // 2. Sprites & Dimming (Simplified logic for clarity)
-
-            const updateSpriteVisibilityAndDimming = (container, imageElement, currentStep) => {
-                const isLeft = container.classList.contains('left');
-                const positionKey = isLeft ? 'left' : 'right';
-
-                // Check if this sprite is active in the current step
-                const isActiveSpeakerSprite = currentStep.sprite && currentStep.position && currentStep.position.toLowerCase() === positionKey;
-
-                // If this is the active speaker's sprite
-                if (isActiveSpeakerSprite) {
-                    container.classList.remove('hidden');
-                    if (imageElement.src.indexOf(currentStep.sprite) === -1) {
-                        imageElement.src = currentStep.sprite;
-                    }
-                    imageElement.classList.remove('dimmed-sprite'); // Active sprite is bright
-                } 
-                // Check if an explicit sprite_dimmed instruction exists for a known sprite (e.g., Kiana 1.png)
-                else if (currentStep.sprite_dimmed && currentStep.sprite_dimmed === imageElement.src.substring(imageElement.src.lastIndexOf('/') + 1)) {
-                    // This is the dimmed sprite
-                    container.classList.remove('hidden');
-                    imageElement.classList.add('dimmed-sprite');
-                }
-                // If there is a speaker, and this is NOT the active sprite, dim it if visible, otherwise hide it.
-                else if (currentStep.speaker && currentStep.speaker !== '') {
-                    // If the sprite is visible but not the current speaker's, dim it.
-                    if (!container.classList.contains('hidden')) {
-                        imageElement.classList.add('dimmed-sprite');
-                    } else {
-                        container.classList.add('hidden');
-                    }
-                }
-                // Default: if no speaker/sprite instruction, hide it (or maintain hidden state)
-                else {
-                    container.classList.add('hidden');
-                }
-            };
-            
+            // 2. Sprites & Dimming 
             // Re-hide all before checking the logic for the current step
             spriteLeftContainer.classList.add('hidden');
             spriteRightContainer.classList.add('hidden');
