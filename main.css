@@ -2,7 +2,6 @@
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
     font-family: 'Microsoft YaHei', sans-serif;
 }
 
@@ -60,15 +59,10 @@ body {
 }
 
 /* Общие стили для всех фильтров (тип сюжета, сюжет, этап) */
-.story-type-selector,
-.story-selector,
-.stage-selector {
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
+.selector {
+    background: rgba(255, 255, 255, 0.1);
     padding: 12px 15px; /* Уменьшили отступы */
-    border: 1px solid #ff6ec7;
     flex-grow: 1; /* Элементы растягиваются по ширине */
-    min-width: 120px; /* Минимальная ширина */
 }
 
 .selector-title {
@@ -95,8 +89,7 @@ body {
 .selector-dropdown {
     width: 100%;
     padding: 8px 30px 8px 12px; /* Уменьшили отступы */
-    background: rgba(42, 42, 42, 0.8);
-    color: #e0e0e0; /* Светлый текст */
+    color: #000000; /* Светлый текст */
     border: 1px solid #ff6ec7;
     border-radius: 6px;
     font-size: 0.9rem; /* Уменьшили шрифт */
