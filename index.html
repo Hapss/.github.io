@@ -161,7 +161,7 @@
         <div class="bg-gray-700 p-4 rounded-xl shadow-lg mb-6 flex flex-wrap gap-4 items-end">
             <div class="flex-1 min-w-[180px]">
                 <label for="storyTypeSelect" id="labelStoryType" class="block text-sm font-medium mb-1 text-gray-300">Тип сюжета</label>
-                <select id="storyTypeSelect" onchange="updateChapterSelect(); saveProgress()" class="w-full bg-gray-800 text-white rounded-lg p-2.5 cursor-pointer focus:ring-red-400 focus:border-red-400 transition">
+                <select id="storyTypeSelect" onchange="initializeOrUpdateUI()" class="w-full bg-gray-800 text-white rounded-lg p-2.5 cursor-pointer focus:ring-red-400 focus:border-red-400 transition">
                     <!-- Options populated by JS -->
                 </select>
             </div>
@@ -435,10 +435,11 @@
         async function loadProgress() {
             const savedProgress = localStorage.getItem(STORAGE_KEY);
             
-            // 1. Инициализация UI и I18n
-            await initializeOrUpdateUI(); // Теперь ждем, пока прогрузятся типы
+            // 1. Инициализация UI и I18n, ждем проверки доступности глав
+            await initializeOrUpdateUI(); 
 
             if (!savedProgress) {
+                enableLoadButton();
                 return;
             }
 
@@ -450,7 +451,7 @@
             
             let shouldAutoLoad = false;
 
-            // 2. Restore Language & Update UI strings
+            // 2. Restore Language
             if (i18n[progress.lang]) {
                 langSelect.value = progress.lang;
             }
@@ -467,7 +468,7 @@
             if (progress.type && STORY_GROUPS[progress.type]) {
                 typeSelect.value = progress.type;
                 
-                // 5. Восстанавливаем список глав и ждем его завершения
+                // 5. Восстанавливаем список глав, ожидая завершения асинхронной проверки
                 await updateChapterSelect(true); 
             }
             
@@ -506,7 +507,9 @@
             setVolume(0.5); 
             if (chapterAudio) chapterAudio.pause(); 
 
+            // Асинхронная инициализация после сброса
             initializeOrUpdateUI(); 
+            
             const vnViewer = document.getElementById('vnViewer');
             vnViewer.style.backgroundImage = `url('${DEFAULT_BG_URL}')`;
             
@@ -558,7 +561,7 @@
         }
 
         function enableLoadButton() {
-            // Кнопка включена только если выбрана глава
+            // Кнопка включена только если выбрана глава (value не пустая строка)
             const storyId = document.getElementById('chapterSelect').value;
             document.getElementById('loadButton').disabled = !storyId;
         }
@@ -578,6 +581,7 @@
                 <p class="whitespace-pre-line">${text.helpText}</p>`;
         }
 
+        // *** FIX: Сделано асинхронным для ожидания проверки доступности глав ***
         async function initializeOrUpdateUI() {
             updateI18nStrings();
             updateStoryTypeSelect();
@@ -681,14 +685,17 @@
             const lang = document.getElementById('languageSelect').value; 
             const fullStoryKey = document.getElementById('chapterSelect').value; 
             
-            console.log(`[ACTION] Кнопка "Загрузить" нажата. Загрузка сюжета: ${fullStoryKey} (${lang})`);
+            const filePath = `${STORY_BASE_PATH}${lang}/${fullStoryKey}.json`;
+
+            // *** CRITICAL LOGGING: Логируем путь к файлу для диагностики ***
+            console.log(`[*** START LOAD ***] Запуск загрузки. Ключ: ${fullStoryKey}. Язык: ${lang}. Ожидаемый файл: ${filePath}`);
+
 
             if (!fullStoryKey) {
                 console.error("Story chapter is not selected. Aborting load.");
                 return;
             }
 
-            const filePath = `${STORY_BASE_PATH}${lang}/${fullStoryKey}.json`;
             
             document.getElementById('loadText').textContent = "Загрузка...";
             document.getElementById('loadButton').disabled = true;
@@ -917,7 +924,7 @@
             document.getElementById('storyTypeSelect').addEventListener('change', initializeOrUpdateUI);
             
             // Initial UI setup and progress check
-            loadProgress(); // Теперь loadProgress вызывает initializeOrUpdateUI и ждет ее
+            loadProgress(); 
         };
 
     </script>
