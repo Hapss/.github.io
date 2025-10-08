@@ -96,3 +96,25 @@ body {
     cursor: pointer;
     appearance: none;
 }
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    .top-bar {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .site-title {
+        position: static;
+        transform: none;
+        margin-bottom: 10px;
+    }
+    
+    .language-container {
+        margin-left: 0;
+    }
+    
+    .controls-container {
+        flex-direction: column;
+    }
+}
