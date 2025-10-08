@@ -186,7 +186,8 @@
         const KIANA_SPRITE_B64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjODAwMDgwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5LSUFOQTwvdGV4dD48L3N2Zz4='; // Пурпурный
         const MEI_SPRITE_B64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRkY1NzMzIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5NRUk8L3RleHQ+PC9zdmc+'; // Красный
         const DEFAULT_SPRITE_B64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjIyMjIyIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5TUFJJSVQ8L3RleHQ+PC9zdmc+';
-        const DEFAULT_BG_B64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyMCIgaGVpZ2h0PSIxMDgwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMyYjJkM2EiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjQwcHgiIGZpbGw9IiNkMWQxZDEiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlpERU0gTE9HSSBLT05URU5UQTwvdGV4dD48L3N2Zz4='; // Серый фон с текстом
+        // ИСПРАВЛЕНИЕ: Убрана латиница (ZDEM LOGI KONТЕНТA) из фонового плейсхолдера
+        const DEFAULT_BG_B64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyMCIgaGVpZ2h0PSIxMDgwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMyYjJkM2EiLz48L3N2Zz4='; // Темный фон без текста
         
         const STORAGE_KEY = 'vn_story_progress_v4';
         const METADATA_FILE = 'story/story_metadata.json'; 
@@ -200,7 +201,7 @@
         const MAX_PERSISTENT_IMAGE_RETRIES = 50; 
         const PERSISTENT_IMAGE_RETRY_DELAY_MS = 2000; 
 
-        // Группировка сюжетов
+        // Группировка сюжетов (без изменений)
         const STORY_GROUPS = {
             main: { ru: "Основной сюжет", en: "Main Story", cn: "主线剧情", prefix: "main_" },
             extra: { ru: "Дополнительный сюжет", en: "Extra Story", cn: "额外剧情", prefix: "extra_" },
@@ -294,9 +295,7 @@
             }
         }
         
-        /** * Определяет путь/URL к спрайту.
-         * Возвращает Base64-строку, если имя соответствует плейсхолдеру, или исходный URL.
-         */
+        /** * Определяет путь/URL к спрайту. */
         const spritePath = (fileName) => {
             if (!fileName) return DEFAULT_SPRITE_B64;
             
@@ -310,9 +309,7 @@
             return fileName; 
         };
         
-        /** * Загружает ВНЕШНЕЕ изображение (или фон) с механизмом постоянного повтора.
-         * Используется ТОЛЬКО для внешних/относительных URL, НЕ для Base64.
-         */
+        /** * Загружает ВНЕШНЕЕ изображение (или фон) с механизмом постоянного повтора. */
         function loadExternalImageWithPersistence(url, element, isBackground = false, attempt = 1) {
             // Если достигнут лимит попыток, останавливаемся
             if (attempt > MAX_PERSISTENT_IMAGE_RETRIES) {
@@ -320,6 +317,9 @@
                  if (!isBackground) element.parentElement.classList.add('hidden');
                  return;
             }
+            
+            console.log(`[Image Load] Попытка загрузки ВНЕШНЕГО URL: ${url} (Попытка ${attempt})`);
+
 
             // --- Логика для спрайтов (<img>) с внешним URL ---
             if (!isBackground) {
@@ -332,11 +332,12 @@
                 };
 
                 element.onerror = () => {
-                    console.warn(`[Sprite Load] Ошибка загрузки: ${url}. Попытка ${attempt} не удалась. Повтор через ${PERSISTENT_IMAGE_RETRY_DELAY_MS} мс.`);
+                    console.warn(`[Sprite Load] ОШИБКА: ${url}. Повтор через ${PERSISTENT_IMAGE_RETRY_DELAY_MS} мс.`);
                     element.src = ""; 
                     setTimeout(() => loadExternalImageWithPersistence(url, element, isBackground, attempt + 1), PERSISTENT_IMAGE_RETRY_DELAY_MS);
                 };
                 
+                // Добавляем параметр для обхода кеша
                 const cacheBuster = attempt > 1 ? `?t=${Date.now()}` : '';
                 element.src = url + cacheBuster;
 
@@ -349,7 +350,7 @@
                 };
                 
                 tempImg.onerror = () => {
-                    console.warn(`[Background Load] Ошибка загрузки фона: ${url}. Попытка ${attempt} не удалась. Повтор через ${PERSISTENT_IMAGE_RETRY_DELAY_MS} мс.`);
+                    console.warn(`[Background Load] ОШИБКА: ${url}. Повтор через ${PERSISTENT_IMAGE_RETRY_DELAY_MS} мс.`);
                     setTimeout(() => loadExternalImageWithPersistence(url, element, isBackground, attempt + 1), PERSISTENT_IMAGE_RETRY_DELAY_MS);
                 };
                 
@@ -408,7 +409,7 @@
                 container.classList.remove('hidden'); // Показываем контейнер спрайта
                 
                 if (path.startsWith('data:')) {
-                    // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: ПРЯМОЕ ПРИСВОЕНИЕ ДЛЯ BASE64
+                    // ПРЯМОЕ ПРИСВОЕНИЕ ДЛЯ BASE64
                     imageElement.src = path;
                 } else {
                     // Использование механизма повтора для внешних URL
@@ -508,7 +509,7 @@
         }
 
         // ====================================================================
-        // === UI & I18N FUNCTIONS (без изменений) ===
+        // === UI & I18N FUNCTIONS ===
         // ====================================================================
 
         /**
