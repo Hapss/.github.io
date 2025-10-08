@@ -9,19 +9,18 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #5c5c5c;
+            background-color: #5c5c5c; /* Фон сайта */
             color: #e5e7eb;
             transition: background-image 0.5s ease;
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
         }
-
+        /* VN Overlay for fixed size box */
         .vn-overlay {
             background-color: rgba(0, 0, 0, 0.75);
             backdrop-filter: blur(4px);
         }
-
         .speaker-name {
             background-color: #2a2a2a;
             color: #ca7cfe;
@@ -29,406 +28,648 @@
             border-radius: 8px;
             display: inline-block;
             font-weight: bold;
-            white-space: nowrap;
+            margin-left: 8px;
         }
-
         .sprite {
             position: absolute;
             bottom: 0;
-            max-height: 95%;
+            max-height: 95%;         /* Ограничение высоты спрайта */
             transition: opacity 0.3s ease, transform 0.3s ease;
             z-index: 10;
-            pointer-events: none;
         }
-        .sprite.left { left: 20px; }
-        .sprite.right { right: 20px; }
-
-        /* Logs */
-        .log-entry { margin-bottom: 0.5rem; padding: 0.5rem; cursor: pointer; border-radius: 4px; transition: background-color 0.2s; }
-        .log-entry:hover { background-color: #333; }
-        .log-speaker { font-weight: bold; color: #ca7cfe; display: block; }
-        .log-text { color: #ccc; }
-        .current-log-entry { background-color: #4a4a4a !important; border-left: 3px solid #ca7cfe; padding-left: 12px; }
+        .sprite.left {
+            left: 20px;
+        }
+        .sprite.right {
+            right: 20px;
+        }
+        /* Custom styles for Dialogue Log entries */
+        .log-entry {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .log-entry:hover {
+            background-color: #333;
+        }
+        .log-speaker {
+            font-weight: bold;
+            color: #ca7cfe;
+            display: block;
+        }
+        .log-text {
+            color: #ccc;
+        }
+        .current-log-entry {
+            background-color: #4a4a4a !important; /* Выделение текущей реплики */
+            border-left: 3px solid #ca7cfe;
+            padding-left: 12px;
+        }
     </style>
 </head>
 <body class="min-h-screen">
 
-<header id="header" class="fixed top-0 left-0 right-0 z-50 p-4 shadow-xl text-white" style="background-color: #2a2a2a;">
-    <div class="flex justify-between items-center max-w-7xl mx-auto">
-        <h1 id="headerTitle" class="text-xl font-bold tracking-wider">Houkai Gakuen 2 архив сюжета</h1>
-        <div class="flex items-center space-x-4">
-            <button id="resetButton" onclick="resetProgress()" class="px-3 py-1 bg-red-800 hover:bg-red-700 rounded-full transition duration-150 text-sm">Сброс</button>
-            <button id="helpButton" onclick="showHelpModal()" class="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-full transition duration-150 text-sm">?</button>
-            <select id="languageSelect" onchange="updateUI()" class="bg-gray-700 text-white rounded-lg p-2 cursor-pointer transition hover:ring-2 ring-red-400">
-                <option value="ru">Русский</option>
-                <option value="en">English</option>
-                <option value="cn">中文</option>
-            </select>
-        </div>
-    </div>
-</header>
-
-<main class="pt-20 pb-4 px-4 max-w-7xl mx-auto min-h-screen">
-
-    <div class="bg-gray-700 p-4 rounded-xl shadow-lg mb-6 flex flex-wrap gap-4 items-end">
-        <div class="flex-1 min-w-[180px]">
-            <label for="storyTypeSelect" id="labelStoryType" class="block text-sm font-medium mb-1 text-gray-300">Тип сюжета</label>
-            <select id="storyTypeSelect" onchange="updateChapterSelect()" class="w-full bg-gray-800 text-white rounded-lg p-2.5 cursor-pointer focus:ring-red-400 focus:border-red-400 transition"></select>
-        </div>
-        <div class="flex-1 min-w-[250px]">
-            <label for="chapterSelect" id="labelChapter" class="block text-sm font-medium mb-1 text-gray-300">Сюжет (Глава)</label>
-            <select id="chapterSelect" onchange="enableLoadButton()" class="w-full bg-gray-800 text-white rounded-lg p-2.5 cursor-pointer focus:ring-red-400 focus:border-red-400 transition"></select>
-        </div>
-        <button id="loadButton" onclick="updateStoryContent(0)" class="min-w-[120px] bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition duration-150 disabled:opacity-50" disabled>
-            <span id="loadText">Загрузить</span>
-        </button>
-    </div>
-
-    <!-- VN Viewer -->
-    <div id="vnViewer" class="relative w-full aspect-[16/9] bg-gray-900 rounded-xl shadow-2xl overflow-hidden flex flex-col justify-end transition-colors duration-500"
-         style="min-height:400px; background-image:url('https://placehold.co/1920x1080/2a2a2a/fca5a5?text=Выбор+сюжета'); background-size:cover; background-position:center;"
-         onclick="handleVnClick(event)">
-
-        <!-- Toggle log -->
-        <button id="logToggleButton" onclick="toggleLog()" class="absolute top-4 right-4 z-30 bg-gray-800 hover:bg-red-700 text-white p-3 rounded-full shadow-lg transition duration-150 hidden">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.22 4.5 7.5 4.5A2.75 2.75 0 004.75 7.25v9.5A2.75 2.75 0 007.5 19.5c1.72 0 3.332-.977 4.5-2.753m0-13C13.168 5.477 14.78 4.5 16.5 4.5A2.75 2.75 0 0119.25 7.25v9.5A2.75 2.75 0 0116.5 19.5c-1.72 0-3.332-.977-4.5-2.753"></path></svg>
-        </button>
-
-        <!-- Sprite container (sprites still positioned by JSON: left/right) -->
-        <div id="spriteContainer" class="absolute inset-0 z-10 pointer-events-none"></div>
-
-        <!-- Dialogue wrapper: centered. relative so speaker name can be absolutely anchored to its left/top -->
-        <div id="dialogueWrapper" class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 transition-all duration-300 opacity-100 hidden relative">
-            <!-- Speaker name: absolutely positioned relative to dialogueWrapper, left-aligned to dialogue box -->
-            <div id="speakerNameContainer" class="absolute -top-10 left-0 hidden">
-                <div id="currentSpeaker" class="speaker-name text-lg"></div>
-            </div>
-
-            <!-- Dialogue box (centered on page via wrapper). text aligned top. -->
-            <div id="dialogueContentBox" class="vn-overlay w-[900px] max-w-[calc(100vw-96px)] h-[200px] p-4 flex items-start justify-start rounded-xl shadow-2xl text-left overflow-auto"
-                 onclick="event.stopPropagation()">
-                <p id="currentText" class="text-base leading-tight transition-opacity duration-300">Текст диалога...</p>
+    <!-- 1. Header Bar -->
+    <header id="header" class="fixed top-0 left-0 right-0 z-50 p-4 shadow-xl text-white" style="background-color: #2a2a2a;">
+        <div class="flex justify-between items-center max-w-7xl mx-auto">
+            <h1 id="headerTitle" class="text-xl font-bold tracking-wider">Houkai Gakuen 2 архив сюжета</h1>
+            
+            <div class="flex items-center space-x-4">
+                <button id="resetButton" onclick="resetProgress()" class="px-3 py-1 bg-red-800 hover:bg-red-700 rounded-full transition duration-150 text-sm">Сброс</button>
+                <button id="helpButton" onclick="showHelpModal()" class="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-full transition duration-150 text-sm">?</button>
+                <select id="languageSelect" onchange="updateUI()" class="bg-gray-700 text-white rounded-lg p-2 cursor-pointer transition hover:ring-2 ring-red-400">
+                    <option value="ru">Русский</option>
+                    <option value="en">English</option>
+                    <option value="cn">中文</option>
+                </select>
             </div>
         </div>
+    </header>
 
-        <!-- nav buttons (hidden by default) -->
-        <div id="navButtons" class="absolute bottom-6 right-6 flex space-x-3 z-30 opacity-0 transition-opacity duration-300 hidden">
-            <button id="prevButton" onclick="navigateDialogue(-1)" class="bg-gray-800 hover:bg-gray-700 text-white p-3 rounded-full shadow-lg transition duration-150 disabled:opacity-30">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+    <!-- 2. Main Content Area -->
+    <main class="pt-20 pb-4 px-4 max-w-7xl mx-auto min-h-screen">
+        
+        <!-- Controls Panel -->
+        <div class="bg-gray-700 p-4 rounded-xl shadow-lg mb-6 flex flex-wrap gap-4 items-end">
+            <div class="flex-1 min-w-[180px]">
+                <label for="storyTypeSelect" id="labelStoryType" class="block text-sm font-medium mb-1 text-gray-300">Тип сюжета</label>
+                <select id="storyTypeSelect" onchange="updateChapterSelect()" class="w-full bg-gray-800 text-white rounded-lg p-2.5 cursor-pointer focus:ring-red-400 focus:border-red-400 transition">
+                    <!-- Options populated by JS -->
+                </select>
+            </div>
+
+            <div class="flex-1 min-w-[250px]">
+                <label for="chapterSelect" id="labelChapter" class="block text-sm font-medium mb-1 text-gray-300">Сюжет (Глава)</label>
+                <select id="chapterSelect" onchange="enableLoadButton()" class="w-full bg-gray-800 text-white rounded-lg p-2.5 cursor-pointer focus:ring-red-400 focus:border-red-400 transition">
+                    <!-- Options populated by JS -->
+                </select>
+            </div>
+            
+            <button id="loadButton" onclick="updateStoryContent(0)" class="min-w-[120px] bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition duration-150 disabled:opacity-50" disabled>
+                <span id="loadText">Загрузить</span>
             </button>
-            <button id="nextButton" onclick="navigateDialogue(1)" class="bg-red-600 hover:bg-red-500 text-white p-3 rounded-full shadow-lg transition duration-150 disabled:opacity-30">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        </div>
+
+        <!-- 3. Visual Novel Viewer (Main View) -->
+        <div id="vnViewer" class="relative w-full aspect-[16/9] bg-gray-900 rounded-xl shadow-2xl overflow-hidden flex flex-col justify-end transition-colors duration-500" 
+             style="min-height: 400px; background-image: url('https://placehold.co/1920x1080/2a2a2a/fca5a5?text=Выбор+сюжета'); background-size: cover; background-position: center;"
+             onclick="handleVnClick(event)">
+
+            <!-- Log Toggle Button (New feature) -->
+            <button id="logToggleButton" onclick="toggleLog()" 
+                class="absolute top-4 right-4 z-30 bg-gray-800 hover:bg-red-700 text-white p-3 rounded-full shadow-lg transition duration-150 hidden">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.22 4.5 7.5 4.5A2.75 2.75 0 004.75 7.25v9.5A2.75 2.75 0 007.5 19.5c1.72 0 3.332-.977 4.5-2.753m0-13C13.168 5.477 14.78 4.5 16.5 4.5A2.75 2.75 0 0119.25 7.25v9.5A2.75 2.75 0 0116.5 19.5c-1.72 0-3.332-.977-4.5-2.753"></path>
+                </svg>
             </button>
+            
+            <!-- Sprite Container -->
+            <div id="spriteContainer" class="absolute inset-0 z-10 pointer-events-none flex justify-start items-end p-4">
+                <!-- Sprites are inserted here by JS -->
+            </div>
+
+            <!-- Dialogue Wrapper: Contains Speaker (above) and fixed-size Text Box (below) -->
+            <div id="dialogueWrapper" class="absolute bottom-4 left-4 z-20 transition-all duration-300 opacity-100 hidden">
+                
+                <!-- Speaker Name Container (Above the main box) -->
+                <div id="speakerNameContainer" class="text-left mb-2">
+                    <div id="currentSpeaker" class="speaker-name text-lg rounded-t-lg rounded-b-none"></div>
+                </div>
+                
+                <!-- Dialogue Text Content Box -->
+                <div id="dialogueContentBox" 
+                    class="vn-overlay w-[900px] max-w-[calc(100vw-96px)] h-[200px] p-4 flex items-start justify-start 
+                            rounded-xl shadow-2xl text-left overflow-auto"
+                    onclick="event.stopPropagation()">
+                    <p id="currentText" class="text-base leading-tight transition-opacity duration-300">Текст диалога...</p>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons (hidden, navigation handled by click) -->
+            <div id="navButtons" class="absolute bottom-6 right-6 flex space-x-3 z-30 opacity-0 transition-opacity duration-300 hidden">
+                <button id="prevButton" onclick="navigateDialogue(-1)" class="bg-gray-800 hover:bg-gray-700 text-white p-3 rounded-full shadow-lg transition duration-150 disabled:opacity-30">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                </button>
+                <button id="nextButton" onclick="navigateDialogue(1)" class="bg-red-600 hover:bg-red-500 text-white p-3 rounded-full shadow-lg transition duration-150 disabled:opacity-30">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </button>
+            </div>
+        </div>
+        <!-- Note: Old Dialogue Log section removed from main content -->
+
+    </main>
+    
+    <!-- Help Modal -->
+    <div id="helpModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center hidden" onclick="showHelpModal()">
+        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl max-w-lg w-11/12 transform transition-all duration-300 scale-95" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-3">
+                <h3 class="text-xl font-bold text-red-400">О приложении</h3>
+                <button onclick="showHelpModal()" class="text-gray-400 hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <p id="helpContent" class="text-gray-300 leading-relaxed"></p>
         </div>
     </div>
-</main>
 
-<!-- Help modal -->
-<div id="helpModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center hidden" onclick="showHelpModal()">
-    <div class="bg-gray-800 p-6 rounded-xl shadow-2xl max-w-lg w-11/12 transform transition-all duration-300 scale-95" onclick="event.stopPropagation()">
-        <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-3">
-            <h3 class="text-xl font-bold text-red-400">О приложении</h3>
-            <button onclick="showHelpModal()" class="text-gray-400 hover:text-white transition">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-        </div>
-        <p id="helpContent" class="text-gray-300 leading-relaxed"></p>
-    </div>
-</div>
-
-<!-- Log modal -->
-<div id="logModal" class="fixed inset-0 z-40 hidden" onclick="toggleLog()">
-    <div id="logContent" class="absolute top-0 right-0 h-full w-full sm:w-1/3 bg-gray-900 border-l-4 border-red-500 shadow-2xl p-6 transform translate-x-full transition-transform duration-300" onclick="event.stopPropagation()">
-        <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-700">
-            <h2 class="text-xl font-bold text-red-400">Лог Диалогов</h2>
-            <button onclick="toggleLog()" class="text-gray-400 hover:text-white transition">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-        </div>
-        <div id="logContainer" class="h-[calc(100%-60px)] overflow-y-auto">
-            <p class="text-gray-500 text-center mt-8">Загрузите сюжет, чтобы увидеть лог.</p>
+    <!-- Dialogue Log Modal (New structure: Fixed Overlay) -->
+    <div id="logModal" class="fixed inset-0 z-40 hidden" onclick="toggleLog()">
+        <div id="logContent" 
+            class="absolute top-0 right-0 h-full w-full sm:w-1/3 bg-gray-900 border-l-4 border-red-500 shadow-2xl p-6 transform translate-x-full transition-transform duration-300"
+            onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-700">
+                <h2 class="text-xl font-bold text-red-400">Лог Диалогов</h2>
+                <button onclick="toggleLog()" class="text-gray-400 hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div id="logContainer" class="h-[calc(100%-60px)] overflow-y-auto">
+                <!-- Dialogue entries will be added here by JS -->
+                <p class="text-gray-500 text-center mt-8">Загрузите сюжет, чтобы увидеть лог.</p>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    const STORAGE_KEY = 'hg2_story_progress';
-    const SPRITE_BASE_PATH = 'images/sprites/';
+    <script>
+        const STORAGE_KEY = 'hg2_story_progress';
+        const SPRITE_BASE_PATH = 'images/sprites/'; 
 
-    let currentDialogue = [];
-    let currentDialogueIndex = 0;
-    let dialogueIsLoaded = false;
+        let currentDialogue = [];
+        let currentDialogueIndex = 0;
+        let dialogueIsLoaded = false;
 
-    const i18n = {
-        ru: { headerTitle:"Houkai Gakuen 2 архив сюжета", labelStoryType:"Тип сюжета", labelChapter:"Сюжет (Глава)", loadText:"Загрузить", resetProgress:"Сброс", errorFetch:"Ошибка загрузки контента: файл не найден или проблема с сетью.", logTitle:"Лог Диалогов", helpTitle:"Как пользоваться архивом:", helpText:"Это интерактивный архив сюжетов Honkai Gakuen 2.\n\n1. Используйте верхние выпадающие списки, чтобы выбрать [Тип сюжета] и конкретную [Главу].\n2. Нажмите [Загрузить].\n3. В окне визуальной новеллы используйте клик в правой части для перехода Далее и клик в левой части для перехода Назад.\n4. Ваш прогресс автоматически сохраняется.\n5. Чтобы открыть [Лог диалогов], нажмите на иконку книги в правом верхнем углу VN-окна." },
-        en: { headerTitle:"Houkai Gakuen 2 Story Archive", labelStoryType:"Story Type", labelChapter:"Story (Chapter)", loadText:"Load", resetProgress:"Reset", errorFetch:"Content loading error: file not found or network issue.", logTitle:"Dialogue Log", helpTitle:"How to use the Archive:", helpText:"This is an interactive story archive for Honkai Gakuen 2.\n\n1. Use the top dropdowns to select the [Story Type] and a specific [Chapter].\n2. Click [Load].\n3. In the Visual Novel viewer, use click on the right side to go Next and click on the left side to go Back.\n4. Your progress is saved automatically.\n5. To open the [Dialogue Log], click the book icon in the top right of the VN viewer." },
-        cn: { headerTitle:"崩坏学园2 剧情档案", labelStoryType:"剧情类型", labelChapter:"剧情 (章节)", loadText:"加载", resetProgress:"重置", errorFetch:"内容加载错误：未找到文件或网络问题。", logTitle:"对话记录", helpTitle:"如何使用档案：", helpText:"这是一个崩坏学园2的交互式剧情档案。\n\n1. 使用顶部下拉列表选择剧情类型和特定章节。\n2. 点击加载。\n3. 在视觉小说查看器中，使用右侧点击进行下一页，左侧点击进行上一页。\n4. 您的进度将自动保存。\n5. 要打开对话记录，请点击 VN 查看器右上角的书本图标。" }
-    };
-
-    const storyData = {
-        main: { ru:"Основной сюжет", en:"Main Story", cn:"主线剧情", chapters:{ ch1:{ru:"Глава 1",en:"Chapter 1",cn:"章节 1"}, ch2:{ru:"Глава 2",en:"Chapter 2",cn:"章节 2"}, ch3:{ru:"Глава 3",en:"Chapter 3",cn:"章节 3"} } },
-        extra: { ru:"Дополнительный сюжет", en:"Extra Story", cn:"额外剧情", chapters:{ ex1:{ru:"Экстра 1",en:"Extra 1",cn:"额外 1"}, ex2:{ru:"Экстра 2",en:"Extra 2",cn:"额外 2"} } },
-        bosses: { ru:"Боссы", en:"Boss Fights", cn:"首领战", chapters:{ b1:{ru:"Босс 1",en:"Boss 1",cn:"首领 1"} } },
-        vn: { ru:"Визуальная новелла", en:"Visual Novel", cn:"视觉小说", chapters:{ vn1:{ru:"VN 1",en:"VN 1",cn:"VN 1"} } },
-        romance: { ru:"Роман", en:"Romance", cn:"小说", chapters:{ r1:{ru:"Роман 1",en:"Novel 1",cn:"小说 1"} } }
-    };
-
-    function saveProgress() {
-        const progress = {
-            lang: document.getElementById('languageSelect').value,
-            type: document.getElementById('storyTypeSelect').value,
-            chapter: document.getElementById('chapterSelect').value,
-            index: currentDialogueIndex
-        };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-    }
-
-    function loadProgress() {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (!saved) return;
-        const progress = JSON.parse(saved);
-        if (i18n[progress.lang]) document.getElementById('languageSelect').value = progress.lang;
-        if (storyData[progress.type]) document.getElementById('storyTypeSelect').value = progress.type;
-        updateUI();
-        if (storyData[progress.type]?.chapters[progress.chapter]) document.getElementById('chapterSelect').value = progress.chapter;
-        if (document.getElementById('storyTypeSelect').value && document.getElementById('chapterSelect').value) {
-            updateStoryContent(progress.index);
-        }
-    }
-
-    function resetProgress() {
-        localStorage.removeItem(STORAGE_KEY);
-        document.getElementById('dialogueWrapper').classList.add('hidden');
-        document.getElementById('navButtons').classList.add('hidden');
-        document.getElementById('logToggleButton').classList.add('hidden');
-        document.getElementById('logModal').classList.add('hidden');
-        document.getElementById('logContent').classList.add('translate-x-full');
-        document.getElementById('languageSelect').value = 'ru';
-        updateUI();
-        const currentLang = document.getElementById('languageSelect').value;
-        const vnViewer = document.getElementById('vnViewer');
-        vnViewer.style.backgroundImage = `url('https://placehold.co/1920x1080/2a2a2a/fca5a5?text=${i18n[currentLang].loadText.replace('Загрузить','Прогресс+сброшен')}')`;
-    }
-
-    function toggleLog() {
-        const modal = document.getElementById('logModal');
-        const content = document.getElementById('logContent');
-        const logContainer = document.getElementById('logContainer');
-        if (modal.classList.contains('hidden')) {
-            if (dialogueIsLoaded) {
-                populateDialogueLog();
-                modal.classList.remove('hidden');
-                setTimeout(()=>{ content.classList.remove('translate-x-full'); const currentEntry = logContainer.querySelector('.current-log-entry'); if (currentEntry) currentEntry.scrollIntoView({behavior:'smooth', block:'center'}); },10);
+        // --- I18N DATA ---
+        const i18n = {
+            ru: {
+                headerTitle: "Houkai Gakuen 2 архив сюжета",
+                labelStoryType: "Тип сюжета",
+                labelChapter: "Сюжет (Глава)",
+                loadText: "Загрузить",
+                resetProgress: "Сброс",
+                errorFetch: "Ошибка загрузки контента: файл не найден или проблема с сетью.",
+                logTitle: "Лог Диалогов",
+                helpTitle: "Как пользоваться архивом:",
+                helpText: "Это интерактивный архив сюжетов Honkai Gakuen 2.\n\n1. Используйте верхние выпадающие списки, чтобы выбрать [Тип сюжета] и конкретную [Главу].\n2. Нажмите [Загрузить].\n3. В окне визуальной новеллы используйте клик в правой части для перехода Далее и клик в левой части для перехода Назад.\n4. Ваш прогресс автоматически сохраняется.\n5. Чтобы открыть [Лог диалогов], нажмите на иконку книги в правом верхнем углу VN-окна."
+            },
+            en: {
+                headerTitle: "Houkai Gakuen 2 Story Archive",
+                labelStoryType: "Story Type",
+                labelChapter: "Story (Chapter)",
+                loadText: "Load",
+                resetProgress: "Reset",
+                errorFetch: "Content loading error: file not found or network issue.",
+                logTitle: "Dialogue Log",
+                helpTitle: "How to use the Archive:",
+                helpText: "This is an interactive story archive for Honkai Gakuen 2.\n\n1. Use the top dropdowns to select the [Story Type] and a specific [Chapter].\n2. Click [Load].\n3. In the Visual Novel viewer, use click on the right side to go Next and click on the left side to go Back.\n4. Your progress is saved automatically.\n5. To open the [Dialogue Log], click the book icon in the top right of the VN viewer."
+            },
+            cn: {
+                headerTitle: "崩坏学园2 剧情档案",
+                labelStoryType: "剧情类型",
+                labelChapter: "剧情 (章节)",
+                loadText: "加载",
+                resetProgress: "重置",
+                errorFetch: "内容加载错误：未找到文件或网络问题。",
+                logTitle: "对话记录",
+                helpTitle: "如何使用档案：",
+                helpText: "这是一个崩坏学园2的交互式剧情档案。\n\n1. 使用顶部下拉列表选择剧情类型和特定章节。\n2. 点击加载。\n3. 在视觉小说查看器中，使用右侧点击进行下一页，左侧点击进行上一页。\n4. 您的进度将自动保存。\n5. 要打开对话记录，请点击 VN 查看器右上角的书本图标。"
             }
-        } else {
-            content.classList.add('translate-x-full');
-            setTimeout(()=> modal.classList.add('hidden'), 300);
+        };
+
+        // --- STORY DATA STRUCTURE (Mocked) ---
+        const storyData = {
+            main: {
+                ru: "Основной сюжет", en: "Main Story", cn: "主线剧情",
+                chapters: {
+                    ch1: { ru: "Глава 1", en: "Chapter 1", cn: "章节 1" },
+                    ch2: { ru: "Глава 2", en: "Chapter 2", cn: "章节 2" },
+                    ch3: { ru: "Глава 3", en: "Chapter 3", cn: "章节 3" }
+                }
+            },
+            extra: {
+                ru: "Дополнительный сюжет", en: "Extra Story", cn: "额外剧情",
+                chapters: {
+                    ex1: { ru: "Экстра 1", en: "Extra 1", cn: "额外 1" },
+                    ex2: { ru: "Экстра 2", en: "Extra 2", cn: "额外 2" }
+                }
+            },
+            bosses: {
+                ru: "Боссы", en: "Boss Fights", cn: "首领战",
+                chapters: {
+                    b1: { ru: "Босс 1", en: "Boss 1", cn: "首领 1" }
+                }
+            },
+            vn: {
+                ru: "Визуальная новелла", en: "Visual Novel", cn: "视觉小说",
+                chapters: {
+                    vn1: { ru: "VN 1", en: "VN 1", cn: "VN 1" }
+                }
+            },
+            romance: {
+                ru: "Роман", en: "Romance", cn: "小说",
+                chapters: {
+                    r1: { ru: "Роман 1", en: "Novel 1", cn: "小说 1" }
+                }
+            }
+        };
+
+        // --- PROGRESS MANAGEMENT ---
+        
+        /** Saves current progress (language, type, chapter, index) to localStorage. */
+        function saveProgress() {
+            const progress = {
+                lang: document.getElementById('languageSelect').value,
+                type: document.getElementById('storyTypeSelect').value,
+                chapter: document.getElementById('chapterSelect').value,
+                index: currentDialogueIndex
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
         }
-    }
 
-    function handleVnClick(event) {
-        if (!dialogueIsLoaded || !document.getElementById('logModal').classList.contains('hidden')) return;
-        const vnViewer = document.getElementById('vnViewer');
-        const rect = vnViewer.getBoundingClientRect();
-        const relativeX = (event.clientX - rect.left) / rect.width;
-        if (relativeX > 0.6) navigateDialogue(1);
-        else if (relativeX < 0.4) navigateDialogue(-1);
-    }
+        /** Loads progress from localStorage on page load. */
+        function loadProgress() {
+            const savedProgress = localStorage.getItem(STORAGE_KEY);
+            if (!savedProgress) return;
 
-    function enableLoadButton() {
-        const storyId = document.getElementById('chapterSelect').value;
-        document.getElementById('loadButton').disabled = !storyId;
-    }
+            const progress = JSON.parse(savedProgress);
+            
+            // Restore language
+            const langSelect = document.getElementById('languageSelect');
+            if (i18n[progress.lang]) {
+                langSelect.value = progress.lang;
+            }
 
-    function updateUI() {
-        const lang = document.getElementById('languageSelect').value;
-        const text = i18n[lang];
-        document.getElementById('headerTitle').textContent = text.headerTitle;
-        document.getElementById('labelStoryType').textContent = text.labelStoryType;
-        document.getElementById('labelChapter').textContent = text.labelChapter;
-        document.getElementById('loadText').textContent = text.loadText;
-        document.getElementById('resetButton').textContent = text.resetProgress;
-        document.getElementById('helpContent').innerHTML = `<h4 class="text-lg font-semibold text-red-400 mb-2">${text.helpTitle}</h4><p class="whitespace-pre-line">${text.helpText}</p>`;
-        updateStoryTypeSelect();
-        updateChapterSelect();
-        enableLoadButton();
-    }
+            // Restore story type
+            const typeSelect = document.getElementById('storyTypeSelect');
+            if (storyData[progress.type]) {
+                typeSelect.value = progress.type;
+            }
 
-    function updateStoryTypeSelect() {
-        const select = document.getElementById('storyTypeSelect');
-        const lang = document.getElementById('languageSelect').value;
-        const currentType = select.value;
-        select.innerHTML = '';
-        const defaultOption = document.createElement('option');
-        defaultOption.value = "";
-        defaultOption.textContent = "---";
-        select.appendChild(defaultOption);
-        for (const key in storyData) {
-            const option = document.createElement('option');
-            option.value = key;
-            option.textContent = storyData[key][lang];
-            if (key === currentType) option.selected = true;
-            select.appendChild(option);
+            // Must update UI first to populate chapter list
+            updateUI(); 
+
+            // Restore chapter
+            const chapterSelect = document.getElementById('chapterSelect');
+            if (storyData[progress.type]?.chapters[progress.chapter]) {
+                chapterSelect.value = progress.chapter;
+            }
+
+            // If we have both chapter and type, load content from the saved index
+            if (typeSelect.value && chapterSelect.value) {
+                // Pass the saved index to updateStoryContent
+                updateStoryContent(progress.index);
+            }
         }
-    }
 
-    function updateChapterSelect() {
-        const typeKey = document.getElementById('storyTypeSelect').value;
-        const select = document.getElementById('chapterSelect');
-        const lang = document.getElementById('languageSelect').value;
-        select.innerHTML = '';
-        const defaultOption = document.createElement('option');
-        defaultOption.value = "";
-        defaultOption.textContent = "---";
-        select.appendChild(defaultOption);
-        if (typeKey && storyData[typeKey] && storyData[typeKey].chapters) {
-            const chapters = storyData[typeKey].chapters;
-            for (const key in chapters) {
+        /** Clears saved progress and reloads the page. */
+        function resetProgress() {
+            localStorage.removeItem(STORAGE_KEY);
+            document.getElementById('dialogueWrapper').classList.add('hidden');
+            document.getElementById('navButtons').classList.add('hidden');
+            document.getElementById('logToggleButton').classList.add('hidden'); // Hide toggle button
+
+            // Ensure log modal is closed on reset
+            document.getElementById('logModal').classList.add('hidden');
+            document.getElementById('logContent').classList.add('translate-x-full');
+
+            // Reset selectors to default
+            document.getElementById('languageSelect').value = 'ru';
+            updateUI(); 
+            // Inform the user
+            const currentLang = document.getElementById('languageSelect').value;
+            const vnViewer = document.getElementById('vnViewer');
+            vnViewer.style.backgroundImage = `url('https://placehold.co/1920x1080/2a2a2a/fca5a5?text=${i18n[currentLang].loadText.replace('Загрузить', 'Прогресс сброшен')}')`;
+        }
+
+        // --- CORE UI FUNCTIONS ---
+
+        /** Toggles the visibility of the dialogue log modal. */
+        function toggleLog() {
+            const modal = document.getElementById('logModal');
+            const content = document.getElementById('logContent');
+            const logContainer = document.getElementById('logContainer');
+
+            if (modal.classList.contains('hidden')) {
+                // SHOW: Populate log before showing it
+                if (dialogueIsLoaded) {
+                    populateDialogueLog();
+                    modal.classList.remove('hidden');
+                    // Apply transform property on next tick for CSS transition
+                    setTimeout(() => {
+                        content.classList.remove('translate-x-full');
+                        // Ensure the current line is visible upon opening
+                        const currentEntry = logContainer.querySelector(`.current-log-entry`);
+                        if (currentEntry) {
+                            currentEntry.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }, 10);
+                }
+            } else {
+                // HIDE
+                content.classList.add('translate-x-full');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300); // Wait for transition to complete
+            }
+        }
+
+        /** Handles click on VN Viewer area for navigation. */
+        function handleVnClick(event) {
+            if (!dialogueIsLoaded || !document.getElementById('logModal').classList.contains('hidden')) return;
+            
+            const vnViewer = document.getElementById('vnViewer');
+            const rect = vnViewer.getBoundingClientRect();
+            const clickX = event.clientX;
+            
+            // Calculate relative position (0 to 1)
+            const relativeX = (clickX - rect.left) / rect.width;
+
+            if (relativeX > 0.6) { // Click on right 40% (Next)
+                navigateDialogue(1);
+            } else if (relativeX < 0.4) { // Click on left 40% (Previous)
+                navigateDialogue(-1);
+            }
+            // Ignore click in the middle 20%
+        }
+
+        /** Enables the load button when a chapter is selected. */
+        function enableLoadButton() {
+            const storyId = document.getElementById('chapterSelect').value;
+            document.getElementById('loadButton').disabled = !storyId;
+        }
+
+        /** Updates all UI elements based on the current language selection. */
+        function updateUI() {
+            const lang = document.getElementById('languageSelect').value;
+            const text = i18n[lang];
+
+            document.getElementById('headerTitle').textContent = text.headerTitle;
+            document.getElementById('labelStoryType').textContent = text.labelStoryType;
+            document.getElementById('labelChapter').textContent = text.labelChapter;
+            document.getElementById('loadText').textContent = text.loadText;
+            document.getElementById('resetButton').textContent = text.resetProgress;
+            
+            document.getElementById('helpContent').innerHTML = `
+                <h4 class="text-lg font-semibold text-red-400 mb-2">${text.helpTitle}</h4>
+                <p class="whitespace-pre-line">${text.helpText}</p>`;
+            
+            updateStoryTypeSelect();
+            updateChapterSelect();
+            enableLoadButton();
+        }
+
+        /** Populates the Story Type dropdown based on the current language. */
+        function updateStoryTypeSelect() {
+            const select = document.getElementById('storyTypeSelect');
+            const lang = document.getElementById('languageSelect').value;
+            const currentType = select.value;
+            
+            select.innerHTML = '';
+            
+            const defaultOption = document.createElement('option');
+            defaultOption.value = "";
+            defaultOption.textContent = "---";
+            select.appendChild(defaultOption);
+
+            for (const key in storyData) {
                 const option = document.createElement('option');
                 option.value = key;
-                option.textContent = chapters[key][lang];
+                option.textContent = storyData[key][lang];
+                if (key === currentType) {
+                    option.selected = true;
+                }
                 select.appendChild(option);
             }
-            select.disabled = false;
-        } else select.disabled = true;
-        enableLoadButton();
-    }
+        }
 
-    async function updateStoryContent(startIndex = 0) {
-        const storyType = document.getElementById('storyTypeSelect').value;
-        const storyId = document.getElementById('chapterSelect').value;
-        const currentLang = document.getElementById('languageSelect').value;
-        const vnViewer = document.getElementById('vnViewer');
-        const loadButton = document.getElementById('loadButton');
-        const loadText = document.getElementById('loadText');
-        if (!storyType || !storyId) return;
-        const fileName = `story/${currentLang}/${storyType}_${storyId}.json`;
-        loadButton.disabled = true;
-        loadText.textContent = i18n[currentLang].loadText + '...';
-        try {
-            const response = await fetch(fileName);
-            if (!response.ok) throw new Error(i18n[currentLang].errorFetch + ` (File: ${fileName})`);
-            const data = await response.json();
-            if (!data.dialogue || !Array.isArray(data.dialogue)) throw new Error("JSON structure error: 'dialogue' array not found.");
-            currentDialogue = data.dialogue;
-            currentDialogueIndex = Math.min(startIndex, currentDialogue.length - 1);
-            if (currentDialogueIndex < 0) currentDialogueIndex = 0;
-            dialogueIsLoaded = true;
-            if (currentDialogue.length > 0 && currentDialogue[currentDialogueIndex].background) {
-                vnViewer.style.backgroundImage = `url('${currentDialogue[currentDialogueIndex].background}')`;
+        /** Populates the Chapter dropdown based on the selected Story Type and language. */
+        function updateChapterSelect() {
+            const typeKey = document.getElementById('storyTypeSelect').value;
+            const select = document.getElementById('chapterSelect');
+            const lang = document.getElementById('languageSelect').value;
+            
+            select.innerHTML = '';
+            
+            const defaultOption = document.createElement('option');
+            defaultOption.value = "";
+            defaultOption.textContent = "---";
+            select.appendChild(defaultOption);
+
+            if (typeKey && storyData[typeKey] && storyData[typeKey].chapters) {
+                const chapters = storyData[typeKey].chapters;
+                for (const key in chapters) {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = chapters[key][lang];
+                    select.appendChild(option);
+                }
+                select.disabled = false;
             } else {
-                vnViewer.style.backgroundImage = `url('https://placehold.co/1920x1080/2a2a2a/fca5a5?text=${encodeURIComponent(storyData[storyType][currentLang])}')`;
+                select.disabled = true;
             }
-            document.getElementById('dialogueWrapper').classList.remove('hidden');
-            document.getElementById('logToggleButton').classList.remove('hidden');
+            enableLoadButton();
+        }
+
+        /** Asynchronously loads the selected story chapter JSON. Assumes the JSON file contains a flat 'dialogue' array.
+         * @param {number} startIndex - The dialogue index to start viewing from (used for loading progress).
+         */
+        async function updateStoryContent(startIndex = 0) {
+            const storyType = document.getElementById('storyTypeSelect').value;
+            const storyId = document.getElementById('chapterSelect').value;
+            const currentLang = document.getElementById('languageSelect').value;
+            const vnViewer = document.getElementById('vnViewer');
+            const loadButton = document.getElementById('loadButton');
+            const loadText = document.getElementById('loadText');
+            
+            if (!storyType || !storyId) return;
+
+            // Filename format: {language}/{type}_{chapter}.json (e.g., ru/main_ch1.json)
+            const fileName = `story/${currentLang}/${storyType}_${storyId}.json`;
+
+            loadButton.disabled = true;
+            loadText.textContent = i18n[currentLang].loadText + '...';
+            
+            try {
+                const response = await fetch(fileName);
+                if (!response.ok) {
+                    throw new Error(i18n[currentLang].errorFetch + ` (File: ${fileName})`);
+                }
+                const data = await response.json();
+                
+                if (!data.dialogue || !Array.isArray(data.dialogue)) {
+                    throw new Error("JSON structure error: 'dialogue' array not found at the root level.");
+                }
+
+                currentDialogue = data.dialogue;
+                
+                // Set the current index, ensuring it doesn't exceed the dialogue length
+                currentDialogueIndex = Math.min(startIndex, currentDialogue.length - 1);
+                if (currentDialogueIndex < 0) currentDialogueIndex = 0;
+
+                dialogueIsLoaded = true;
+
+                // Set default VN background if available
+                if (currentDialogue.length > 0 && currentDialogue[currentDialogueIndex].background) {
+                    vnViewer.style.backgroundImage = `url('${currentDialogue[currentDialogueIndex].background}')`;
+                } else {
+                    vnViewer.style.backgroundImage = `url('https://placehold.co/1920x1080/2a2a2a/fca5a5?text=${storyData[storyType][currentLang]}')`;
+                }
+
+                document.getElementById('dialogueWrapper').classList.remove('hidden');
+                document.getElementById('logToggleButton').classList.remove('hidden'); // Show toggle button
+                
+                renderDialogue();
+                saveProgress(); // Save initial load state
+
+            } catch (error) {
+                console.error("Error loading story:", error.message);
+                currentDialogue = [];
+                dialogueIsLoaded = false;
+                vnViewer.style.backgroundImage = `url('https://placehold.co/1920x1080/aa0000/ffffff?text=Ошибка+Загрузки')`;
+                
+                document.getElementById('dialogueWrapper').classList.add('hidden');
+                document.getElementById('logToggleButton').classList.add('hidden'); // Hide toggle button
+                
+            } finally {
+                loadButton.disabled = false;
+                loadText.textContent = i18n[currentLang].loadText;
+            }
+        }
+
+        /** Populates the dialogue log with only the lines that have been read up to the current index. */
+        function populateDialogueLog() {
+            const logContainer = document.getElementById('logContainer');
+            logContainer.innerHTML = '';
+
+            if (currentDialogue.length === 0) {
+                 logContainer.innerHTML = '<p class="text-gray-500 text-center mt-8">Сюжет не загружен.</p>';
+                 return;
+            }
+
+            // Only populate lines from 0 up to and including the current index
+            for (let index = 0; index <= currentDialogueIndex; index++) {
+                const line = currentDialogue[index];
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                entry.setAttribute('data-index', index);
+                entry.onclick = () => {
+                    jumpToDialogue(index);
+                    toggleLog(); // Close log after jumping
+                };
+
+                // Speaker name is optional
+                if (line.speaker) {
+                    const speaker = document.createElement('span');
+                    speaker.className = 'log-speaker';
+                    speaker.textContent = line.speaker + ': ';
+                    entry.appendChild(speaker);
+                }
+
+                const text = document.createElement('span');
+                text.className = 'log-text';
+                text.textContent = line.text;
+                entry.appendChild(text);
+
+                // Add highlight if it's the current line
+                if (index === currentDialogueIndex) {
+                    entry.classList.add('current-log-entry');
+                }
+
+                logContainer.appendChild(entry);
+            }
+        }
+
+        /** Jumps to a specific line in the dialogue. */
+        function jumpToDialogue(index) {
+            currentDialogueIndex = index;
             renderDialogue();
             saveProgress();
-        } catch (err) {
-            console.error("Error loading story:", err.message);
-            currentDialogue = [];
-            dialogueIsLoaded = false;
-            vnViewer.style.backgroundImage = `url('https://placehold.co/1920x1080/aa0000/ffffff?text=Ошибка+Загрузки')`;
-            document.getElementById('dialogueWrapper').classList.add('hidden');
-            document.getElementById('logToggleButton').classList.add('hidden');
-        } finally {
-            loadButton.disabled = false;
-            loadText.textContent = i18n[currentLang].loadText;
         }
-    }
 
-    function populateDialogueLog() {
-        const logContainer = document.getElementById('logContainer');
-        logContainer.innerHTML = '';
-        if (currentDialogue.length === 0) { logContainer.innerHTML = '<p class="text-gray-500 text-center mt-8">Сюжет не загружен.</p>'; return; }
-        for (let index = 0; index <= currentDialogueIndex; index++) {
-            const line = currentDialogue[index];
-            const entry = document.createElement('div');
-            entry.className = 'log-entry';
-            entry.setAttribute('data-index', index);
-            entry.onclick = () => { jumpToDialogue(index); toggleLog(); };
-            if (line.speaker) {
-                const speaker = document.createElement('span');
-                speaker.className = 'log-speaker';
-                speaker.textContent = line.speaker + ': ';
-                entry.appendChild(speaker);
+        /** Renders the current dialogue line, sprite, and updates navigation buttons and log. */
+        function renderDialogue() {
+            if (!dialogueIsLoaded || currentDialogue.length === 0) return;
+
+            const dialogue = currentDialogue[currentDialogueIndex];
+            const vnViewer = document.getElementById('vnViewer');
+            const spriteContainer = document.getElementById('spriteContainer');
+            const currentSpeaker = document.getElementById('currentSpeaker');
+            const currentText = document.getElementById('currentText');
+            const speakerNameContainer = document.getElementById('speakerNameContainer');
+            const logContainer = document.getElementById('logContainer');
+
+            // 1. Update Background (uses the 'background' property from the current line)
+            if (dialogue.background) {
+                vnViewer.style.backgroundImage = `url('${dialogue.background}')`;
             }
-            const text = document.createElement('span');
-            text.className = 'log-text';
-            text.textContent = line.text;
-            entry.appendChild(text);
-            if (index === currentDialogueIndex) entry.classList.add('current-log-entry');
-            logContainer.appendChild(entry);
-        }
-    }
 
-    function jumpToDialogue(index) {
-        currentDialogueIndex = index;
-        renderDialogue();
-        saveProgress();
-    }
+            // 2. Update Sprite
+            spriteContainer.innerHTML = ''; // Clear existing sprites
+            if (dialogue.sprite) {
+                const img = document.createElement('img');
+                const spriteSrc = SPRITE_BASE_PATH + dialogue.sprite;
+                img.src = spriteSrc; 
+                
+                img.alt = dialogue.speaker || 'sprite';
+                // Respect position from JSON: 'left' or 'right' (default left)
+                const posClass = (dialogue.position && dialogue.position.toLowerCase() === 'right') ? 'right' : 'left';
+                img.classList.add('sprite', posClass);
+                img.onerror = () => {
+                    // Используем заглушку, если спрайт не загрузился по указанному пути
+                    img.src = `https://placehold.co/200x400/808080/ffffff?text=${encodeURIComponent(dialogue.speaker || 'NoName')}`; 
+                    console.error(`Sprite not found at: ${spriteSrc}. Check your file path.`);
+                }; 
+                spriteContainer.appendChild(img);
+            }
 
-    function renderDialogue() {
-        if (!dialogueIsLoaded || currentDialogue.length === 0) return;
-        const dialogue = currentDialogue[currentDialogueIndex];
-        const vnViewer = document.getElementById('vnViewer');
-        const spriteContainer = document.getElementById('spriteContainer');
-        const currentSpeaker = document.getElementById('currentSpeaker');
-        const currentText = document.getElementById('currentText');
-        const speakerNameContainer = document.getElementById('speakerNameContainer');
-        const logContainer = document.getElementById('logContainer');
+            // 3. Update Text and Speaker
+            currentText.style.opacity = '0';
+            setTimeout(() => {
+                currentText.textContent = dialogue.text;
+                currentText.style.opacity = '1';
+            }, 50); // Small delay for fade effect
 
-        if (dialogue.background) vnViewer.style.backgroundImage = `url('${dialogue.background}')`;
+            if (dialogue.speaker) {
+                currentSpeaker.textContent = dialogue.speaker;
+                speakerNameContainer.classList.remove('hidden');
+            } else {
+                currentSpeaker.textContent = '';
+                speakerNameContainer.classList.add('hidden');
+            }
 
-        // SPRITE (position from JSON: 'left' or 'right')
-        spriteContainer.innerHTML = '';
-        if (dialogue.sprite) {
-            const img = document.createElement('img');
-            const spriteSrc = SPRITE_BASE_PATH + dialogue.sprite;
-            img.src = spriteSrc;
-            img.alt = dialogue.speaker || 'sprite';
-            const posClass = (dialogue.position && dialogue.position.toLowerCase() === 'right') ? 'right' : 'left';
-            img.classList.add('sprite', posClass);
-            img.onerror = () => {
-                img.src = `https://placehold.co/200x400/808080/ffffff?text=${encodeURIComponent(dialogue.speaker || 'NoName')}`;
-                console.error(`Sprite not found at: ${spriteSrc}`);
-            };
-            spriteContainer.appendChild(img);
-        }
-
-        // TEXT (fade) and ensure it's top-aligned inside box
-        currentText.style.opacity = '0';
-        setTimeout(() => { currentText.textContent = dialogue.text; currentText.style.opacity = '1'; }, 50);
-
-        // SPEAKER NAME: show and attach to dialogueWrapper's left edge
-        if (dialogue.speaker) {
-            currentSpeaker.textContent = dialogue.speaker;
-            speakerNameContainer.classList.remove('hidden');
-            // if you want to nudge the name relative to dialogue width or add offsets based on sprite, do here
-        } else {
-            currentSpeaker.textContent = '';
-            speakerNameContainer.classList.add('hidden');
+            // 4. Update Log Highlighting and content if the log is open
+            if (!document.getElementById('logModal').classList.contains('hidden')) {
+                populateDialogueLog();
+                const currentEntry = logContainer.querySelector(`.current-log-entry`);
+                if (currentEntry) {
+                    currentEntry.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
         }
 
-        // If log open, refresh and scroll to current
-        if (!document.getElementById('logModal').classList.contains('hidden')) {
-            populateDialogueLog();
-            const currentEntry = logContainer.querySelector('.current-log-entry');
-            if (currentEntry) currentEntry.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        /** Handles navigation (next/previous) in the dialogue array. */
+        function navigateDialogue(direction) {
+            const newIndex = currentDialogueIndex + direction;
+            
+            // Check boundaries
+            if (newIndex >= 0 && newIndex < currentDialogue.length) {
+                currentDialogueIndex = newIndex;
+                renderDialogue();
+                saveProgress(); // Save progress after navigation
+            }
         }
-    }
-
-    function navigateDialogue(direction) {
-        const newIndex = currentDialogueIndex + direction;
-        if (newIndex >= 0 && newIndex < currentDialogue.length) {
-            currentDialogueIndex = newIndex;
-            renderDialogue();
-            saveProgress();
+        
+        /** Toggles the help modal. */
+        function showHelpModal() {
+            document.getElementById('helpModal').classList.toggle('hidden');
         }
-    }
 
-    function showHelpModal() { document.getElementById('helpModal').classList.toggle('hidden'); }
-
-    window.onload = () => { loadProgress(); updateUI(); };
-</script>
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            loadProgress(); // Try to load saved progress
+            updateUI(); // Render UI based on loaded or default language
+        };
+    </script>
 </body>
 </html>
