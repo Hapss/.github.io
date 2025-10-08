@@ -167,7 +167,7 @@
             </div>
 
             <div class="flex-1 min-w-[250px]">
-                <label for="chapterSelect" id="labelChapter" class="block text-sm font-medium mb-1 text-gray-300">Сюжет (Глава)</label>
+                <label for="chapterSelect" id="labelChapter" class="block text-sm font-medium mb-1 text-gray-300">Сюжет</label>
                 <select id="chapterSelect" onchange="enableLoadButton(); saveProgress()" class="w-full bg-gray-800 text-white rounded-lg p-2.5 cursor-pointer focus:ring-red-400 focus:border-red-400 transition">
                     <!-- Options populated by JS -->
                 </select>
@@ -267,7 +267,7 @@
         // --- GLOBAL CONSTANTS ---
         const STORAGE_KEY = 'hg2_story_progress';
         const STORY_BASE_PATH = 'story/'; // Базовый путь для JSON: story/ru/main_ch1.json
-        const SPRITE_BASE_PATH = 'images/sprites/'; // Базовый путь для спрайтов
+        const SPRITE_BASE_PATH = 'sprites/'; // Базовый путь для спрайтов
         const AUDIO_BASE_PATH = 'audio/'; 
         const DEFAULT_BG_URL = 'https://placehold.co/1920x1080/2a2a2a/fca5a5?text=Выберите+сюжет+и+нажмите+Загрузить';
         
@@ -280,9 +280,10 @@
         let chapterAudio; 
         
         // --- STORY METADATA (Синхронно доступные названия глав) ---
+        // Это хранилище метаданных, которое будет фильтроваться по наличию файлов.
         const KNOWN_CHAPTERS = {
             "main_ch1": { ru: "Глава 1: Выброс Хоукая", en: "Chapter 1: The Honkai Eruption", cn: "章节 1: 崩坏爆发" }, 
-            "main_ch2": { ru: "Глава 2: Заражение", en: "Chapter 2: The Infection", cn: "章节 2: 感染" },
+            "main_ch2": { ru: "Глава 2: Киана наносит ответный удар!", en: "Chapter 2: Kiana Strikes Back!", cn: "章节 2: 琪亚娜反击" }, 
             "extra_ex1": { ru: "Экстра 1: Летний пляж", en: "Extra 1: Summer Beach", cn: "额外 1: 夏日沙滩" },
             "boss_b1": { ru: "Босс 1: Херувим", en: "Boss 1: Cherubim", cn: "首领 1: 智天使" },
             "vn_vn1": { ru: "VN 1: Пролог Кианы", en: "VN 1: Kiana's Prologue", cn: "VN 1: 琪亚娜序章" },
@@ -295,20 +296,23 @@
             extra: { ru: "Дополнительный сюжет", en: "Extra Story", cn: "额外剧情", prefix: "extra_" },
             bosses: { ru: "Боссы", en: "Boss Fights", cn: "首领战", prefix: "boss_" },
             vn: { ru: "Визуальная новелла", en: "Visual Novel", cn: "视觉小说", prefix: "vn_" },
-            romance: { ru: "Роман", en: "Romance", cn: "小说", prefix: "ln_" }
+            romance: { ru: "Роман", en: "Romance", cn: "Novel", prefix: "ln_" }
         };
 
+        // Кэш для хранения доступности глав: { chapterKey: { lang: true/false, ... }, ... }
+        const chapterAvailabilityCache = {};
 
         // --- I18N DATA (Без изменений) ---
         const i18n = {
             ru: {
                 headerTitle: "Houkai Gakuen 2 Архив Сюжета",
                 labelStoryType: "Тип сюжета",
-                labelChapter: "Сюжет (Глава)",
+                labelChapter: "Сюжет",
                 loadText: "Загрузить",
                 resetProgress: "Сброс",
                 errorFetch: "Ошибка загрузки контента: файл не найден или проблема с сетью.",
                 logTitle: "Лог Диалогов",
+                loadingCheck: "Проверка...",
                 helpTitle: "Как пользоваться архивом:",
                 helpText: "Это интерактивный архив сюжетов Honkai Gakuen 2.\n\n1. Используйте верхние выпадающие списки, чтобы выбрать [Тип сюжета] и конкретную [Главу].\n2. Нажмите [Загрузить].\n3. **В окне визуальной новеллы используйте клик в правой части для перехода Далее и клик в левой части для перехода Назад.**\n4. Ваш прогресс автоматически сохраняется. Сайт запомнит выбранную главу и реплику, на которой вы остановились.\n5. Чтобы открыть [Лог диалогов], нажмите на иконку книги в правом верхнем углу VN-окна. Вы можете настроить **громкость** аудио через ползунок в заголовке."
             },
@@ -320,6 +324,7 @@
                 resetProgress: "Reset",
                 errorFetch: "Content loading error: file not found or network issue.",
                 logTitle: "Dialogue Log",
+                loadingCheck: "Checking...",
                 helpTitle: "How to use the Archive:",
                 helpText: "This is an interactive story archive for Honkai Gakuen 2.\n\n1. Use the top dropdowns to select the [Story Type] and a specific [Chapter].\n2. Click [Load].\n3. **In the Visual Novel viewer, use click on the right side to go Next and click on the left side to go Back.**\n4. Your progress is saved automatically. The site will remember the selected chapter and the dialogue line you stopped at.\n5. To open the [Dialogue Log], click the book icon in the top right of the VN viewer. You can adjust the **audio volume** using the slider in the header."
             },
@@ -331,11 +336,41 @@
                 resetProgress: "重置",
                 errorFetch: "内容加载错误：未找到文件或网络问题。",
                 logTitle: "对话记录",
+                loadingCheck: "正在检查...",
                 helpTitle: "如何使用档案：",
                 helpText: "这是一个崩坏学园2的交互式剧情档案。\n\n1. 使用顶部下拉列表选择剧情类型和特定章节。\n2. 点击加载。\n3. **在视觉小说查看器中，使用右侧点击进行下一页，左侧点击进行上一页。**\n4. 您的进度将自动保存。网站会记住选择的章节和您停止的对话行。\n5. 要打开对话记录，请点击 VN 查看器右上角的书本图标。您可以使用标题中的滑块调整**音频音量**。"
             }
         };
 
+        // --- CORE FETCH/CHECK LOGIC ---
+        
+        /** Проверяет, существует ли файл главы на сервере, используя кэш. */
+        async function checkChapterAvailability(fullStoryKey, lang) {
+            if (!chapterAvailabilityCache[fullStoryKey]) {
+                chapterAvailabilityCache[fullStoryKey] = {};
+            }
+            
+            // 1. Проверка кэша
+            if (chapterAvailabilityCache[fullStoryKey][lang] !== undefined) {
+                return chapterAvailabilityCache[fullStoryKey][lang];
+            }
+
+            const filePath = `${STORY_BASE_PATH}${lang}/${fullStoryKey}.json`;
+
+            try {
+                // Используем GET с небольшим таймаутом, чтобы проверить наличие файла
+                const response = await fetch(filePath, { method: 'GET' }); 
+                
+                const available = response.ok;
+                chapterAvailabilityCache[fullStoryKey][lang] = available;
+                return available;
+            } catch (e) {
+                // Сетевые ошибки или ошибки таймаута
+                chapterAvailabilityCache[fullStoryKey][lang] = false;
+                return false;
+            }
+        }
+        
         // --- AUDIO CONTROL FUNCTIONS (Без изменений) ---
         
         function setVolume(volume) {
@@ -396,10 +431,13 @@
             console.log('Progress saved:', progress);
         }
 
-        function loadProgress() {
+        async function loadProgress() {
             const savedProgress = localStorage.getItem(STORAGE_KEY);
+            
+            // 1. Инициализация UI и I18n
+            await initializeOrUpdateUI(); // Теперь ждем, пока прогрузятся типы
+
             if (!savedProgress) {
-                updateI18nStrings(); 
                 return;
             }
 
@@ -411,32 +449,37 @@
             
             let shouldAutoLoad = false;
 
-            // 1. Restore Language & Update UI strings
+            // 2. Restore Language & Update UI strings
             if (i18n[progress.lang]) {
                 langSelect.value = progress.lang;
             }
             updateI18nStrings(); 
             
-            // 2. Restore Volume
+            // 3. Restore Volume
             if (volumeInput) {
                 const savedVolume = progress.volume !== undefined ? progress.volume : 0.5;
                 volumeInput.value = savedVolume * 100;
                 setVolume(savedVolume);
             }
 
-            // 3. Restore Story Type
+            // 4. Restore Story Type
             if (progress.type && STORY_GROUPS[progress.type]) {
                 typeSelect.value = progress.type;
-                updateChapterSelect(true); 
+                
+                // 5. Восстанавливаем список глав и ждем его завершения
+                await updateChapterSelect(true); 
             }
             
-            // 4. Restore Chapter
+            // 6. Restore Chapter
             if (typeSelect.value && progress.chapter && KNOWN_CHAPTERS[progress.chapter]) {
-                chapterSelect.value = progress.chapter;
-                shouldAutoLoad = true;
+                // Проверяем, что глава действительно появилась в списке после динамической проверки
+                if (Array.from(chapterSelect.options).some(opt => opt.value === progress.chapter)) {
+                    chapterSelect.value = progress.chapter;
+                    shouldAutoLoad = true;
+                }
             }
 
-            // 5. Auto Load Content and restore dialogue index
+            // 7. Auto Load Content and restore dialogue index
             if (shouldAutoLoad && progress.index !== undefined && chapterSelect.value) {
                 updateStoryContent(progress.index);
             }
@@ -533,10 +576,10 @@
                 <p class="whitespace-pre-line">${text.helpText}</p>`;
         }
 
-        function initializeOrUpdateUI() {
+        async function initializeOrUpdateUI() {
             updateI18nStrings();
             updateStoryTypeSelect();
-            updateChapterSelect(); 
+            await updateChapterSelect(); 
             saveProgress(); 
         }
 
@@ -563,46 +606,68 @@
             }
         }
 
-        /** Populates the Chapter dropdown based on the selected Story Type. */
-        function updateChapterSelect(skipSideEffects = false) {
+        /** Populates the Chapter dropdown based on the selected Story Type and *actual file existence*. */
+        async function updateChapterSelect(skipSideEffects = false) {
             const typeKey = document.getElementById('storyTypeSelect').value;
             const select = document.getElementById('chapterSelect');
             const lang = document.getElementById('languageSelect').value;
             const currentChapterKey = select.value; 
 
             select.innerHTML = '';
+            select.disabled = true;
             
             const defaultOption = document.createElement('option');
             defaultOption.value = "";
             defaultOption.textContent = "---";
             select.appendChild(defaultOption);
-            select.disabled = true;
 
+            const loadButton = document.getElementById('loadButton');
+            const originalLoadText = i18n[lang].loadText;
+
+            // Если выбран тип, начинаем проверку
             if (typeKey && STORY_GROUPS[typeKey]) {
-                const prefix = STORY_GROUPS[typeKey].prefix;
-                
-                // Фильтрация глав по префиксу
-                const filteredChapters = Object.keys(KNOWN_CHAPTERS).filter(key => key.startsWith(prefix));
-                
-                for (const fullChapterKey of filteredChapters) {
-                    const chapterData = KNOWN_CHAPTERS[fullChapterKey];
+                loadButton.textContent = i18n[lang].loadingCheck;
+                loadButton.disabled = true; 
 
-                    if (chapterData && chapterData[lang]) {
-                        const option = document.createElement('option');
-                        option.value = fullChapterKey; 
-                        option.textContent = chapterData[lang]; 
-                        
-                        if (fullChapterKey === currentChapterKey) {
-                             option.selected = true;
+                const prefix = STORY_GROUPS[typeKey].prefix;
+                const chaptersToCheck = Object.keys(KNOWN_CHAPTERS).filter(key => key.startsWith(prefix));
+
+                // Конкурентная проверка доступности всех глав
+                const availabilityChecks = chaptersToCheck.map(key => 
+                    checkChapterAvailability(key, lang).then(isAvailable => ({ key, isAvailable }))
+                );
+
+                const results = await Promise.all(availabilityChecks);
+
+                let chapterFound = false;
+
+                results.forEach(({ key, isAvailable }) => {
+                    if (isAvailable) {
+                        const fullChapterKey = key;
+                        const chapterData = KNOWN_CHAPTERS[fullChapterKey];
+
+                        if (chapterData && chapterData[lang]) {
+                            const option = document.createElement('option');
+                            option.value = fullChapterKey; 
+                            option.textContent = chapterData[lang]; 
+                            
+                            if (fullChapterKey === currentChapterKey) {
+                                 option.selected = true;
+                            }
+                            select.appendChild(option);
+                            chapterFound = true;
                         }
-                        select.appendChild(option);
                     }
-                }
-                if (filteredChapters.length > 0) {
+                });
+                
+                if (chapterFound) {
                      select.disabled = false;
                 }
             } 
-
+            
+            // Восстанавливаем кнопку загрузки
+            loadButton.textContent = originalLoadText;
+            
             if (!skipSideEffects) {
                 enableLoadButton();
                 saveProgress(); 
@@ -623,6 +688,8 @@
             console.log(`[Load] Запрос файла: ${filePath}`);
 
             document.getElementById('loadText').textContent = "Загрузка...";
+            document.getElementById('loadButton').disabled = true;
+
 
             try {
                 const maxRetries = 3;
@@ -702,63 +769,63 @@
                  vnViewer.style.backgroundImage = `url('${DEFAULT_BG_URL}')`;
             } 
 
-            // 2. Sprites & Dimming 
-            // 2a. Сброс: очищаем эффекты и пути.
-            spriteLeftContainer.classList.add('hidden');
-            spriteRightContainer.classList.add('hidden');
-            spriteLeftElement.classList.remove('dimmed-sprite');
-            spriteRightElement.classList.remove('dimmed-sprite');
+            // --- 2. Sprites & Dimming (FIXED LOGIC) ---
             
-            spriteLeftElement.src = '';
-            spriteRightElement.src = ''; 
-            
-            // 2b. Логика установки активного спрайта (Усиленная проверка пути)
+            const activeSpeakerPosition = (step.speaker && step.position) ? step.position.toLowerCase() : null;
+            const dimmedSpriteFilename = step.sprite_dimmed ? step.sprite_dimmed.trim() : null;
+
+            // 2a. Handle Sprite updates (only if a new sprite is explicitly defined).
             if (step.sprite && step.position) {
                 const isLeft = step.position.toLowerCase() === 'left';
                 const container = isLeft ? spriteLeftContainer : spriteRightContainer;
                 const imageElement = isLeft ? spriteLeftElement : spriteRightElement;
                 
-                let spritePath;
-                let spriteFileName = step.sprite.trim(); // Удаляем пробелы
+                let spriteFileName = step.sprite.trim(); 
+                let spritePath = spriteFileName.startsWith('http') ? spriteFileName : SPRITE_BASE_PATH + spriteFileName;
 
-                // 1. Проверка на внешний URL (http/https)
-                if (spriteFileName.startsWith('http')) {
-                    spritePath = spriteFileName;
-                } else {
-                    // 2. Локальный файл: гарантируем, что префикс 'sprites/' будет добавлен только один раз.
-                    let bareFileName = spriteFileName;
-                    const basePrefix = SPRITE_BASE_PATH.toLowerCase();
-
-                    // Если имя файла уже содержит префикс 'sprites/', удаляем его, чтобы избежать дублирования.
-                    if (bareFileName.toLowerCase().startsWith(basePrefix)) {
-                        bareFileName = bareFileName.substring(basePrefix.length);
-                    }
-                    
-                    // Добавляем префикс. Теперь 'Kiana 1.png' -> 'sprites/Kiana 1.png'
-                    spritePath = SPRITE_BASE_PATH + bareFileName;
+                // Load/Show sprite (makes it persistent until a new one replaces it)
+                if (imageElement.src !== spritePath) {
+                    imageElement.src = spritePath;
                 }
-                
-                console.log(`[Sprite] Финальный путь для загрузки: ${spritePath}`);
-
-                // Устанавливаем src.
-                imageElement.src = spritePath;
                 container.classList.remove('hidden');
-            }
+            } 
+            // Note: If step.sprite is missing, the previous sprite is assumed to persist visually.
 
-            // 2c. Логика диммирования (притухания спрайтов)
-            if (step.sprite_dimmed) {
-                const dimmedSpriteFilename = step.sprite_dimmed; 
-                
-                // Проверка, что загруженный путь спрайта содержит имя диммируемого файла
+            // 2b. Reset dimming for all, then apply new dimming rules.
+            spriteLeftElement.classList.remove('dimmed-sprite');
+            spriteRightElement.classList.remove('dimmed-sprite');
+            
+            // 2c. Apply Dimming Rules
+            
+            // Rule 1: Apply dimming if explicitly requested (e.g., narration/SFX steps).
+            if (dimmedSpriteFilename) {
+                // Check Left Sprite
                 if (!spriteLeftContainer.classList.contains('hidden') && spriteLeftElement.src.includes(dimmedSpriteFilename)) {
                     spriteLeftElement.classList.add('dimmed-sprite');
-                } 
-                
+                }
+                // Check Right Sprite
                 if (!spriteRightContainer.classList.contains('hidden') && spriteRightElement.src.includes(dimmedSpriteFilename)) {
                     spriteRightElement.classList.add('dimmed-sprite');
-                } 
+                }
             }
 
+            // Rule 2: Classic VN Dimming - Dim non-speaking characters.
+            if (activeSpeakerPosition) {
+                // Ensure the active speaker is BRIGHT
+                if (activeSpeakerPosition === 'left' && !spriteLeftContainer.classList.contains('hidden')) {
+                    spriteLeftElement.classList.remove('dimmed-sprite'); // Active speaker bright
+                } else if (activeSpeakerPosition === 'right' && !spriteRightContainer.classList.contains('hidden')) {
+                    spriteRightElement.classList.remove('dimmed-sprite'); // Active speaker bright
+                }
+                
+                // Ensure non-active sprites are DIMMED (unless already dimmed by Rule 1)
+                if (activeSpeakerPosition === 'right' && !spriteLeftContainer.classList.contains('hidden')) {
+                    spriteLeftElement.classList.add('dimmed-sprite'); // Non-speaker dim
+                } else if (activeSpeakerPosition === 'left' && !spriteRightContainer.classList.contains('hidden')) {
+                    spriteRightElement.classList.add('dimmed-sprite'); // Non-speaker dim
+                }
+            } 
+            // End of Sprite Logic
 
             // 3. Dialogue Text and Speaker Name
             // Имя говорящего скрывается, если поле пустое, но контейнер диалога остается полностью непрозрачным.
@@ -842,10 +909,11 @@
 
             // Setup event listeners
             document.getElementById('volumeInput').addEventListener('input', handleVolumeChange);
+            document.getElementById('languageSelect').addEventListener('change', initializeOrUpdateUI);
+            document.getElementById('storyTypeSelect').addEventListener('change', initializeOrUpdateUI);
             
             // Initial UI setup and progress check
-            initializeOrUpdateUI(); 
-            loadProgress();
+            loadProgress(); // Теперь loadProgress вызывает initializeOrUpdateUI и ждет ее
         };
 
     </script>
