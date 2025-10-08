@@ -187,11 +187,11 @@
         // Настройки повторной загрузки контента (Exponential Backoff)
         const INITIAL_DELAY_MS = 2000;
         const MAX_DELAY_MS = 30000;
-        // УДАЛЕНО: RETRY_LIMIT_FOR_MOCK 
         
         // Настройки постоянной загрузки изображений (спрайтов/фонов)
-        const MAX_PERSISTENT_IMAGE_RETRIES = 50; // Высокий лимит для "бесконечной" загрузки
-        const PERSISTENT_IMAGE_RETRY_DELAY_MS = 2000; // 2 секунды между попытками
+        // Этот механизм гарантирует, что спрайт/фон будет загружаться, пока не получит успешный ответ.
+        const MAX_PERSISTENT_IMAGE_RETRIES = 50; 
+        const PERSISTENT_IMAGE_RETRY_DELAY_MS = 2000; 
 
         // Группировка сюжетов
         const STORY_GROUPS = {
@@ -249,7 +249,9 @@
             loadProgress(); 
         });
 
-        /** * Асинхронно загружает метаданные глав из story/story_metadata.json. */
+        /** * Асинхронно загружает метаданные глав из story/story_metadata.json.
+         * Это необходимо ТОЛЬКО для заполнения выпадающего списка выбора главы.
+         */
         async function fetchChapterMetadata() {
             try {
                 const response = await fetch(METADATA_FILE); 
@@ -284,26 +286,32 @@
             }
         }
         
-        /** Mock-функция для создания пути к спрайтам (использует placehold.co) */
+        /** * Mock-функция для создания пути к спрайтам (использует placehold.co).
+         * В реальном приложении здесь будут пути к вашим asset-файлам.
+         */
         const spritePath = (fileName) => {
-            if (fileName && fileName.includes('kiana')) return `https://placehold.co/400x800/800080/ffffff?text=КИАНА`;
-            if (fileName && fileName.includes('mei')) return `https://placehold.co/400x800/FF5733/ffffff?text=МЕЙ`;
-            return `https://placehold.co/400x800/2a2a2a/ffffff?text=СПРАЙТ`;
+            if (fileName && fileName.includes('kiana')) return `https://placehold.co/400x800/800080/ffffff?text=KIANA`;
+            if (fileName && fileName.includes('mei')) return `https://placehold.co/400x800/FF5733/ffffff?text=MEI`;
+            return `https://placehold.co/400x800/2a2a2a/ffffff?text=SPRITE`;
         };
         
         /** * Загружает изображение (или фон) с механизмом постоянного повтора, пока не удастся.
+         * Эта функция полностью независима от статуса загрузки метаданных.
          * @param {string} url URL изображения или фона.
          * @param {HTMLElement} element Элемент <img> или контейнер (для фона).
          * @param {boolean} isBackground Флаг, указывающий, является ли это фоном.
          * @param {number} attempt Текущая попытка.
          */
         function loadImageWithPersistence(url, element, isBackground = false, attempt = 1) {
+            // Если URL пуст, скрываем элемент и прекращаем попытки
             if (!url || url === DEFAULT_BG_URL) {
                 if (!isBackground) element.parentElement.classList.add('hidden');
-                element.style.backgroundImage = `url('${DEFAULT_BG_URL}')`;
+                // Если это фон, устанавливаем дефолтный плейсхолдер
+                if (isBackground) element.style.backgroundImage = `url('${DEFAULT_BG_URL}')`;
                 return;
             }
             
+            // Если достигнут лимит попыток, останавливаемся
             if (attempt > MAX_PERSISTENT_IMAGE_RETRIES) {
                  console.error(`[Image Load] Достигнут лимит попыток (${MAX_PERSISTENT_IMAGE_RETRIES}) для ${url}. Загрузка прекращена.`);
                  if (!isBackground) element.parentElement.classList.add('hidden');
@@ -365,7 +373,7 @@
             const currentSpeakerElement = document.getElementById('currentSpeaker');
             const currentTextElement = document.getElementById('currentText');
 
-            // 1. Фон - Используем новую функцию с постоянным повтором
+            // 1. Фон - Используем функцию с постоянным повтором
             const bgUrl = step.background || DEFAULT_BG_URL;
             loadImageWithPersistence(bgUrl, vnViewer, true);
 
@@ -390,7 +398,7 @@
                 const path = spritePath(step.sprite);
                 container.classList.remove('hidden');
                 
-                // Используем новую функцию с постоянным повтором
+                // Используем функцию с постоянным повтором
                 loadImageWithPersistence(path, imageElement);
             } 
             
@@ -415,7 +423,9 @@
             currentTextElement.textContent = step.text || "";
         }
         
-        /** * Асинхронно пытается загрузить выбранную главу. */
+        /** * Асинхронно пытается загрузить выбранную главу, используя Exponential Backoff.
+         * Этот уровень загрузки полностью независим от загрузки изображений.
+         */
         async function updateStoryContent(startIndex = 0) {
             const lang = document.getElementById('languageSelect').value; 
             const fullStoryKey = document.getElementById('chapterSelect').value; 
@@ -442,10 +452,9 @@
                     data = await response.json();
                     success = true;
                 } catch (e) {
-                    console.warn(`[Content] Загрузка главы не удалась (Попытка ${attempt}).`);
+                    // Используем console.error, если загрузка не удалась, чтобы привлечь внимание
+                    console.error(`[Content] Критическая ошибка загрузки главы: ${expectedFilePath} (Попытка ${attempt}).`, e);
                 }
-
-                // УДАЛЕНО: Блок мок-данных
 
                 if (success && data) {
                     // --- УСПЕХ: Обновление глобального состояния ---
@@ -530,7 +539,9 @@
             }
         }
 
-        /** * Обновляет выпадающий список глав. */
+        /** * Обновляет выпадающий список глав.
+         * Зависит от window.storyMetadata, так как без него невозможно составить список.
+         */
         function updateChapterSelect(skipSideEffects = false) {
             const typeKey = document.getElementById('storyTypeSelect').value;
             const select = document.getElementById('chapterSelect');
@@ -587,7 +598,9 @@
 
         function enableLoadButton() {
             const storyId = document.getElementById('chapterSelect').value;
-            document.getElementById('loadButton').disabled = !storyId || !window.storyMetadata;
+            // Кнопка загрузки активируется, если выбрана глава, независимо от того, загружены ли метаданные.
+            // Хотя, по факту, выбрать главу без метаданных невозможно, но мы не блокируем кнопку явно по метаданным.
+            document.getElementById('loadButton').disabled = !storyId;
         }
 
         function initializeOrUpdateUI(calledByUIEvent) {
@@ -613,6 +626,7 @@
         }
 
         async function loadProgress() {
+            // Сначала загружаем метаданные, чтобы UI мог предоставить пользователю список глав
             await fetchChapterMetadata(); 
             
             const savedProgress = localStorage.getItem(STORAGE_KEY);
@@ -639,6 +653,7 @@
                 updateChapterSelect(true); 
             }
             
+            // Восстанавливаем выбранную главу, только если метаданные были загружены
             if (window.storyMetadata && typeSelect.value && progress.chapter) {
                 if (Array.from(chapterSelect.options).some(opt => opt.value === progress.chapter)) {
                     chapterSelect.value = progress.chapter;
