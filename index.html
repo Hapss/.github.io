@@ -30,7 +30,7 @@
             border-top-right-radius: 8px;
             display: inline-block;
             font-weight: bold;
-            left: 20px;
+            /* Убрано: left: 20px; Позиционирование контролируется через ml-8 в родительском контейнере в HTML */
         }
         .sprite {
             position: absolute;
@@ -137,14 +137,16 @@
             <div id="dialogueWrapper" class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 transition-all duration-300 opacity-100 hidden">
                 
                 <!-- Speaker Name Container (Above the main box) -->
-                <div id="speakerNameContainer" class="text-center mb-0">
+                <!-- ОБНОВЛЕНО: text-left и ml-8 для выравнивания имени говорящего по левому краю -->
+                <div id="speakerNameContainer" class="text-left mb-0 ml-8"> 
                     <div id="currentSpeaker" class="speaker-name text-lg rounded-t-lg rounded-b-none"></div>
                 </div>
                 
                 <!-- Dialogue Text Content Box -->
+                <!-- ОБНОВЛЕНО: p-8, items-start, justify-start, text-left для выравнивания текста в верхнем левом углу -->
                 <div id="dialogueContentBox" 
-                    class="vn-overlay w-[900px] h-[200px] p-2 flex items-center justify-center 
-                            rounded-xl shadow-2xl text-center overflow-hidden"
+                    class="vn-overlay w-[900px] h-[200px] p-8 flex items-start justify-start text-left
+                            rounded-xl shadow-2xl overflow-hidden"
                     onclick="event.stopPropagation()"> <!-- Предотвращаем срабатывание клика по VN Viewer -->
                     <p id="currentText" class="text-base leading-tight transition-opacity duration-300">Текст диалога...</p>
                 </div>
