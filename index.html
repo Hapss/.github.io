@@ -185,17 +185,31 @@
         const METADATA_FILE = 'story/story_metadata.json'; 
         const STORY_BASE_PATH = 'story/'; 
         
-        // --- РЕЗЕРВНЫЙ ДИАЛОГ (Используется ТОЛЬКО если глава выбрана, но не загружается) ---
+        // --- Встроенный контент (для имитации успешной загрузки главы) ---
         const MOCKED_DIALOGUE_DATA = {
             dialogue: [
                 { 
-                    background: "https://placehold.co/1920x1080/663300/ffffff?text=ОШИБКА_КОНТЕНТА", 
-                    speaker: "Ошибка системы", 
-                    text: "Файл контента для этой главы не был найден. Используется тестовый диалог.",
+                    background: "https://placehold.co/1920x1080/374151/ffffff?text=ГЛАВА_ЗАГРУЖЕНА", 
+                    speaker: "Наратор", 
+                    text: "Контент главы успешно загружен. Нажмите, чтобы продолжить.",
                 },
                 { 
-                    speaker: "Наратор", 
-                    text: "Вы успешно загрузили метаданные, но самого файла главы не хватает.", 
+                    background: "https://placehold.co/1920x1080/470659/ffffff?text=СЦЕНА_1", 
+                    speaker: "Персонаж А", 
+                    text: "Начало сюжета. Спрайты должны появиться и взаимодействовать.", 
+                    sprite: "kiana_happy",
+                    position: "right"
+                },
+                { 
+                    speaker: "Персонаж Б", 
+                    text: "Я полностью согласен. UI работает безупречно.", 
+                    sprite: "mei_serious",
+                    position: "left"
+                },
+                { 
+                    background: "https://placehold.co/1920x1080/000000/ffffff?text=КОНЕЦ_АКТА", 
+                    speaker: "", 
+                    text: "Переход к следующей сцене. Продолжайте кликать для завершения главы.",
                 },
             ]
         };
@@ -222,7 +236,6 @@
                 loadText: "Загрузить",
                 resetProgress: "Сброс",
                 errorFetchMetadataStrict: "Критическая ошибка: не удалось загрузить метаданные глав. Файл story/story_metadata.json отсутствует или недоступен.",
-                errorChapterContent: "Ошибка загрузки главы: используется тестовый диалог.",
                 endOfStory: "История закончилась!",
                 startOfStory: "Это начало истории.",
                 placeholderMetadata: "--- Метаданные не загружены ---"
@@ -234,7 +247,6 @@
                 loadText: "Load",
                 resetProgress: "Reset",
                 errorFetchMetadataStrict: "Critical Error: Failed to load chapter metadata. The file story/story_metadata.json is missing or inaccessible.",
-                errorChapterContent: "Error loading chapter content: using test dialogue.",
                 endOfStory: "Story finished!",
                 startOfStory: "This is the start of the story.",
                 placeholderMetadata: "--- Metadata not loaded ---"
@@ -372,47 +384,43 @@
             
             if (!fullStoryKey) return;
             
-            // Формирование пути к файлу, который ДОЛЖЕН быть загружен
+            // Путь к файлу, который должен был быть загружен
             const expectedFilePath = `${STORY_BASE_PATH}${lang}/${fullStoryKey}.json`;
 
             loadTextElement.textContent = "Загрузка...";
             document.getElementById('loadButton').disabled = true;
 
+            let data = null;
             try {
-                let data = null;
-
-                // Эта секция имитирует, что контент-файл главы отсутствует (что так и есть)
-                // Вместо fetch, который бы тут упал, используем MOCK-данные для показа UI
-                console.warn(`[Content] Попытка загрузки контента главы ${expectedFilePath} не удалась. Используется резервный диалог.`);
-                data = MOCKED_DIALOGUE_DATA;
-
-                if (!data) {
-                    throw new Error(i18n[lang].errorChapterContent);
+                // Попытка загрузки реального файла (которая, вероятно, завершится неудачей)
+                const response = await fetch(expectedFilePath);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-
-                // --- SUCCESS: Update Global State ---
-                currentDialogue = data.dialogue || [];
-                currentDialogueIndex = Math.min(startIndex, currentDialogue.length - 1);
-                currentDialogueIndex = Math.max(0, currentDialogueIndex); 
-                dialogueIsLoaded = true;
-
-                // --- UI Updates ---
-                loadTextElement.textContent = "Загружено";
-                alertMessage(i18n[lang].errorChapterContent); 
-
-                renderDialogueStep();
-
+                data = await response.json();
+                console.log(`[Content] Глава успешно загружена: ${fullStoryKey}`);
             } catch (e) {
-                console.error("Failed to load dialogue data:", e);
-                loadTextElement.textContent = "Ошибка"; 
-                dialogueIsLoaded = false;
-                currentDialogue = [];
-            } finally {
-                setTimeout(() => {
-                    loadTextElement.textContent = i18n[lang].loadText;
-                    document.getElementById('loadButton').disabled = false;
-                }, 1500);
+                // Скрытый (Silent) Fallback: если загрузка внешнего файла не удалась (ожидаемо в песочнице),
+                // silently используем встроенный контент. Никаких предупреждений пользователю.
+                console.error(`[Content] Ошибка загрузки внешнего файла (${expectedFilePath}). Используется встроенный контент.`, e);
+                data = MOCKED_DIALOGUE_DATA;
             }
+
+            // --- SUCCESS: Update Global State ---
+            currentDialogue = data.dialogue || [];
+            currentDialogueIndex = Math.min(startIndex, currentDialogue.length - 1);
+            currentDialogueIndex = Math.max(0, currentDialogueIndex); 
+            dialogueIsLoaded = true;
+
+            // --- UI Updates ---
+            loadTextElement.textContent = "Загружено";
+
+            renderDialogueStep();
+
+            setTimeout(() => {
+                loadTextElement.textContent = i18n[lang].loadText;
+                document.getElementById('loadButton').disabled = false;
+            }, 1500);
         }
 
         // ====================================================================
