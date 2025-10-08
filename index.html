@@ -1,73 +1,47 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Houkai Gakuen 2 архив сюжета</title>
-    <link rel="stylesheet" href="main.css">
-</head>
-<body>
-    <!-- Верхняя полоса с заголовком и выбором языка -->
-    <div class="top-bar">
-        <div class="top-bar-content">
-            <h1 class="site-title">Houkai Gakuen 2 архив сюжета</h1>
-            <div class="language-dropdown">
-                <select class="language-select" id="languageSelect">
-                    <option value="ru">Русский</option>
-                    <option value="en">English</option>
-                    <option value="cn">中文</option>
-                </select>
-            </div>
+<!-- Верхняя панель с заголовком и выбором языка -->
+<div class="top-bar">
+    <h1 class="site-title">Houkai Gakuen 2 архив сюжета</h1>
+    <div class="language-container">
+        <div class="language-dropdown">
+            <select class="language-select" id="languageSelect">
+                <option value="ru">Русский</option>
+                <option value="en">English</option>
+                <option value="cn">中文</option>
+            </select>
         </div>
     </div>
+</div>
 
-    <!-- Основной контент -->
-        
-        <div class="selector-grid">
-            <!-- Блок выбора типа сюжета -->
-            <div class="story-type-selector">
-                <h2 class="selector-title">📚 Тип сюжета</h2>
-                <div class="select-wrapper">
-                    <select class="selector-dropdown" id="storyType">
-                        <option value="main">Основной сюжет</option>
-                        <option value="extra">Дополнительный сюжет</option>
-                        <option value="bosses">Боссы</option>
-                        <option value="visual_novel">Визуальная новелла</option>
-                        <option value="novel">Роман</option>
-                    </select>
-                </div>
-            </div>
-            
-            <!-- Блок выбора конкретного сюжета -->
-            <div class="story-selector">
-                <h2 class="selector-title">📖 Сюжет</h2>
-                <div class="select-wrapper">
-                    <select class="selector-dropdown" id="storySelection">
-                        <option value="prologue">Глава 1: Выброс Хокая</option>
-                        <!-- Остальные варианты будут подгружаться через JS -->
-                    </select>
-                </div>
-            </div>
-            
-            <!-- Блок выбора этапа -->
-            <div class="stage-selector">
-                <h2 class="selector-title">🎮 Этап</h2>
-                <div class="select-wrapper">
-                    <select class="selector-dropdown" id="stageSelection">
-                        <option value="stage1">Этап 1</option>
-                        <!-- Остальные варианты будут подгружаться через JS -->
-                    </select>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Область для отображения контента -->
-        <div class="content-display" id="contentDisplay">
-            <p>Выберите параметры выше, чтобы отобразить контент.</p>
+<!-- Компактные фильтры -->
+<div class="controls-container">
+    <div class="story-type-selector">
+        <h2 class="selector-title">📚 Тип сюжета</h2>
+        <div class="select-wrapper">
+            <select class="selector-dropdown" id="storyType">
+                <option value="main">Основной сюжет</option>
+                <option value="extra">Дополнительный сюжет</option>
+                <!-- остальные варианты -->
+            </select>
         </div>
     </div>
     
-    <script src="script.js"></script>
-
-</body>
-</html>
+    <div class="story-selector">
+        <h2 class="selector-title">📖 Сюжет</h2>
+        <div class="select-wrapper">
+            <select class="selector-dropdown" id="storySelection">
+                <option value="prologue">Глава 1: Выброс Хоукая</option>
+                <!-- остальные варианты -->
+            </select>
+        </div>
+    </div>
+    
+    <div class="stage-selector">
+        <h2 class="selector-title">🎮 Этап</h2>
+        <div class="select-wrapper">
+            <select class="selector-dropdown" id="stageSelection">
+                <option value="stage1">Этап 1</option>
+                <!-- остальные варианты -->
+            </select>
+        </div>
+    </div>
+</div>
