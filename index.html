@@ -206,16 +206,16 @@
                 
                 <!-- Left Sprite (Persistent element) -->
                 <div id="spriteLeftContainer" class="sprite-position left hidden">
-                    <!-- Заглушка для спрайта -->
+                    <!-- Обратите внимание: onerror теперь выводит ошибку в консоль и скрывает контейнер -->
                     <img id="spriteLeft" class="sprite-image" src="" alt="Левый персонаж" 
-                         onerror="this.parentElement.classList.add('hidden')">
+                         onerror="console.error('Ошибка загрузки спрайта:', this.src); this.parentElement.classList.add('hidden');">
                 </div>
                 
                 <!-- Right Sprite (Persistent element) -->
                 <div id="spriteRightContainer" class="sprite-position right hidden">
-                    <!-- Заглушка для спрайта -->
+                    <!-- Обратите внимание: onerror теперь выводит ошибку в консоль и скрывает контейнер -->
                     <img id="spriteRight" class="sprite-image" src="" alt="Правый персонаж" 
-                         onerror="this.parentElement.classList.add('hidden')">
+                         onerror="console.error('Ошибка загрузки спрайта:', this.src); this.parentElement.classList.add('hidden');">
                 </div>
 
             </div>
@@ -274,8 +274,8 @@
     <script>
         // --- GLOBAL CONSTANTS ---
         const STORAGE_KEY = 'hg2_story_progress';
-        const STORY_BASE_PATH = 'story/'; // Базовый путь: story/
-        const SPRITE_BASE_PATH = 'https://placehold.co/'; 
+        const STORY_BASE_PATH = 'story/'; // Базовый путь для JSON: story/ru/main_ch1.json
+        const SPRITE_BASE_PATH = 'sprites/'; // Новый базовый путь для спрайтов
         const AUDIO_BASE_PATH = 'audio/'; 
         const DEFAULT_BG_URL = 'https://placehold.co/1920x1080/2a2a2a/fca5a5?text=Выберите+сюжет+и+нажмите+Загрузить';
         
@@ -737,19 +737,29 @@
                 const imageElement = isLeft ? spriteLeftElement : spriteRightElement;
                 
                 container.classList.remove('hidden');
-                imageElement.src = step.sprite;
+                // *** ИСПРАВЛЕНО: Добавление SPRITE_BASE_PATH, если путь не является полной ссылкой ***
+                imageElement.src = step.sprite.startsWith('http') ? step.sprite : SPRITE_BASE_PATH + step.sprite;
             }
 
             // Логика диммирования (притухания)
-            // Предполагаем, что sprite_dimmed содержит имя файла спрайта, который нужно притушить
+            // Притушает спрайт, который не говорит (если указан sprite_dimmed)
             if (step.sprite_dimmed) {
                 const dimmedSpriteFilename = step.sprite_dimmed; 
                 
-                // Проверяем, какой спрайт сейчас отображается и соответствует ли он тому, который нужно притушить
+                // Проверяем левый спрайт
                 if (!spriteLeftContainer.classList.contains('hidden') && spriteLeftElement.src.includes(dimmedSpriteFilename)) {
                     spriteLeftElement.classList.add('dimmed-sprite');
-                } else if (!spriteRightContainer.classList.contains('hidden') && spriteRightElement.src.includes(dimmedSpriteFilename)) {
+                } else {
+                     // Убеждаемся, что спрайт, который должен быть активным, не притушен
+                     spriteLeftElement.classList.remove('dimmed-sprite');
+                }
+                
+                // Проверяем правый спрайт
+                if (!spriteRightContainer.classList.contains('hidden') && spriteRightElement.src.includes(dimmedSpriteFilename)) {
                     spriteRightElement.classList.add('dimmed-sprite');
+                } else {
+                    // Убеждаемся, что спрайт, который должен быть активным, не притушен
+                    spriteRightElement.classList.remove('dimmed-sprite');
                 }
             }
 
@@ -760,9 +770,10 @@
                 currentSpeakerElement.parentElement.style.opacity = '1';
                 dialogueWrapper.classList.remove('opacity-50');
             } else {
+                // Это происходит, когда идет повествование (нет говорящего)
                 currentSpeakerElement.textContent = '';
                 currentSpeakerElement.parentElement.style.opacity = '0'; 
-                dialogueWrapper.classList.add('opacity-50'); 
+                dialogueWrapper.classList.add('opacity-50'); // Контейнер диалога притухает
             }
             
             currentTextElement.textContent = step.text || ' ';
