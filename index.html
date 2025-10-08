@@ -22,6 +22,7 @@
             background-color: rgba(0, 0, 0, 0.75);
             backdrop-filter: blur(4px);
         }
+        /* Speaker Name Styling for LEFT ALIGNMENT */
         .speaker-name {
             background-color: #2a2a2a;
             color: #ca7cfe;
@@ -30,7 +31,6 @@
             border-top-right-radius: 8px;
             display: inline-block;
             font-weight: bold;
-            left: 20px;
         }
         .sprite {
             position: absolute;
@@ -38,12 +38,7 @@
             max-height: 95%; /* Ограничение высоты спрайта */
             transition: opacity 0.3s ease, transform 0.3s ease;
             z-index: 10;
-        }
-        .sprite.left {
-            left: 20px;
-        }
-        .sprite.right {
-            right: 20;
+            /* Позиционирование X/Y задается динамически через JS с использованием left/transform */
         }
         /* Custom styles for Dialogue Log entries */
         .log-entry {
@@ -133,20 +128,21 @@
                 <!-- Sprites are inserted here by JS -->
             </div>
 
-            <!-- Dialogue Wrapper: Contains Speaker (above) and fixed-size Text Box (below) -->
+            <!-- Dialogue Wrapper: Centered container for the dialogue box and speaker name -->
             <div id="dialogueWrapper" class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 transition-all duration-300 opacity-100 hidden">
                 
-                <!-- Speaker Name Container (Above the main box) -->
-                <div id="speakerNameContainer" class="text-center mb-0">
+                <!-- Speaker Name Container (Absolute positioning relative to Dialogue Content Box) -->
+                <!-- The 'left-10' class ensures the speaker label is visually aligned with the left padding of the dialogue box. -->
+                <div id="currentSpeakerContainer" class="absolute top-0 transform -translate-y-full left-10 hidden">
                     <div id="currentSpeaker" class="speaker-name text-lg rounded-t-lg rounded-b-none"></div>
                 </div>
                 
                 <!-- Dialogue Text Content Box -->
                 <div id="dialogueContentBox" 
-                    class="vn-overlay w-[900px] h-[200px] p-2 flex items-center justify-center 
-                            rounded-xl shadow-2xl text-center overflow-hidden"
+                    class="vn-overlay w-[900px] h-[200px] p-8 flex items-center justify-start 
+                            rounded-xl shadow-2xl overflow-hidden"
                     onclick="event.stopPropagation()"> <!-- Предотвращаем срабатывание клика по VN Viewer -->
-                    <p id="currentText" class="text-base leading-tight transition-opacity duration-300">Текст диалога...</p>
+                    <p id="currentText" class="text-xl leading-snug transition-opacity duration-300">Текст диалога...</p>
                 </div>
             </div>
 
@@ -600,7 +596,7 @@
             const spriteContainer = document.getElementById('spriteContainer');
             const currentSpeaker = document.getElementById('currentSpeaker');
             const currentText = document.getElementById('currentText');
-            const speakerNameContainer = document.getElementById('speakerNameContainer');
+            const currentSpeakerContainer = document.getElementById('currentSpeakerContainer');
             const logContainer = document.getElementById('logContainer');
 
             // 1. Update Background (uses the 'background' property from the current line)
@@ -608,24 +604,38 @@
                 vnViewer.style.backgroundImage = `url('${dialogue.background}')`;
             }
 
-            // 2. Update Sprite
+            // 2. Update Sprite: Flexible positioning based on sprite_x (0-100%)
             spriteContainer.innerHTML = ''; // Clear existing sprites
             if (dialogue.sprite) {
+                // Determine positioning: use explicit sprite_x/sprite_y if available
+                // Otherwise, use 'position' keyword (left/right/center) for default percentages.
+                const positionKeyword = dialogue.position || 'center'; 
+                let xPercent = dialogue.sprite_x !== undefined ? dialogue.sprite_x : 
+                            (positionKeyword === 'left' ? 25 : positionKeyword === 'right' ? 75 : 50);
+                
                 const img = document.createElement('img');
                 const spriteSrc = SPRITE_BASE_PATH + dialogue.sprite;
                 img.src = spriteSrc; 
                 
-                img.alt = dialogue.speaker;
-                img.classList.add('sprite', dialogue.position === 'left' ? 'left' : 'right');
+                img.alt = dialogue.speaker || 'Персонаж';
+                // Use 'absolute' and 'h-full' for responsive scaling and positioning
+                img.classList.add('sprite', 'absolute'); 
                 img.onerror = () => {
                     // Используем заглушку, если спрайт не загрузился по указанному пути
-                    img.src = `https://placehold.co/200x400/808080/ffffff?text=${dialogue.speaker}`; 
+                    img.src = `https://placehold.co/200x400/808080/ffffff?text=${dialogue.speaker || 'Char'}`; 
                     console.error(`Sprite not found at: ${spriteSrc}. Check your file path.`);
                 }; 
+                
+                // Applying responsive percentage positioning using CSS transform:
+                // left: X% sets the starting point of the image to X% of the container width.
+                // transform: translateX(-50%) centers the image horizontally on that X% mark.
+                img.style.left = `${xPercent}%`;
+                img.style.transform = `translateX(-50%)`; 
+                
                 spriteContainer.appendChild(img);
             }
             
-            // 3. Update Text and Speaker
+            // 3. Update Text and Speaker (Speaker name now left-aligned relative to the dialogue box)
             currentText.style.opacity = '0';
             setTimeout(() => {
                 currentText.textContent = dialogue.text;
@@ -634,10 +644,10 @@
 
             if (dialogue.speaker) {
                 currentSpeaker.textContent = dialogue.speaker;
-                speakerNameContainer.classList.remove('hidden');
+                currentSpeakerContainer.classList.remove('hidden');
             } else {
                 currentSpeaker.textContent = '';
-                speakerNameContainer.classList.add('hidden');
+                currentSpeakerContainer.classList.add('hidden');
             }
 
             // 4. Update Log Highlighting and content if the log is open
