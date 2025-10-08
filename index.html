@@ -1,69 +1,71 @@
-<html>
-	<head>
-		<title>Houkai Gakuen 2 перевод</title>
-		<link type="text/css" href="main.css" rel="stylesheet" />
-    <script type="text/javascript" src="/js/util.js"></script>
-    <meta charset="UTF-8" />
-  </head>
-  <body ontouchstart>
-    <div id="topNav">
-      <div class="nav-left">
-        <span id="pageTitle">Перевод сюжета</span>
-      </div>
-      <div class="nav-center">
-        <div id="storyTitle" class="hidden"></div>
-      </div>
-      <div class="nav-right">
-        <div class="nav-dropdown rightButton" id="serverSelect">
-          <div class="dropbtn button">
-            RU
-            <i class="fa fa-caret-down"></i>
-          </div>
-          <div class="dropdown-content"></div>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Houkai Gakuen 2 архив сюжета</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Houkai Gakuen 2 архив сюжета</h1>
+        </header>
+        
+        <div class="selector-grid">
+            <!-- Блок выбора языка -->
+            <div class="language-selector">
+                <h2 class="selector-title">🌐 Язык / Language</h2>
+                <div class="btn-group">
+                    <button class="selector-btn active" data-lang="ru">Русский</button>
+                    <button class="selector-btn" data-lang="en">English</button>
+                    <button class="selector-btn" data-lang="cn">中文</button>
+                </div>
+            </div>
+            
+            <!-- Блок выбора типа сюжета -->
+            <div class="story-type-selector">
+                <h2 class="selector-title">📚 Тип сюжета</h2>
+                <div class="select-wrapper">
+                    <select class="selector-dropdown" id="storyType">
+                        <option value="main">Основной сюжет</option>
+                        <option value="extra">Дополнительный сюжет</option>
+                        <option value="bosses">Боссы</option>
+                        <option value="visual_novel">Визуальная новелла</option>
+                        <option value="novel">Роман</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Блок выбора конкретного сюжета -->
+            <div class="story-selector">
+                <h2 class="selector-title">📖 Сюжет</h2>
+                <div class="select-wrapper">
+                    <select class="selector-dropdown" id="storySelection">
+                        <option value="prologue">Пролог: Прорыв Хокая</option>
+                        <!-- Остальные варианты подгружаются через JS -->
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Блок выбора этапа -->
+            <div class="stage-selector">
+                <h2 class="selector-title">🎮 Этап</h2>
+                <div class="select-wrapper">
+                    <select class="selector-dropdown" id="stageSelection">
+                        <option value="stage1">Этап 1: Начало</option>
+                        <!-- Остальные варианты подгружаются через JS -->
+                    </select>
+                </div>
+            </div>
         </div>
-        <div
-          class="button iconButton rightButton"
-          id="visButton"
-          title="Режим отображения"
-        >
-          <i class="fas fa-eye"></i>
-        </div>
-        <div id="volControl">
-          <div class="iconButton button" id="playPauseBtn" title="Включить BGM">
-            <i class="fas fa-play"></i>
-          </div>
-          <i class="fa fa-volume-down"></i>
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value="50"
-            class="slider"
-            id="volSlider"
-          />
-          <i class="fa fa-volume-up"></i>
+        
+        <!-- Сюда будет выводиться контент -->
+        <div class="content-display" id="contentDisplay">
+            <! -- Контент будет загружаться здесь через JavaScript -->
         </div>
     </div>
-    <div id="avatarModal" class="modal">
-      <div class="modal-content"></div>
-    </div>
-    <div class="btnPanel" id="ccselector">
-      <select class="storySelect" id="catSelect"></select>
-      <select class="storySelect" id="subCatSelect"></select>
-      <select class="storySelect" id="thirdCatSelect"></select>
-    </div>
-    <div class="storyNav top">
-      <i class="fas fa-angle-double-left story_nav story_prev"></i>
-      <div class="spacer"></div>
-      <i class="fas fa-angle-double-right story_nav story_next"></i>
-    </div>
-    <div id="storyDisp" display-mode="0"></div>
-    <div class="storyNav">
-      <i class="fas fa-angle-double-left story_nav story_prev"></i>
-      <div class="spacer"></div>
-      <i class="fas fa-angle-double-right story_nav story_next"></i>
-    </div>
-    <i id="topBtn" class="fas fa-caret-square-up"></i>
-    <script type="text/javascript" src="/js/story.js"></script>
-  </body>
+    
+    <script src="script.js"></script>
+</body>
 </html>
