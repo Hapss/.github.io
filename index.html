@@ -694,8 +694,6 @@
             const vnViewer = document.getElementById('vnViewer');
             const currentSpeakerElement = document.getElementById('currentSpeaker');
             const currentTextElement = document.getElementById('currentText');
-            // dialogueWrapper больше не используется для затемнения
-            // const dialogueWrapper = document.getElementById('dialogueWrapper'); 
 
             // 1. Background
             if (step.background) {
@@ -722,11 +720,22 @@
                 const container = isLeft ? spriteLeftContainer : spriteRightContainer;
                 const imageElement = isLeft ? spriteLeftElement : spriteRightElement;
                 
-                // Формирование пути: либо абсолютный URL, либо с префиксом 'sprites/'
-                const spritePath = step.sprite.startsWith('http') ? step.sprite : SPRITE_BASE_PATH + step.sprite;
+                let spritePath;
+                let spriteFileName = step.sprite;
                 
-                // Устанавливаем src. Если загрузка не удастся, сработает onerror,
-                // который выведет ошибку в консоль и скроет контейнер.
+                // *** ИСПРАВЛЕННАЯ ЛОГИКА ЗАГРУЗКИ СПРАЙТОВ ***
+                // Проверяем, не содержит ли имя файла уже префикс 'sprites/' или 'http'
+                if (spriteFileName.startsWith('http') || spriteFileName.startsWith(SPRITE_BASE_PATH)) {
+                    // Если путь абсолютный или уже содержит префикс 'sprites/', используем его как есть.
+                    spritePath = spriteFileName;
+                } else {
+                    // Если указано только имя файла (например, "Kiana 1.png"), добавляем префикс.
+                    spritePath = SPRITE_BASE_PATH + spriteFileName;
+                }
+                
+                console.log(`[Sprite] Попытка загрузить: ${spritePath}`);
+
+                // Устанавливаем src. Если загрузка не удастся, сработает onerror.
                 imageElement.src = spritePath;
                 
                 // Делаем контейнер видимым ТОЛЬКО после установки src
@@ -738,12 +747,12 @@
                 const dimmedSpriteFilename = step.sprite_dimmed; 
                 
                 // Если левый спрайт видим и его путь содержит имя для диммирования, диммируем
-                if (!spriteLeftContainer.classList.contains('hidden') && spriteLeftElement.src.endsWith(dimmedSpriteFilename)) {
+                if (!spriteLeftContainer.classList.contains('hidden') && spriteLeftElement.src.includes(dimmedSpriteFilename)) {
                     spriteLeftElement.classList.add('dimmed-sprite');
                 } 
                 
                 // Если правый спрайт видим и его путь содержит имя для диммирования, диммируем
-                if (!spriteRightContainer.classList.contains('hidden') && spriteRightElement.src.endsWith(dimmedSpriteFilename)) {
+                if (!spriteRightContainer.classList.contains('hidden') && spriteRightElement.src.includes(dimmedSpriteFilename)) {
                     spriteRightElement.classList.add('dimmed-sprite');
                 } 
             }
