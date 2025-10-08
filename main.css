@@ -59,13 +59,13 @@ body {
 }
 
 /* Общие стили для всех фильтров (тип сюжета, сюжет, этап) */
-.selector {
+.filter-group {
     background: rgba(255, 255, 255, 0.1);
     padding: 12px 15px; /* Уменьшили отступы */
     flex-grow: 1; /* Элементы растягиваются по ширине */
 }
 
-.selector-title {
+.filter-title {
     font-size: 0.9rem; /* Уменьшили размер шрифта */
     margin-bottom: 8px;
     color: #ff6ec7;
