@@ -185,6 +185,10 @@
         const METADATA_FILE = 'story/story_metadata.json'; 
         const STORY_BASE_PATH = 'story/'; 
         
+        // Настройки повторной загрузки (Exponential Backoff)
+        const INITIAL_DELAY_MS = 2000;
+        const MAX_DELAY_MS = 30000;
+        
         // Группировка сюжетов
         const STORY_GROUPS = {
             main: { ru: "Основной сюжет", en: "Main Story", cn: "主线剧情", prefix: "main_" },
@@ -242,20 +246,16 @@
             loadProgress(); 
         });
 
-        /** * Асинхронно загружает метаданные глав из story/story_metadata.json.
-         * Если загрузка не удалась, storyMetadata остается null, и главы НЕ загружаются.
-         */
+        /** * Асинхронно загружает метаданные глав из story/story_metadata.json. */
         async function fetchChapterMetadata() {
             try {
                 const response = await fetch(METADATA_FILE); 
                 if (!response.ok) {
-                    // Принудительная ошибка, если файл не найден/недоступен
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 window.storyMetadata = await response.json();
                 console.log("[Metadata] Загрузка глав с внешнего сервера завершена.");
             } catch (error) {
-                // Строгое требование: НИКАКОЙ резервной загрузки.
                 console.error(`[Metadata] Критическая ошибка загрузки внешнего файла (${METADATA_FILE}).`, error);
                 // Показываем сообщение об ошибке, так как без метаданных UI нефункционален
                 alertMessage(i18n[document.getElementById('languageSelect').value].errorFetchMetadataStrict); 
@@ -297,7 +297,7 @@
                 document.getElementById('dialogueWrapper').classList.add('hidden');
                 spriteLeftContainer.classList.add('hidden');
                 spriteRightContainer.classList.add('hidden');
-                // Убеждаемся, что фон возвращается к дефолту, если не загружено
+                // Убеждаемся, что фон возвращается к дефолту
                 document.getElementById('vnViewer').style.backgroundImage = `url('${DEFAULT_BG_URL}')`;
                 return;
             }
@@ -354,57 +354,71 @@
             currentTextElement.textContent = step.text || "";
         }
         
-        /** Асинхронно пытается загрузить выбранную главу. */
+        /** * Асинхронно пытается загрузить выбранную главу. 
+         * Если не удается, запускает цикл повторных попыток с экспоненциальной задержкой.
+         */
         async function updateStoryContent(startIndex = 0) {
             const lang = document.getElementById('languageSelect').value; 
             const fullStoryKey = document.getElementById('chapterSelect').value; 
+            const loadButton = document.getElementById('loadButton');
             const loadTextElement = document.getElementById('loadText');
             
             if (!fullStoryKey) return;
-            
+
             const expectedFilePath = `${STORY_BASE_PATH}${lang}/${fullStoryKey}.json`;
 
+            loadButton.disabled = true;
             loadTextElement.textContent = "Загрузка...";
-            document.getElementById('loadButton').disabled = true;
+            
+            // Внутренняя функция для выполнения попыток загрузки
+            const attemptLoad = async (attempt = 1) => {
+                
+                let success = false;
+                let data = null;
 
-            try {
-                // Строгая попытка загрузить файл
-                const response = await fetch(expectedFilePath);
-                if (!response.ok) {
-                    // Если файл не найден или ошибка HTTP, бросаем ошибку
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                try {
+                    const response = await fetch(expectedFilePath);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    data = await response.json();
+                    success = true;
+                } catch (e) {
+                    console.warn(`[Content] Загрузка главы не удалась (Попытка ${attempt}).`);
+                    // Ошибка не отображается пользователю, но логируется
                 }
-                
-                const data = await response.json();
-                
-                // Если загрузка успешна, обновляем состояние
-                currentDialogue = data.dialogue || [];
-                currentDialogueIndex = Math.min(startIndex, currentDialogue.length - 1);
-                currentDialogueIndex = Math.max(0, currentDialogueIndex); 
-                dialogueIsLoaded = true;
-                
-                loadTextElement.textContent = "Загружено";
-                renderDialogueStep();
 
-            } catch (e) {
-                // Если загрузка не удалась, НЕ загружаем ничего и НЕ сообщаем пользователю.
-                console.error(`[Content] Ошибка загрузки главы ${fullStoryKey}. Содержимое не отображается.`, e);
-                
-                // Сбрасываем состояние, чтобы UI оставался в исходном виде
-                dialogueIsLoaded = false; 
-                currentDialogue = [];
-                currentDialogueIndex = 0;
-                
-                // Принудительно скрываем диалоговый UI и сбрасываем фон
-                renderDialogueStep(); 
-                
-            } finally {
-                // Возвращаем кнопку в исходное состояние
-                setTimeout(() => {
-                    loadTextElement.textContent = i18n[lang].loadText;
-                    document.getElementById('loadButton').disabled = false;
-                }, 1500);
-            }
+                if (success && data) {
+                    // --- УСПЕХ: Обновление глобального состояния ---
+                    currentDialogue = data.dialogue || [];
+                    currentDialogueIndex = Math.min(startIndex, currentDialogue.length - 1);
+                    currentDialogueIndex = Math.max(0, currentDialogueIndex); 
+                    dialogueIsLoaded = true;
+                    
+                    // --- Обновление UI ---
+                    loadTextElement.textContent = "Загружено";
+                    renderDialogueStep();
+
+                    setTimeout(() => {
+                        loadTextElement.textContent = i18n[lang].loadText;
+                        loadButton.disabled = false;
+                    }, 1500);
+
+                } else {
+                    // --- ПОВТОРНАЯ ПОПЫТКА: Вычисление задержки (Exponential Backoff) ---
+                    const delay = Math.min(MAX_DELAY_MS, INITIAL_DELAY_MS * Math.pow(2, attempt - 1));
+                    
+                    loadTextElement.textContent = `Повтор (${attempt})...`;
+
+                    // Рекурсивный вызов через setTimeout для повтора
+                    setTimeout(() => {
+                        attemptLoad(attempt + 1);
+                    }, delay);
+                }
+            };
+            
+            // Запуск первой попытки
+            attemptLoad();
         }
 
         // ====================================================================
@@ -590,7 +604,8 @@
 
             // 4. Автозагрузка контента
             if (shouldAutoLoad && progress.index !== undefined && chapterSelect.value) {
-                updateStoryContent(progress.index);
+                // Убираем автозагрузку при старте, чтобы не запускать бесконечный цикл сразу
+                // updateStoryContent(progress.index);
             }
 
             enableLoadButton();
