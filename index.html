@@ -1,12 +1,4 @@
 <!-- Chosen Palette: Dark Neutrals (Black, Grey, White) with Honkai Red/Purple accents for UI elements. -->
-<!-- Application Structure Plan: Single-page application with a fixed header for navigation (language selector, title, reset button) and a main content area. The main area is divided into a control panel (story type/chapter selection) and a large, immersive Visual Novel (VN) viewer. This dashboard-like structure prioritizes interactivity (filters/selectors) and contextual presentation (VN viewer with dynamic text/sprites/backgrounds and LLM tools). This structure was chosen for usability because it separates navigation from the viewing experience, making it easy to change the story without losing immersion. Progress persistence is added via localStorage. -->
-<!-- Visualization & Content Choices: Report Info -> Goal -> Viz/Presentation Method -> Interaction -> Justification -> Library/Method.
-1. Story Content -> Narrative Consumption -> Visual Novel Display (HTML/CSS, Dynamic text/images) -> Next/Prev buttons, Dropdowns, Persistence (localStorage) -> Best way to present dialogue-heavy game lore, now with user progress tracking. -> Vanilla JS/HTML/CSS.
-2. Character/Scene Analysis -> Contextual Understanding -> Text Output (Modal window) -> Clickable buttons (Character Info/Scene Analysis) -> Enhances comprehension by leveraging LLM expertise instantly. -> Gemini API (Fetch/JSON).
-3. Navigation/Filtering -> Content Discovery -> Dropdown Menus (Type and Chapter) -> Cascading selection (Type filters Chapter options) -> Efficiently handles large, hierarchical data sets (story chapters). -> Vanilla JS/HTML/CSS.
-4. Progress Persistence -> User Experience -> localStorage save/load/reset functions -> Automatically resumes reading where the user left off. -> Vanilla JS.
--->
-<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -121,6 +113,8 @@
                 
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mt-2">
                     <p id="currentText" class="text-xl sm:text-2xl leading-relaxed transition-opacity duration-300">Текст диалога...</p>
+                    
+                    <!-- LLM Context Buttons Removed -->
                 </div>
             </div>
 
@@ -137,26 +131,40 @@
         </div>
 
     </main>
+    
+    <!-- Help Modal -->
+    <div id="helpModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center hidden" onclick="showHelpModal()">
+        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl max-w-lg w-11/12 transform transition-all duration-300 scale-95" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-3">
+                <h3 class="text-xl font-bold text-red-400">О приложении</h3>
+                <button onclick="showHelpModal()" class="text-gray-400 hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <p id="helpContent" class="text-gray-300 leading-relaxed"></p>
+        </div>
+    </div>
 
     <script>
-        const API_KEY = "";
-        const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=" + API_KEY;
+        // AI/LLM functionality removed as requested.
+
         const STORAGE_KEY = 'hg2_story_progress'; // Key for localStorage
 
         let currentDialogue = [];
         let currentDialogueIndex = 0;
         let dialogueIsLoaded = false;
 
-        // --- I18N DATA ---
+        // --- I18N DATA (LLM references removed) ---
         const i18n = {
             ru: {
                 headerTitle: "Houkai Gakuen 2 архив сюжета",
                 labelStoryType: "Тип сюжета",
                 labelChapter: "Сюжет (Глава)",
                 loadText: "Загрузить",
+                resetProgress: "Сброс",
                 errorFetch: "Ошибка загрузки контента: файл не найден или проблема с сетью.",
                 helpTitle: "Как пользоваться архивом:",
-                helpText: "Это интерактивный архив сюжетов Honkai Gakuen 2.\n\n1. Используйте верхние выпадающие списки, чтобы выбрать [Тип сюжета] и конкретную [Главу].\n2. Нажмите [Загрузить].\n3. В окне визуальной новеллы используйте кнопки [Далее/Назад] для просмотра диалога. Ваш прогресс автоматически сохраняется."
+                helpText: "Это интерактивный архив сюжетов Honkai Gakuen 2.\n\n1. Используйте верхние выпадающие списки, чтобы выбрать **Тип сюжета** и конкретную **Главу**.\n2. Нажмите **'Загрузить'**.\n3. В окне визуальной новеллы используйте кнопки **Далее/Назад** для просмотра диалога. **Ваш прогресс автоматически сохраняется**."
             },
             en: {
                 headerTitle: "Houkai Gakuen 2 Story Archive",
@@ -166,7 +174,7 @@
                 resetProgress: "Reset",
                 errorFetch: "Content loading error: file not found or network issue.",
                 helpTitle: "How to use the Archive:",
-                helpText: "This is an interactive story archive for Honkai Gakuen 2.\n\n1. Use the top dropdowns to select the [Story Type] and specific [Chapter].\n2. Click [Load].\n3. In the Visual Novel viewer, use the [Next/Prev] buttons to advance the dialogue. Your progress is saved automatically."
+                helpText: "This is an interactive story archive for Honkai Gakuen 2.\n\n1. Use the top dropdowns to select the **Story Type** and a specific **Chapter**.\n2. Click **'Load'**.\n3. In the Visual Novel viewer, use the **Next/Prev** buttons to advance the dialogue. **Your progress is saved automatically**."
             },
             cn: {
                 headerTitle: "崩坏学园2 剧情档案",
@@ -176,43 +184,43 @@
                 resetProgress: "重置",
                 errorFetch: "内容加载错误：未找到文件或网络问题。",
                 helpTitle: "如何使用档案：",
-                helpText: "这是一个崩坏学园2的交互式剧情档案。\n\n1. 使用顶部下拉列表选择剧情类型和特定章节。\n2. 点击加载。\n3. 在视觉小说查看器中，使用下一页/上一页按钮推进对话。您的进度将自动保存。\n4. 点击角色资料或场景分析以获取来自 Gemini API 的实时背景信息。"
+                helpText: "这是一个崩坏学园2的交互式剧情档案。\n\n1. 使用顶部下拉列表选择**剧情类型**和特定**章节**。\n2. 点击**'加载'**。\n3. 在视觉小说查看器中，使用**下一页/上一页**按钮推进对话。**您的进度将自动保存**。"
             }
         };
 
-        // --- STORY DATA STRUCTURE ---
+        // --- STORY DATA STRUCTURE (Chapter names simplified) ---
         const storyData = {
             main: {
                 ru: "Основной сюжет", en: "Main Story", cn: "主线剧情",
                 chapters: {
-                    ch1: { ru: "Глава 1: Выброс Хоукая", en: "Chapter 1: Honkai Eruption", cn: "第一章 崩坏爆发" },
-                    ch2: { ru: "Глава 2: Киана наносит ответный удар", en: "Chapter 2: Kiana Strikes Back", cn: "第二章 琪亚娜的反击" },
-                    ch3: { ru: "Глава 3: Зловещая молния", en: "Chapter 3: Ominous Lightning", cn: "第三章 邪恶的雷电" }
+                    ch1: { ru: "Глава 1", en: "Chapter 1", cn: "章节 1" },
+                    ch2: { ru: "Глава 2", en: "Chapter 2", cn: "章节 2" },
+                    ch3: { ru: "Глава 3", en: "Chapter 3", cn: "章节 3" }
                 }
             },
             extra: {
                 ru: "Дополнительный сюжет", en: "Extra Story", cn: "额外剧情",
                 chapters: {
-                    ex1: { ru: "Экстра 1: Берегись", en: "Extra 1: Beware", cn: "额外 1: 小心" },
-                    ex2: { ru: "Экстра 2: Неутолимое желание", en: "Extra 2: Insatiable Desire", cn: "额外 2: 不可满足的欲望" }
+                    ex1: { ru: "Экстра 1", en: "Extra 1", cn: "额外 1" },
+                    ex2: { ru: "Экстра 2", en: "Extra 2", cn: "额外 2" }
                 }
             },
             bosses: {
-                ru: "Боссы", en: "Bosses", cn: "BOSS",
+                ru: "Боссы", en: "Boss Fights", cn: "首领战",
                 chapters: {
-                    b1: { ru: "Босс", en: "Boss", cn: "首领" }
+                    b1: { ru: "Босс 1", en: "Boss 1", cn: "首领 1" }
                 }
             },
             vn: {
                 ru: "Визуальная новелла", en: "Visual Novel", cn: "视觉小说",
                 chapters: {
-                    vn1: { ru: "VN", en: "VN", cn: "视觉小说" }
+                    vn1: { ru: "VN 1", en: "VN 1", cn: "VN 1" }
                 }
             },
             romance: {
                 ru: "Роман", en: "Romance", cn: "小说",
                 chapters: {
-                    r1: { ru: "Роман", en: "Novel", cn: "小说" }
+                    r1: { ru: "Роман 1", en: "Novel 1", cn: "小说 1" }
                 }
             }
         };
@@ -273,8 +281,10 @@
             // Reset selectors to default
             document.getElementById('languageSelect').value = 'ru';
             updateUI(); 
-            // Optional: Show a message to the user that progress was reset
-            document.getElementById('vnViewer').style.backgroundImage = `url('https://placehold.co/1920x1080/2a2a2a/fca5a5?text=Прогресс+сброшен.+Выберите+главу.')`;
+            // Inform the user
+            const currentLang = document.getElementById('languageSelect').value;
+            const vnViewer = document.getElementById('vnViewer');
+            vnViewer.style.backgroundImage = `url('https://placehold.co/1920x1080/2a2a2a/fca5a5?text=${i18n[currentLang].loadText.replace('Загрузить', 'Прогресс сброшен')}')`;
         }
 
         // --- CORE UI FUNCTIONS ---
@@ -295,8 +305,6 @@
             document.getElementById('labelChapter').textContent = text.labelChapter;
             document.getElementById('loadText').textContent = text.loadText;
             document.getElementById('resetButton').textContent = text.resetProgress;
-            document.getElementById('contextButton').textContent = text.characterContext;
-            document.getElementById('analysisButton').textContent = text.sceneAnalysis;
             document.getElementById('helpContent').innerHTML = `
                 <h4 class="text-lg font-semibold text-red-400 mb-2">${text.helpTitle}</h4>
                 <p class="whitespace-pre-line">${text.helpText}</p>`;
@@ -358,7 +366,7 @@
             enableLoadButton();
         }
 
-        /** Asynchronously loads the selected story chapter JSON and initializes the VN viewer. 
+        /** Asynchronously loads the selected story chapter JSON. Assumes the JSON file contains a flat 'dialogue' array.
          * @param {number} startIndex - The dialogue index to start viewing from (used for loading progress).
          */
         async function updateStoryContent(startIndex = 0) {
@@ -371,7 +379,7 @@
             
             if (!storyType || !storyId) return;
 
-            // Filename format: {language}/{type}_{chapter}.json
+            // Filename format: {language}/{type}_{chapter}.json (e.g., ru/main_ch1.json)
             const fileName = `story/${currentLang}/${storyType}_${storyId}.json`;
 
             loadButton.disabled = true;
@@ -384,6 +392,10 @@
                 }
                 const data = await response.json();
                 
+                if (!data.dialogue || !Array.isArray(data.dialogue)) {
+                    throw new Error("JSON structure error: 'dialogue' array not found at the root level.");
+                }
+
                 currentDialogue = data.dialogue;
                 
                 // Set the current index, ensuring it doesn't exceed the dialogue length
@@ -411,8 +423,7 @@
                 vnViewer.style.backgroundImage = `url('https://placehold.co/1920x1080/aa0000/ffffff?text=Ошибка+Загрузки')`;
                 document.getElementById('dialogueBox').classList.add('hidden');
                 document.getElementById('navButtons').classList.add('hidden');
-                alert(error.message); 
-
+                
             } finally {
                 loadButton.disabled = false;
                 loadText.textContent = i18n[currentLang].loadText;
@@ -430,7 +441,7 @@
             const currentText = document.getElementById('currentText');
             const speakerNameContainer = document.getElementById('speakerNameContainer');
             
-            // 1. Update Background
+            // 1. Update Background (uses the 'background' property from the current line)
             if (dialogue.background) {
                 vnViewer.style.backgroundImage = `url('${dialogue.background}')`;
             }
@@ -464,10 +475,6 @@
             // 4. Update Navigation Buttons
             document.getElementById('prevButton').disabled = currentDialogueIndex === 0;
             document.getElementById('nextButton').disabled = currentDialogueIndex >= currentDialogue.length - 1;
-            
-            // 5. Update LLM buttons visibility
-            document.getElementById('contextButton').style.display = dialogue.speaker ? 'block' : 'none';
-            document.getElementById('analysisButton').style.display = dialogue.text ? 'block' : 'none';
         }
 
         /** Handles navigation (next/previous) in the dialogue array. */
@@ -479,108 +486,10 @@
                 saveProgress(); // Save progress after navigation
             }
         }
-
-        // --- LLM API INTEGRATION & MODAL ---
-
-        /** Shows the modal with a loading state. */
-        function showModal(titleKey) {
-            const lang = document.getElementById('languageSelect').value;
-            document.getElementById('modalTitle').textContent = i18n[lang][titleKey];
-            document.getElementById('modalContent').innerHTML = `
-                <div id="modalSpinner" class="flex justify-center items-center py-8">
-                    <svg class="animate-spin -ml-1 mr-3 h-8 w-8 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <p class="text-gray-300">${i18n[lang].modalLoading}</p>
-                </div>`;
-            document.getElementById('llmModal').classList.remove('hidden');
-        }
-
-        /** Closes the LLM modal. */
-        function closeModal(event = null) {
-            if (event && event.target.id !== 'llmModal') return;
-            document.getElementById('llmModal').classList.add('hidden');
-        }
         
         /** Toggles the help modal. */
         function showHelpModal() {
             document.getElementById('helpModal').classList.toggle('hidden');
-        }
-
-        /** Sends a request to the Gemini API for character context or scene analysis. */
-        async function handleLLMCall(type) {
-            if (!dialogueIsLoaded) return;
-
-            const dialogue = currentDialogue[currentDialogueIndex];
-            const currentLang = document.getElementById('languageSelect').value;
-            const storyChapterName = document.getElementById('chapterSelect').options[document.getElementById('chapterSelect').selectedIndex].textContent;
-
-            let prompt = "";
-            let systemInstruction = "";
-            let modalTitleKey = "";
-
-            if (type === 'character' && dialogue.speaker) {
-                const speakerName = dialogue.speaker;
-                modalTitleKey = 'modalTitleCharacter';
-                
-                systemInstruction = `Ты эксперт по лору игры Houkai Gakuen 2. Твоя задача — предоставить краткую, увлекательную, но точную справку о персонаже, названном пользователем. Ответ должен быть в одном абзаце на ${currentLang === 'ru' ? 'русском' : (currentLang === 'en' ? 'английском' : 'китайском')} языке.`;
-                prompt = `Предоставь краткую биографию и роль в сюжете игры Houkai Gakuen 2 для персонажа по имени: "${speakerName}".`;
-                
-            } else if (type === 'analysis' && dialogue.text) {
-                const sceneText = dialogue.text;
-                modalTitleKey = 'modalTitleAnalysis';
-
-                systemInstruction = `Ты литературный аналитик и эксперт по сюжету игры Houkai Gakuen 2. Твоя задача — объяснить важность предоставленного фрагмента диалога (сцены) для общего повествования. Ответ должен быть в одном-двух абзацах на ${currentLang === 'ru' ? 'русском' : (currentLang === 'en' ? 'английском' : 'китайском')} языке.`;
-                prompt = `Проанализируй сюжетную значимость следующего фрагмента из главы "${storyChapterName}": "${sceneText}". Объясни, что он означает для персонажей и сюжета.`;
-            } else {
-                return; // Nothing to analyze
-            }
-
-            showModal(modalTitleKey);
-
-            try {
-                const response = await fetchWithExponentialBackoff(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }],
-                        systemInstruction: { parts: [{ text: systemInstruction }] },
-                        tools: [{ "google_search": {} }] // Используем Google Search для актуального лора
-                    })
-                });
-
-                const result = await response.json();
-                const text = result.candidates?.[0]?.content?.parts?.[0]?.text || i18n[currentLang].errorLLM;
-                
-                document.getElementById('modalContent').innerHTML = `<p class="text-gray-200 whitespace-pre-line">${text}</p>`;
-
-            } catch (error) {
-                console.error("LLM fetch error:", error);
-                document.getElementById('modalContent').innerHTML = `<p class="text-red-400">${i18n[currentLang].errorLLM}: ${error.message}</p>`;
-            }
-        }
-
-        /** Helper function for fetch with exponential backoff. */
-        async function fetchWithExponentialBackoff(url, options, retries = 3) {
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const response = await fetch(url, options);
-                    if (response.status === 429 && i < retries - 1) { // Too Many Requests
-                        const delay = Math.pow(2, i) * 1000;
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                        continue;
-                    }
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response;
-                } catch (error) {
-                    if (i === retries - 1) throw error;
-                    const delay = Math.pow(2, i) * 1000;
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                }
-            }
         }
 
         // --- INITIALIZATION ---
