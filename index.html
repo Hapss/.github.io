@@ -142,7 +142,7 @@
 
         <!-- 3. Visual Novel Viewer (Main View) -->
         <div id="vnViewer" class="relative w-full aspect-[16/9] bg-gray-900 rounded-xl shadow-2xl overflow-hidden flex flex-col justify-end transition-colors duration-500 cursor-pointer" 
-             style="min-height: 400px; background-image: url('https://placehold.co/1920x1080/2a2a2a/fca5a5?text=Ждем+загрузки+метаданных+глав'); background-size: cover; background-position: center;"
+             style="min-height: 400px; background-size: cover; background-position: center;"
              onclick="navigateDialogue(1)"> 
 
             <!-- Sprite Container -->
@@ -178,9 +178,14 @@
         // ====================================================================
         // === КОНСТАНТЫ И ДАННЫЕ ===
         // ====================================================================
+
+        // Base64-кодированные SVG для надежных плейсхолдеров
+        const KIANA_SPRITE_B64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjODAwMDgwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5LSUFOQTwvdGV4dD48L3N2Zz4='; // Пурпурный
+        const MEI_SPRITE_B64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRkY1NzMzIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5NRUk8L3RleHQ+PC9zdmc+'; // Красный
+        const DEFAULT_BG_B64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyMCIgaGVpZ2h0PSIxMDgwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMyYjJkM2EiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjQwcHgiIGZpbGw9IiNkMWQxZDEiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlpERU0gTE9HSSBLT05URU5UQTwvdGV4dD48L3N2Zz4='; // Серый фон с текстом
         
         const STORAGE_KEY = 'vn_story_progress_v4';
-        const DEFAULT_BG_URL = 'https://placehold.co/1920x1080/2a2a2a/fca5a5?text=Ждем+загрузки+метаданных+глав';
+        const DEFAULT_BG_URL = DEFAULT_BG_B64; // Использование Base64 по умолчанию
         const METADATA_FILE = 'story/story_metadata.json'; 
         const STORY_BASE_PATH = 'story/'; 
         
@@ -189,7 +194,6 @@
         const MAX_DELAY_MS = 30000;
         
         // Настройки постоянной загрузки изображений (спрайтов/фонов)
-        // Этот механизм гарантирует, что спрайт/фон будет загружаться, пока не получит успешный ответ.
         const MAX_PERSISTENT_IMAGE_RETRIES = 50; 
         const PERSISTENT_IMAGE_RETRY_DELAY_MS = 2000; 
 
@@ -246,12 +250,13 @@
             spriteLeftElement = document.getElementById('spriteLeft');
             spriteRightElement = document.getElementById('spriteRight');
             
+            // Устанавливаем дефолтный фон сразу после загрузки DOM
+            document.getElementById('vnViewer').style.backgroundImage = `url('${DEFAULT_BG_URL}')`;
+
             loadProgress(); 
         });
 
-        /** * Асинхронно загружает метаданные глав из story/story_metadata.json.
-         * Это необходимо ТОЛЬКО для заполнения выпадающего списка выбора главы.
-         */
+        /** * Асинхронно загружает метаданные глав из story/story_metadata.json. */
         async function fetchChapterMetadata() {
             try {
                 const response = await fetch(METADATA_FILE); 
@@ -286,27 +291,26 @@
             }
         }
         
-        /** * Mock-функция для создания пути к спрайтам (использует placehold.co).
-         * В реальном приложении здесь будут пути к вашим asset-файлам.
+        /** * Определяет путь/URL к спрайту.
+         * Использует Base64-плейсхолдеры, если не предоставлен реальный URL.
          */
         const spritePath = (fileName) => {
-            if (fileName && fileName.includes('kiana')) return `https://placehold.co/400x800/800080/ffffff?text=KIANA`;
-            if (fileName && fileName.includes('mei')) return `https://placehold.co/400x800/FF5733/ffffff?text=MEI`;
-            return `https://placehold.co/400x800/2a2a2a/ffffff?text=SPRITE`;
+            if (fileName && fileName.includes('kiana')) return KIANA_SPRITE_B64;
+            if (fileName && fileName.includes('mei')) return MEI_SPRITE_B64;
+            // Если вы используете реальные URL в своем JSON, просто верните их:
+            // return `assets/sprites/${fileName}.png`; 
+            
+            // Возвращаем универсальный плейсхолдер Base64
+            return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjIyMjIyIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5TUFJJSVQ8L3RleHQ+PC9zdmc+';
         };
         
         /** * Загружает изображение (или фон) с механизмом постоянного повтора, пока не удастся.
-         * Эта функция полностью независима от статуса загрузки метаданных.
-         * @param {string} url URL изображения или фона.
-         * @param {HTMLElement} element Элемент <img> или контейнер (для фона).
-         * @param {boolean} isBackground Флаг, указывающий, является ли это фоном.
-         * @param {number} attempt Текущая попытка.
+         * Если используется Base64 URL, загрузка будет мгновенной.
          */
         function loadImageWithPersistence(url, element, isBackground = false, attempt = 1) {
-            // Если URL пуст, скрываем элемент и прекращаем попытки
+            // Если URL пуст или является Base64 по умолчанию, мы его обрабатываем
             if (!url || url === DEFAULT_BG_URL) {
                 if (!isBackground) element.parentElement.classList.add('hidden');
-                // Если это фон, устанавливаем дефолтный плейсхолдер
                 if (isBackground) element.style.backgroundImage = `url('${DEFAULT_BG_URL}')`;
                 return;
             }
@@ -317,8 +321,19 @@
                  if (!isBackground) element.parentElement.classList.add('hidden');
                  return;
             }
+            
+            // Успех, если это Base64
+            if (url.startsWith('data:')) {
+                if (!isBackground) {
+                    element.src = url;
+                    element.parentElement.classList.remove('hidden'); 
+                } else {
+                    element.style.backgroundImage = `url('${url}')`;
+                }
+                return;
+            }
 
-            // --- Логика для спрайтов (<img>) ---
+            // --- Логика для спрайтов (<img>) с внешним URL ---
             if (!isBackground) {
                 element.onload = null;
                 element.onerror = null;
@@ -331,7 +346,6 @@
 
                 element.onerror = () => {
                     console.warn(`[Sprite Load] Ошибка загрузки: ${url}. Попытка ${attempt} не удалась. Повтор через ${PERSISTENT_IMAGE_RETRY_DELAY_MS} мс.`);
-                    // Сброс src и "cache buster" для принудительной перезагрузки
                     element.src = ""; 
                     setTimeout(() => loadImageWithPersistence(url, element, isBackground, attempt + 1), PERSISTENT_IMAGE_RETRY_DELAY_MS);
                 };
@@ -340,7 +354,7 @@
                 element.src = url + cacheBuster;
 
             } else {
-                // --- Логика для фона (CSS background-image) ---
+                // --- Логика для фона (CSS background-image) с внешним URL ---
                 const tempImg = new Image();
                 tempImg.onload = () => {
                     console.log(`[Background Load] Успешно загружен: ${url} (Попытка ${attempt})`);
@@ -359,7 +373,6 @@
 
         /** Рендерит текущий шаг диалога и обновляет UI. */
         function renderDialogueStep() {
-            // Если контент не загружен, скрываем диалог и спрайты
             if (!dialogueIsLoaded || currentDialogue.length === 0) {
                 document.getElementById('dialogueWrapper').classList.add('hidden');
                 spriteLeftContainer.classList.add('hidden');
@@ -373,7 +386,7 @@
             const currentSpeakerElement = document.getElementById('currentSpeaker');
             const currentTextElement = document.getElementById('currentText');
 
-            // 1. Фон - Используем функцию с постоянным повтором
+            // 1. Фон - Используем функцию с постоянным повтором (Base64 пройдет мгновенно)
             const bgUrl = step.background || DEFAULT_BG_URL;
             loadImageWithPersistence(bgUrl, vnViewer, true);
 
@@ -395,10 +408,10 @@
                 const container = isLeft ? spriteLeftContainer : spriteRightContainer;
                 const imageElement = isLeft ? spriteLeftElement : spriteRightElement;
                 
-                const path = spritePath(step.sprite);
-                container.classList.remove('hidden');
+                // Используем spritePath, который теперь возвращает Base64, если нет реального URL
+                const path = spritePath(step.sprite); 
                 
-                // Используем функцию с постоянным повтором
+                container.classList.remove('hidden');
                 loadImageWithPersistence(path, imageElement);
             } 
             
@@ -423,9 +436,7 @@
             currentTextElement.textContent = step.text || "";
         }
         
-        /** * Асинхронно пытается загрузить выбранную главу, используя Exponential Backoff.
-         * Этот уровень загрузки полностью независим от загрузки изображений.
-         */
+        /** * Асинхронно пытается загрузить выбранную главу, используя Exponential Backoff. */
         async function updateStoryContent(startIndex = 0) {
             const lang = document.getElementById('languageSelect').value; 
             const fullStoryKey = document.getElementById('chapterSelect').value; 
@@ -452,7 +463,6 @@
                     data = await response.json();
                     success = true;
                 } catch (e) {
-                    // Используем console.error, если загрузка не удалась, чтобы привлечь внимание
                     console.error(`[Content] Критическая ошибка загрузки главы: ${expectedFilePath} (Попытка ${attempt}).`, e);
                 }
 
@@ -539,9 +549,7 @@
             }
         }
 
-        /** * Обновляет выпадающий список глав.
-         * Зависит от window.storyMetadata, так как без него невозможно составить список.
-         */
+        /** * Обновляет выпадающий список глав. */
         function updateChapterSelect(skipSideEffects = false) {
             const typeKey = document.getElementById('storyTypeSelect').value;
             const select = document.getElementById('chapterSelect');
@@ -598,8 +606,6 @@
 
         function enableLoadButton() {
             const storyId = document.getElementById('chapterSelect').value;
-            // Кнопка загрузки активируется, если выбрана глава, независимо от того, загружены ли метаданные.
-            // Хотя, по факту, выбрать главу без метаданных невозможно, но мы не блокируем кнопку явно по метаданным.
             document.getElementById('loadButton').disabled = !storyId;
         }
 
@@ -626,7 +632,6 @@
         }
 
         async function loadProgress() {
-            // Сначала загружаем метаданные, чтобы UI мог предоставить пользователю список глав
             await fetchChapterMetadata(); 
             
             const savedProgress = localStorage.getItem(STORAGE_KEY);
@@ -653,7 +658,6 @@
                 updateChapterSelect(true); 
             }
             
-            // Восстанавливаем выбранную главу, только если метаданные были загружены
             if (window.storyMetadata && typeSelect.value && progress.chapter) {
                 if (Array.from(chapterSelect.options).some(opt => opt.value === progress.chapter)) {
                     chapterSelect.value = progress.chapter;
