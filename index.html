@@ -6,8 +6,8 @@
     <title>Houkai Gakuen 2 Архив Сюжета</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chosen Palette: Custom Dark Theme -->
-    <!-- Application Structure Plan: SPA с фиксированным заголовком, содержащим название и переключатель языка. Основная область содержит три зависимых выпадающих списка (Тип сюжета -> Сюжет -> Этап) для навигации. При выборе сюжета, приложение асинхронно загружает соответствующий JSON-файл из папки story/. Ниже расположена область динамического контента, которая отображает выбранный этап в формате визуальной новеллы. -->
-    <!-- Visualization & Content Choices: Информация: Архив сюжетов игры. Цель: Навигация и чтение с внешней загрузкой данных. Метод представления: HTML-селекторы для фильтрации и динамически обновляемый div для отображения текста. Взаимодействие: Выбор сюжета запускает fetch() для загрузки JSON-файла. Выбор этапа отображает нужный блок диалога из загруженных данных. Обоснование: Внешняя загрузка позволяет легко добавлять новый контент без редактирования основного HTML-файла. Библиотека: Vanilla JS для логики (включая Fetch API), Tailwind CSS для стилей. -->
+    <!-- Application Structure Plan: SPA с фиксированным заголовком, содержащим название и переключатель языка. Основная область содержит три зависимых выпадающих списка (Тип сюжета -> Сюжет -> Этап) для навигации. При выборе языка и сюжета, приложение асинхронно загружает соответствующий JSON-файл из папки story/{lang}/. Ниже расположена область динамического контента, которая отображает выбранный этап в формате визуальной новеллы. -->
+    <!-- Visualization & Content Choices: Информация: Архив сюжетов игры. Цель: Навигация и чтение с внешней загрузкой данных, разделенных по языкам. Метод представления: HTML-селекторы для фильтрации и динамически обновляемый div для отображения текста. Взаимодействие: Выбор языка меняет путь загрузки JSON. Выбор сюжета запускает Fetch API для загрузки unilingual JSON. Выбор этапа отображает нужный блок диалога из загруженных данных. Обоснование: Разделение файлов по языкам упрощает управление переводами. Библиотека: Vanilla JS для логики (включая Fetch API), Tailwind CSS для стилей. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
@@ -174,8 +174,7 @@
             }
         };
 
-        // Story structure now primarily defines the dropdowns.
-        // The actual content (dialogue/backgrounds) will be loaded from external files.
+        // Story structure defines the dropdowns with multilingual names.
         const storyData = {
             main: {
                 "ch1": { 
@@ -233,7 +232,7 @@
         let currentLang = 'ru';
         let currentDialogueIndex = 0;
         let fetchedStoryContent = null; 
-        let currentStageKey = null; // Key of the currently selected stage (s1, s2, etc.)
+        let currentStageKey = null; 
         let currentContentPath = '';
 
         const langSelector = document.getElementById('language-selector');
@@ -309,6 +308,7 @@
                 option.textContent = stories[storyKey][currentLang];
                 storySelector.appendChild(option);
             }
+            // Сохраняем выбранное значение, если оно осталось актуальным
             storySelector.value = selectedValue;
         }
         
@@ -340,9 +340,10 @@
         }
 
         async function fetchStoryContent(type, storyKey) {
-            if (!type || !storyKey) return;
+            if (!type || !storyKey) return false;
             
-            const filePath = `story/${type}_${storyKey}.json`;
+            // НОВЫЙ ПУТЬ: story/{язык}/{тип_сюжета}_{глава}.json
+            const filePath = `story/${currentLang}/${type}_${storyKey}.json`;
             
             if (filePath === currentContentPath && fetchedStoryContent) {
                 return true; 
@@ -353,16 +354,33 @@
             dialogueContainer.classList.add('hidden');
             
             try {
-                const response = await fetch(filePath);
-                if (!response.ok) {
-                    throw new Error(`Не удалось загрузить файл сюжета: ${filePath}`);
+                // Добавляем экспоненциальный откат для устойчивости
+                const maxRetries = 3;
+                let response = null;
+                for (let i = 0; i < maxRetries; i++) {
+                    try {
+                        response = await fetch(filePath);
+                        if (response.ok) break;
+                    } catch (e) {
+                        // Если это не последняя попытка, ждем и повторяем
+                        if (i < maxRetries - 1) {
+                            await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+                        } else {
+                            throw e;
+                        }
+                    }
                 }
+                
+                if (!response || !response.ok) {
+                    throw new Error(`Не удалось загрузить файл: ${filePath}`);
+                }
+
                 fetchedStoryContent = await response.json();
                 currentContentPath = filePath;
                 return true;
             } catch (error) {
-                console.error(error);
-                loadingIndicator.textContent = `Ошибка загрузки: ${filePath}. Проверьте, существует ли файл.`;
+                console.error(`Ошибка при загрузке JSON: ${error.message}`);
+                loadingIndicator.textContent = `Ошибка загрузки контента: ${filePath}. Проверьте, существует ли файл.`;
                 fetchedStoryContent = null;
                 return false;
             } finally {
@@ -382,6 +400,7 @@
                 return;
             }
             
+            // Сначала загружаем контент для выбранного сюжета
             const contentLoaded = await fetchStoryContent(storyType, story);
 
             if (contentLoaded && fetchedStoryContent && fetchedStoryContent[currentStageKey]) {
@@ -407,15 +426,14 @@
 
             const dialogue = currentStageData.dialogue[currentDialogueIndex];
             
-            speakerName.textContent = dialogue.speaker[currentLang] || '';
-            dialogueText.textContent = dialogue.text[currentLang] || '';
+            // ВНИМАНИЕ: Ссылаемся напрямую на поля, так как JSON теперь одноязычный
+            speakerName.textContent = dialogue.speaker || ''; 
+            dialogueText.textContent = dialogue.text || '';
             
-            // Сброс спрайтов
             spriteLeft.style.opacity = 0;
             spriteRight.style.opacity = 0;
 
             if (dialogue.sprite) {
-                // Используем здесь путь images/sprites/
                 const spriteUrl = `images/sprites/${dialogue.sprite}`; 
                 if (dialogue.position === 'left') {
                     spriteLeft.src = spriteUrl;
@@ -430,9 +448,13 @@
             nextBtn.disabled = currentDialogueIndex === currentStageData.dialogue.length - 1;
         }
 
-        langSelector.addEventListener('change', (e) => {
+        langSelector.addEventListener('change', async (e) => {
             currentLang = e.target.value;
-            updateUI();
+            fetchedStoryContent = null; // Сброс, чтобы принудительно загрузить новый файл
+            currentContentPath = '';
+            await updateUI();
+            // Повторно пытаемся отобразить текущий выбранный этап, если он есть
+            displayStage(); 
         });
 
         storyTypeSelector.addEventListener('change', () => {
@@ -450,8 +472,7 @@
             fetchedStoryContent = null;
             currentContentPath = '';
             populateStages();
-            // На этом этапе нужно только загрузить контент, но не отображать его, пока не выбран этап
-            // Вызываем displayStage, чтобы загрузить файл, но он не отобразит ничего, пока stageSelector пуст.
+            // Запускаем displayStage, чтобы загрузить JSON-файл главы
             displayStage(); 
         });
 
