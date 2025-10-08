@@ -323,7 +323,11 @@
                  return;
             }
             
-            console.log(`[Image Load] Попытка загрузки ВНЕШНЕГО URL: ${url} (Попытка ${attempt})`);
+            // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Всегда добавляем уникальный параметр для надежности, чтобы обойти кэш
+            const cacheBuster = `?t=${Date.now()}_${attempt}`;
+            const finalUrl = url + cacheBuster;
+
+            console.log(`[Image Load] Попытка загрузки ВНЕШНЕГО URL: ${finalUrl} (Попытка ${attempt})`);
 
 
             // --- Логика для спрайтов (<img>) с внешним URL ---
@@ -333,34 +337,34 @@
                 element.onerror = null;
 
                 element.onload = () => {
-                    console.log(`[Sprite Load] Успешно загружен: ${url} (Попытка ${attempt})`);
+                    console.log(`[Sprite Load] Успешно загружен: ${finalUrl} (Попытка ${attempt})`);
                 };
 
                 element.onerror = () => {
-                    console.warn(`[Sprite Load] ОШИБКА: ${url}. Повтор через ${PERSISTENT_IMAGE_RETRY_DELAY_MS} мс.`);
+                    console.warn(`[Sprite Load] ОШИБКА: ${finalUrl}. Повтор через ${PERSISTENT_IMAGE_RETRY_DELAY_MS} мс.`);
+                    // Повторяем попытку с оригинальным URL, но persistence добавит новый cacheBuster
                     setTimeout(() => loadExternalImageWithPersistence(url, element, isBackground, attempt + 1), PERSISTENT_IMAGE_RETRY_DELAY_MS);
                 };
                 
-                // Добавляем параметр для обхода кеша
-                const cacheBuster = attempt > 1 ? `?t=${Date.now()}` : '';
-                element.src = url + cacheBuster;
+                // Присваиваем src в конце, используя уникальный URL
+                element.src = finalUrl; 
 
             } else {
                 // --- Логика для фона (CSS background-image) с внешним URL ---
                 const tempImg = new Image();
                 tempImg.onload = () => {
-                    console.log(`[Background Load] Успешно загружен: ${url} (Попытка ${attempt})`);
-                    element.style.backgroundImage = `url('${url}')`;
-                    currentBackgroundUrl = url; // Обновляем глобальную переменную при успешной загрузке
+                    console.log(`[Background Load] Успешно загружен: ${finalUrl} (Попытка ${attempt})`);
+                    element.style.backgroundImage = `url('${finalUrl}')`;
+                    currentBackgroundUrl = finalUrl; // Обновляем глобальную переменную при успешной загрузке
                 };
                 
                 tempImg.onerror = () => {
-                    console.warn(`[Background Load] ОШИБКА: ${url}. Повтор через ${PERSISTENT_IMAGE_RETRY_DELAY_MS} мс.`);
+                    console.warn(`[Background Load] ОШИБКА: ${finalUrl}. Повтор через ${PERSISTENT_IMAGE_RETRY_DELAY_MS} мс.`);
+                    // Повторяем попытку с оригинальным URL, но persistence добавит новый cacheBuster
                     setTimeout(() => loadExternalImageWithPersistence(url, element, isBackground, attempt + 1), PERSISTENT_IMAGE_RETRY_DELAY_MS);
                 };
                 
-                const cacheBuster = attempt > 1 ? `?t=${Date.now()}` : '';
-                tempImg.src = url + cacheBuster;
+                tempImg.src = finalUrl;
             }
         }
 
@@ -380,7 +384,7 @@
             const currentSpeakerElement = document.getElementById('currentSpeaker');
             const currentTextElement = document.getElementById('currentText');
 
-            // 1. Фон (КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Реализация персистентности)
+            // 1. Фон (Реализация персистентности)
             const bgFileName = step.background; 
             let finalBgUrl = null;
 
@@ -434,10 +438,10 @@
                     // Внешний URL
                     finalSpriteUrl = SPRITE_BASE_PATH + spriteFileNameOrB64; 
                     
-                    // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Сброс src перед вызовом загрузчика для внешних файлов
+                    // Обязательный сброс src для принудительной перерисовки
                     imageElement.src = ""; 
                     
-                    // Использование механизма повтора для внешних URL
+                    // Использование механизма повтора для внешних URL (теперь с агрессивным cacheBuster)
                     loadExternalImageWithPersistence(finalSpriteUrl, imageElement, false);
                 }
                 
