@@ -6,8 +6,8 @@
     <title>Houkai Gakuen 2 Архив Сюжета</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chosen Palette: Custom Dark Theme -->
-    <!-- Application Structure Plan: SPA с фиксированным заголовком, содержащим название и переключатель языка. Основная область содержит три зависимых выпадающих списка (Тип сюжета -> Сюжет -> Этап) для навигации. Ниже расположена область динамического контента, которая отображает выбранный этап в формате визуальной новеллы (фон, спрайт персонажа, диалоговое окно). Эта структура выбрана для интуитивно понятной фильтрации и погружения в контент. -->
-    <!-- Visualization & Content Choices: Информация: Архив сюжетов игры. Цель: Навигация и чтение. Метод представления: HTML-селекторы для фильтрации и динамически обновляемый div для отображения текста. Взаимодействие: Выбор опций в выпадающих списках последовательно загружает данные для следующих списков и, в конечном итоге, отображает выбранный сюжетный этап. Обоснование: Данный подход является стандартом для иерархической фильтрации контента и позволяет создать SPA без перезагрузки страницы. Библиотека: Vanilla JS для логики, Tailwind CSS для стилей. -->
+    <!-- Application Structure Plan: SPA с фиксированным заголовком, содержащим название и переключатель языка. Основная область содержит три зависимых выпадающих списка (Тип сюжета -> Сюжет -> Этап) для навигации. При выборе сюжета, приложение асинхронно загружает соответствующий JSON-файл из папки story/. Ниже расположена область динамического контента, которая отображает выбранный этап в формате визуальной новеллы. -->
+    <!-- Visualization & Content Choices: Информация: Архив сюжетов игры. Цель: Навигация и чтение с внешней загрузкой данных. Метод представления: HTML-селекторы для фильтрации и динамически обновляемый div для отображения текста. Взаимодействие: Выбор сюжета запускает fetch() для загрузки JSON-файла. Выбор этапа отображает нужный блок диалога из загруженных данных. Обоснование: Внешняя загрузка позволяет легко добавлять новый контент без редактирования основного HTML-файла. Библиотека: Vanilla JS для логики (включая Fetch API), Tailwind CSS для стилей. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
@@ -73,11 +73,15 @@
             </div>
         </div>
 
+        <div id="loading-indicator" class="text-center text-pink-400 font-bold text-xl my-8 hidden">
+            Загрузка сюжета...
+        </div>
+
         <div id="story-display" class="hidden">
              <div class="story-container w-full rounded-lg shadow-2xl flex flex-col justify-end items-center p-4 relative overflow-hidden">
                 <div id="character-display" class="absolute inset-0 flex justify-center items-end">
-                     <img id="sprite-left" src="" alt="Character Sprite Left" class="character-sprite sprite-left opacity-0 h-full object-contain object-bottom" style="max-width: 40%;">
-                     <img id="sprite-right" src="" alt="Character Sprite Right" class="character-sprite h-full object-contain object-bottom opacity-0" style="max-width: 40%;">
+                     <img id="sprite-left" src="" alt="Спрайт персонажа слева" class="character-sprite sprite-left opacity-0 h-full object-contain object-bottom" style="max-width: 40%;">
+                     <img id="sprite-right" src="" alt="Спрайт персонажа справа" class="character-sprite h-full object-contain object-bottom opacity-0" style="max-width: 40%;">
                 </div>
                 <div id="dialogue-container" class="dialogue-box w-full max-w-4xl p-6 rounded-lg relative z-10 text-center hidden">
                     <h3 id="speaker-name" class="text-2xl font-bold text-pink-400 mb-2"></h3>
@@ -170,6 +174,8 @@
             }
         };
 
+        // Story structure now primarily defines the dropdowns.
+        // The actual content (dialogue/backgrounds) will be loaded from external files.
         const storyData = {
             main: {
                 "ch1": { 
@@ -224,33 +230,11 @@
             novel: {}
         };
         
-        const stageContent = {
-            "main_ch1_s1": {
-                background: "https://placehold.co/1920x1080/2E3440/ECEFF4?text=images/background/school.png",
-                dialogue: [
-                    { speaker: {ru: "Киана", en: "Kiana", cn: "琪亚娜"}, sprite: "kiana_normal.png", position: "right", text: {ru: "Что происходит? Голова... раскалывается.", en: "What's happening? My head... it's splitting.", cn: "发生什么了？我的头...好痛。"}},
-                    { speaker: {ru: "???", en: "???", cn: "???"}, sprite: "", position: "", text: {ru: "Вокруг только тишина... и запах крови.", en: "There's only silence... and the smell of blood.", cn: "周围只有寂静...和血腥味。"}},
-                    { speaker: {ru: "Киана", en: "Kiana", cn: "琪亚娜"}, sprite: "kiana_alert.png", position: "right", text: {ru: "Нужно найти выход. И быстро.", en: "I have to find a way out. And fast.", cn: "我必须找到出路。快点。"}},
-                ]
-            },
-            "main_ch1_s2": {
-                background: "https://placehold.co/1920x1080/4C566A/ECEFF4?text=images/background/corridor.png",
-                dialogue: [
-                    { speaker: {ru: "Мэй", en: "Mei", cn: "芽衣"}, sprite: "mei_sad.png", position: "left", text: {ru: "Киана-чан... Ты в порядке?", en: "Kiana-chan... Are you alright?", cn: "琪亚娜酱...你还好吗？"}},
-                    { speaker: {ru: "Киана", en: "Kiana", cn: "琪亚娜"}, sprite: "kiana_normal.png", position: "right", text: {ru: "Мэй-семпай! Я так рада тебя видеть!", en: "Mei-senpai! I'm so glad to see you!", cn: "芽衣学姐！很高兴见到你！"}},
-                ]
-            },
-            "extra_ex1_s1": {
-                 background: "https://placehold.co/1920x1080/5E81AC/ECEFF4?text=images/background/city.png",
-                dialogue: [
-                     { speaker: {ru: "Броня", en: "Bronya", cn: "布洛妮娅"}, sprite: "bronya_normal.png", position: "left", text: {ru: "Объект обнаружен. Броня начинает операцию.", en: "Target acquired. The Bronya is commencing the operation.", cn: "发现目标。布洛妮娅开始行动。"}},
-                ]
-            }
-        };
-
         let currentLang = 'ru';
         let currentDialogueIndex = 0;
-        let currentStageData = null;
+        let fetchedStoryContent = null; 
+        let currentStageKey = null; // Key of the currently selected stage (s1, s2, etc.)
+        let currentContentPath = '';
 
         const langSelector = document.getElementById('language-selector');
         const mainTitle = document.getElementById('main-title');
@@ -261,6 +245,7 @@
         const storyTypeSelector = document.getElementById('story-type-selector');
         const storySelector = document.getElementById('story-selector');
         const stageSelector = document.getElementById('stage-selector');
+        const loadingIndicator = document.getElementById('loading-indicator');
         const storyDisplay = document.getElementById('story-display');
         const storyContainer = storyDisplay.querySelector('.story-container');
         const dialogueContainer = document.getElementById('dialogue-container');
@@ -277,7 +262,7 @@
             introText.textContent = t.introText;
             labelStoryType.textContent = t.labels.storyType;
             labelStory.textContent = t.labels.story;
-            labelStage.textContent = t.labels.storyStage;
+            labelStage.textContent = t.labels.stage;
             prevBtn.textContent = t.buttons.prev;
             nextBtn.textContent = t.buttons.next;
 
@@ -285,7 +270,7 @@
             populateStories();
             populateStages();
             
-            if(currentStageData) {
+            if(fetchedStoryContent) {
                 renderDialogue();
             }
         }
@@ -342,35 +327,71 @@
 
             stageSelector.disabled = false;
             stageSelector.innerHTML = `<option value="">${t.placeholders.select}</option>`;
-            const stages = storyData[storyType][story].stages;
-            for (const stageKey in stages) {
-                const option = document.createElement('option');
-                option.value = stageKey;
-                option.textContent = stages[stageKey][currentLang];
-                stageSelector.appendChild(option);
+            const stages = storyData[storyType][story]?.stages;
+            if (stages) {
+                for (const stageKey in stages) {
+                    const option = document.createElement('option');
+                    option.value = stageKey;
+                    option.textContent = stages[stageKey][currentLang];
+                    stageSelector.appendChild(option);
+                }
             }
             stageSelector.value = selectedValue;
         }
 
-        function displayStage() {
+        async function fetchStoryContent(type, storyKey) {
+            if (!type || !storyKey) return;
+            
+            const filePath = `story/${type}_${storyKey}.json`;
+            
+            if (filePath === currentContentPath && fetchedStoryContent) {
+                return true; 
+            }
+
+            loadingIndicator.classList.remove('hidden');
+            storyDisplay.classList.add('hidden');
+            dialogueContainer.classList.add('hidden');
+            
+            try {
+                const response = await fetch(filePath);
+                if (!response.ok) {
+                    throw new Error(`Не удалось загрузить файл сюжета: ${filePath}`);
+                }
+                fetchedStoryContent = await response.json();
+                currentContentPath = filePath;
+                return true;
+            } catch (error) {
+                console.error(error);
+                loadingIndicator.textContent = `Ошибка загрузки: ${filePath}. Проверьте, существует ли файл.`;
+                fetchedStoryContent = null;
+                return false;
+            } finally {
+                loadingIndicator.classList.add('hidden');
+            }
+        }
+
+        async function displayStage() {
             const storyType = storyTypeSelector.value;
             const story = storySelector.value;
             const stage = stageSelector.value;
+            currentStageKey = stage;
 
-            if (storyType && story && stage) {
-                const contentKey = `${storyType}_${story}_${stage}`;
-                currentStageData = stageContent[contentKey];
+            if (!storyType || !story || !stage) {
+                storyDisplay.classList.add('hidden');
+                dialogueContainer.classList.add('hidden');
+                return;
+            }
+            
+            const contentLoaded = await fetchStoryContent(storyType, story);
+
+            if (contentLoaded && fetchedStoryContent && fetchedStoryContent[currentStageKey]) {
+                const currentStageData = fetchedStoryContent[currentStageKey];
                 
-                if (currentStageData) {
-                    storyDisplay.classList.remove('hidden');
-                    storyContainer.style.backgroundImage = `url('${currentStageData.background}')`;
-                    currentDialogueIndex = 0;
-                    renderDialogue();
-                    dialogueContainer.classList.remove('hidden');
-                } else {
-                    storyDisplay.classList.add('hidden');
-                    dialogueContainer.classList.add('hidden');
-                }
+                storyDisplay.classList.remove('hidden');
+                storyContainer.style.backgroundImage = `url('${currentStageData.background}')`;
+                currentDialogueIndex = 0;
+                renderDialogue();
+                dialogueContainer.classList.remove('hidden');
             } else {
                 storyDisplay.classList.add('hidden');
                 dialogueContainer.classList.add('hidden');
@@ -378,6 +399,10 @@
         }
 
         function renderDialogue() {
+            if (!fetchedStoryContent || !currentStageKey) return;
+
+            const currentStageData = fetchedStoryContent[currentStageKey];
+
             if (!currentStageData || !currentStageData.dialogue) return;
 
             const dialogue = currentStageData.dialogue[currentDialogueIndex];
@@ -385,11 +410,13 @@
             speakerName.textContent = dialogue.speaker[currentLang] || '';
             dialogueText.textContent = dialogue.text[currentLang] || '';
             
+            // Сброс спрайтов
             spriteLeft.style.opacity = 0;
             spriteRight.style.opacity = 0;
 
             if (dialogue.sprite) {
-                const spriteUrl = `https://placehold.co/800x1200/000000/FFFFFF?text=images/sprites/${dialogue.sprite}`;
+                // Используем здесь путь images/sprites/
+                const spriteUrl = `images/sprites/${dialogue.sprite}`; 
                 if (dialogue.position === 'left') {
                     spriteLeft.src = spriteUrl;
                     spriteLeft.style.opacity = 1;
@@ -411,15 +438,21 @@
         storyTypeSelector.addEventListener('change', () => {
             storySelector.value = '';
             stageSelector.value = '';
+            fetchedStoryContent = null;
+            currentContentPath = '';
             populateStories();
             populateStages();
-            displayStage();
+            displayStage(); 
         });
         
         storySelector.addEventListener('change', () => {
             stageSelector.value = '';
+            fetchedStoryContent = null;
+            currentContentPath = '';
             populateStages();
-            displayStage();
+            // На этом этапе нужно только загрузить контент, но не отображать его, пока не выбран этап
+            // Вызываем displayStage, чтобы загрузить файл, но он не отобразит ничего, пока stageSelector пуст.
+            displayStage(); 
         });
 
         stageSelector.addEventListener('change', displayStage);
@@ -432,6 +465,7 @@
         });
 
         nextBtn.addEventListener('click', () => {
+            const currentStageData = fetchedStoryContent ? fetchedStoryContent[currentStageKey] : null;
             if (currentStageData && currentDialogueIndex < currentStageData.dialogue.length - 1) {
                 currentDialogueIndex++;
                 renderDialogue();
