@@ -1,11 +1,10 @@
 <!-- Chosen Palette: Dark Neutrals (Black, Grey, White) with Honkai Red/Purple accents for UI elements. -->
-<!-- Application Structure Plan: Single-page application with a fixed header for navigation (language selector, title) and a main content area. The main area is divided into a control panel (story type/chapter selection) and a large, immersive Visual Novel (VN) viewer. This dashboard-like structure prioritizes interactivity (filters/selectors) and contextual presentation (VN viewer with dynamic text/sprites/backgrounds and LLM tools). This structure was chosen for usability because it separates navigation from the viewing experience, making it easy to change the story without losing immersion. -->
+<!-- Application Structure Plan: Single-page application with a fixed header for navigation (language selector, title, reset button) and a main content area. The main area is divided into a control panel (story type/chapter selection) and a large, immersive Visual Novel (VN) viewer. This dashboard-like structure prioritizes interactivity (filters/selectors) and contextual presentation (VN viewer with dynamic text/sprites/backgrounds and LLM tools). This structure was chosen for usability because it separates navigation from the viewing experience, making it easy to change the story without losing immersion. Progress persistence is added via localStorage. -->
 <!-- Visualization & Content Choices: Report Info -> Goal -> Viz/Presentation Method -> Interaction -> Justification -> Library/Method.
-1. Story Content -> Narrative Consumption -> Visual Novel Display (HTML/CSS, Dynamic text/images) -> Next/Prev buttons, Dropdowns -> Best way to present dialogue-heavy game lore. -> Vanilla JS/HTML/CSS.
+1. Story Content -> Narrative Consumption -> Visual Novel Display (HTML/CSS, Dynamic text/images) -> Next/Prev buttons, Dropdowns, Persistence (localStorage) -> Best way to present dialogue-heavy game lore, now with user progress tracking. -> Vanilla JS/HTML/CSS.
 2. Character/Scene Analysis -> Contextual Understanding -> Text Output (Modal window) -> Clickable buttons (Character Info/Scene Analysis) -> Enhances comprehension by leveraging LLM expertise instantly. -> Gemini API (Fetch/JSON).
 3. Navigation/Filtering -> Content Discovery -> Dropdown Menus (Type and Chapter) -> Cascading selection (Type filters Chapter options) -> Efficiently handles large, hierarchical data sets (story chapters). -> Vanilla JS/HTML/CSS.
-4. Language Switching -> Localization -> Dropdown Menu (Language) -> Changes all displayed UI text and dynamically adjusts content loading path. -> Vanilla JS/HTML/CSS.
-5. Loading Status -> Feedback -> Text/Spinner in Modal -> Loading state management -> Provides clear feedback during asynchronous data fetching (JSON/LLM). -> Vanilla JS/HTML/CSS.
+4. Progress Persistence -> User Experience -> localStorage save/load/reset functions -> Automatically resumes reading where the user left off. -> Vanilla JS.
 -->
 <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 <!DOCTYPE html>
@@ -71,6 +70,7 @@
             <h1 id="headerTitle" class="text-xl font-bold tracking-wider">Houkai Gakuen 2 архив сюжета</h1>
             
             <div class="flex items-center space-x-4">
+                <button id="resetButton" onclick="resetProgress()" class="px-3 py-1 bg-red-800 hover:bg-red-700 rounded-full transition duration-150 text-sm">Сброс</button>
                 <button id="helpButton" onclick="showHelpModal()" class="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-full transition duration-150 text-sm">?</button>
                 <select id="languageSelect" onchange="updateUI()" class="bg-gray-700 text-white rounded-lg p-2 cursor-pointer transition hover:ring-2 ring-red-400">
                     <option value="ru">Русский</option>
@@ -95,12 +95,12 @@
 
             <div class="flex-1 min-w-[250px]">
                 <label for="chapterSelect" id="labelChapter" class="block text-sm font-medium mb-1 text-gray-300">Сюжет (Глава)</label>
-                <select id="chapterSelect" onchange="updateStoryContent()" class="w-full bg-gray-800 text-white rounded-lg p-2.5 cursor-pointer focus:ring-red-400 focus:border-red-400 transition">
+                <select id="chapterSelect" onchange="enableLoadButton()" class="w-full bg-gray-800 text-white rounded-lg p-2.5 cursor-pointer focus:ring-red-400 focus:border-red-400 transition">
                     <!-- Options populated by JS -->
                 </select>
             </div>
             
-            <button id="loadButton" onclick="updateStoryContent()" class="min-w-[120px] bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition duration-150 disabled:opacity-50" disabled>
+            <button id="loadButton" onclick="updateStoryContent(0)" class="min-w-[120px] bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition duration-150 disabled:opacity-50" disabled>
                 <span id="loadText">Загрузить</span>
             </button>
         </div>
@@ -187,6 +187,7 @@
     <script>
         const API_KEY = "";
         const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=" + API_KEY;
+        const STORAGE_KEY = 'hg2_story_progress'; // Key for localStorage
 
         let currentDialogue = [];
         let currentDialogueIndex = 0;
@@ -199,6 +200,7 @@
                 labelStoryType: "Тип сюжета",
                 labelChapter: "Сюжет (Глава)",
                 loadText: "Загрузить",
+                resetProgress: "Сброс",
                 characterContext: "✨ Справка о персонаже",
                 sceneAnalysis: "✨ Анализ сцены",
                 modalTitleCharacter: "Справка о персонаже",
@@ -207,13 +209,14 @@
                 errorFetch: "Ошибка загрузки контента: файл не найден или проблема с сетью.",
                 errorLLM: "Ошибка LLM: Не удалось получить ответ.",
                 helpTitle: "Как пользоваться архивом:",
-                helpText: "Это интерактивный архив сюжетов Honkai Gakuen 2.\n\n1. Используйте верхние выпадающие списки, чтобы выбрать **Тип сюжета** и конкретную **Главу**.\n2. Нажмите **'Загрузить'**.\n3. В окне визуальной новеллы используйте кнопки **Далее/Назад** для просмотра диалога.\n4. Нажмите **'Справка о персонаже'** или **'Анализ сцены'**, чтобы получить контекст лора от Gemini API в реальном времени."
+                helpText: "Это интерактивный архив сюжетов Honkai Gakuen 2.\n\n1. Используйте верхние выпадающие списки, чтобы выбрать **Тип сюжета** и конкретную **Главу**.\n2. Нажмите **'Загрузить'**.\n3. В окне визуальной новеллы используйте кнопки **Далее/Назад** для просмотра диалога. **Ваш прогресс автоматически сохраняется**.\n4. Нажмите **'Справка о персонаже'** или **'Анализ сцены'**, чтобы получить контекст лора от Gemini API в реальном времени."
             },
             en: {
                 headerTitle: "Houkai Gakuen 2 Story Archive",
                 labelStoryType: "Story Type",
                 labelChapter: "Story (Chapter)",
                 loadText: "Load",
+                resetProgress: "Reset",
                 characterContext: "✨ Character Context",
                 sceneAnalysis: "✨ Scene Analysis",
                 modalTitleCharacter: "Character Context",
@@ -222,13 +225,14 @@
                 errorFetch: "Content loading error: file not found or network issue.",
                 errorLLM: "LLM Error: Failed to get response.",
                 helpTitle: "How to use the Archive:",
-                helpText: "This is an interactive story archive for Honkai Gakuen 2.\n\n1. Use the top dropdowns to select the **Story Type** and a specific **Chapter**.\n2. Click **'Load'**.\n3. In the Visual Novel viewer, use the **Next/Prev** buttons to advance the dialogue.\n4. Click **'Character Context'** or **'Scene Analysis'** to get real-time lore context from the Gemini API."
+                helpText: "This is an interactive story archive for Honkai Gakuen 2.\n\n1. Use the top dropdowns to select the **Story Type** and a specific **Chapter**.\n2. Click **'Load'**.\n3. In the Visual Novel viewer, use the **Next/Prev** buttons to advance the dialogue. **Your progress is saved automatically**.\n4. Click **'Character Context'** or **'Scene Analysis'** to get real-time lore context from the Gemini API."
             },
             cn: {
                 headerTitle: "崩坏学园2 剧情档案",
                 labelStoryType: "剧情类型",
                 labelChapter: "剧情 (章节)",
                 loadText: "加载",
+                resetProgress: "重置",
                 characterContext: "✨ 角色资料",
                 sceneAnalysis: "✨ 场景分析",
                 modalTitleCharacter: "角色资料",
@@ -237,7 +241,7 @@
                 errorFetch: "内容加载错误：未找到文件或网络问题。",
                 errorLLM: "LLM 错误：未能获取响应。",
                 helpTitle: "如何使用档案：",
-                helpText: "这是一个崩坏学园2的交互式剧情档案。\n\n1. 使用顶部下拉列表选择**剧情类型**和特定**章节**。\n2. 点击**'加载'**。\n3. 在视觉小说查看器中，使用**下一页/上一页**按钮推进对话。\n4. 点击**'角色资料'**或**'场景分析'**以获取来自 Gemini API 的实时背景信息。"
+                helpText: "这是一个崩坏学园2的交互式剧情档案。\n\n1. 使用顶部下拉列表选择**剧情类型**和特定**章节**。\n2. 点击**'加载'**。\n3. 在视觉小说查看器中，使用**下一页/上一页**按钮推进对话。**您的进度将自动保存**。\n4. 点击**'角色资料'**或**'场景分析'**以获取来自 Gemini API 的实时背景信息。"
             }
         };
 
@@ -278,7 +282,73 @@
             }
         };
 
+        // --- PROGRESS MANAGEMENT ---
+        
+        /** Saves current progress (language, type, chapter, index) to localStorage. */
+        function saveProgress() {
+            const progress = {
+                lang: document.getElementById('languageSelect').value,
+                type: document.getElementById('storyTypeSelect').value,
+                chapter: document.getElementById('chapterSelect').value,
+                index: currentDialogueIndex
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+        }
+
+        /** Loads progress from localStorage on page load. */
+        function loadProgress() {
+            const savedProgress = localStorage.getItem(STORAGE_KEY);
+            if (!savedProgress) return;
+
+            const progress = JSON.parse(savedProgress);
+            
+            // Restore language
+            const langSelect = document.getElementById('languageSelect');
+            if (i18n[progress.lang]) {
+                langSelect.value = progress.lang;
+            }
+
+            // Restore story type
+            const typeSelect = document.getElementById('storyTypeSelect');
+            if (storyData[progress.type]) {
+                typeSelect.value = progress.type;
+            }
+
+            // Must update UI first to populate chapter list
+            updateUI(); 
+
+            // Restore chapter
+            const chapterSelect = document.getElementById('chapterSelect');
+            if (storyData[progress.type]?.chapters[progress.chapter]) {
+                chapterSelect.value = progress.chapter;
+            }
+
+            // If we have both chapter and type, load content from the saved index
+            if (typeSelect.value && chapterSelect.value) {
+                // Pass the saved index to updateStoryContent
+                updateStoryContent(progress.index);
+            }
+        }
+
+        /** Clears saved progress and reloads the page. */
+        function resetProgress() {
+            localStorage.removeItem(STORAGE_KEY);
+            document.getElementById('dialogueBox').classList.add('hidden');
+            document.getElementById('navButtons').classList.add('hidden');
+            // Reset selectors to default
+            document.getElementById('languageSelect').value = 'ru';
+            updateUI(); 
+            // Optional: Show a message to the user that progress was reset
+            document.getElementById('vnViewer').style.backgroundImage = `url('https://placehold.co/1920x1080/2a2a2a/fca5a5?text=Прогресс+сброшен.+Выберите+главу.')`;
+        }
+
         // --- CORE UI FUNCTIONS ---
+
+        /** Enables the load button when a chapter is selected. */
+        function enableLoadButton() {
+            const storyId = document.getElementById('chapterSelect').value;
+            document.getElementById('loadButton').disabled = !storyId;
+        }
 
         /** Updates all UI elements based on the current language selection. */
         function updateUI() {
@@ -289,6 +359,7 @@
             document.getElementById('labelStoryType').textContent = text.labelStoryType;
             document.getElementById('labelChapter').textContent = text.labelChapter;
             document.getElementById('loadText').textContent = text.loadText;
+            document.getElementById('resetButton').textContent = text.resetProgress;
             document.getElementById('contextButton').textContent = text.characterContext;
             document.getElementById('analysisButton').textContent = text.sceneAnalysis;
             document.getElementById('helpContent').innerHTML = `
@@ -297,6 +368,7 @@
             
             updateStoryTypeSelect();
             updateChapterSelect();
+            enableLoadButton();
         }
 
         /** Populates the Story Type dropdown based on the current language. */
@@ -328,11 +400,9 @@
             const typeKey = document.getElementById('storyTypeSelect').value;
             const select = document.getElementById('chapterSelect');
             const lang = document.getElementById('languageSelect').value;
-            const loadButton = document.getElementById('loadButton');
-
+            
             select.innerHTML = '';
-            loadButton.disabled = true;
-
+            
             const defaultOption = document.createElement('option');
             defaultOption.value = "";
             defaultOption.textContent = "---";
@@ -347,14 +417,16 @@
                     select.appendChild(option);
                 }
                 select.disabled = false;
-                loadButton.disabled = false;
             } else {
                 select.disabled = true;
             }
+            enableLoadButton();
         }
 
-        /** Asynchronously loads the selected story chapter JSON and initializes the VN viewer. */
-        async function updateStoryContent() {
+        /** Asynchronously loads the selected story chapter JSON and initializes the VN viewer. 
+         * @param {number} startIndex - The dialogue index to start viewing from (used for loading progress).
+         */
+        async function updateStoryContent(startIndex = 0) {
             const storyType = document.getElementById('storyTypeSelect').value;
             const storyId = document.getElementById('chapterSelect').value;
             const currentLang = document.getElementById('languageSelect').value;
@@ -378,12 +450,16 @@
                 const data = await response.json();
                 
                 currentDialogue = data.dialogue;
-                currentDialogueIndex = 0;
+                
+                // Set the current index, ensuring it doesn't exceed the dialogue length
+                currentDialogueIndex = Math.min(startIndex, currentDialogue.length - 1);
+                if (currentDialogueIndex < 0) currentDialogueIndex = 0;
+
                 dialogueIsLoaded = true;
 
                 // Set default VN background if available
-                if (currentDialogue.length > 0 && currentDialogue[0].background) {
-                    vnViewer.style.backgroundImage = `url('${currentDialogue[0].background}')`;
+                if (currentDialogue.length > 0 && currentDialogue[currentDialogueIndex].background) {
+                    vnViewer.style.backgroundImage = `url('${currentDialogue[currentDialogueIndex].background}')`;
                 } else {
                     vnViewer.style.backgroundImage = `url('https://placehold.co/1920x1080/2a2a2a/fca5a5?text=${storyData[storyType][currentLang]}')`;
                 }
@@ -391,6 +467,7 @@
                 document.getElementById('dialogueBox').classList.remove('hidden');
                 document.getElementById('navButtons').classList.remove('hidden');
                 renderDialogue();
+                saveProgress(); // Save initial load state
 
             } catch (error) {
                 console.error("Error loading story:", error.message);
@@ -453,8 +530,7 @@
             document.getElementById('prevButton').disabled = currentDialogueIndex === 0;
             document.getElementById('nextButton').disabled = currentDialogueIndex >= currentDialogue.length - 1;
             
-            // 5. Update LLM buttons visibility (only if speaker or text is present)
-            const showLLM = dialogue.speaker && dialogue.text;
+            // 5. Update LLM buttons visibility
             document.getElementById('contextButton').style.display = dialogue.speaker ? 'block' : 'none';
             document.getElementById('analysisButton').style.display = dialogue.text ? 'block' : 'none';
         }
@@ -465,10 +541,11 @@
             if (newIndex >= 0 && newIndex < currentDialogue.length) {
                 currentDialogueIndex = newIndex;
                 renderDialogue();
+                saveProgress(); // Save progress after navigation
             }
         }
 
-        // --- LLM API INTEGRATION ---
+        // --- LLM API INTEGRATION & MODAL ---
 
         /** Shows the modal with a loading state. */
         function showModal(titleKey) {
@@ -573,7 +650,8 @@
 
         // --- INITIALIZATION ---
         window.onload = () => {
-            updateUI();
+            loadProgress(); // Try to load saved progress
+            updateUI(); // Render UI based on loaded or default language
         };
     </script>
 </body>
