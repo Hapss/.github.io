@@ -158,7 +158,7 @@
                 </div>
             </div>
 
-            <!-- Dialogue Wrapper -->
+            <!-- Dialogue Wrapper - Скрыт по умолчанию и пока не загружен контент -->
             <div id="dialogueWrapper" class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 transition-all duration-300 opacity-100 hidden">
                 
                 <!-- Speaker Name Container -->
@@ -185,36 +185,7 @@
         const METADATA_FILE = 'story/story_metadata.json'; 
         const STORY_BASE_PATH = 'story/'; 
         
-        // --- Встроенный контент (для имитации успешной загрузки главы) ---
-        const MOCKED_DIALOGUE_DATA = {
-            dialogue: [
-                { 
-                    background: "https://placehold.co/1920x1080/374151/ffffff?text=ГЛАВА_ЗАГРУЖЕНА", 
-                    speaker: "Наратор", 
-                    text: "Контент главы успешно загружен. Нажмите, чтобы продолжить.",
-                },
-                { 
-                    background: "https://placehold.co/1920x1080/470659/ffffff?text=СЦЕНА_1", 
-                    speaker: "Персонаж А", 
-                    text: "Начало сюжета. Спрайты должны появиться и взаимодействовать.", 
-                    sprite: "kiana_happy",
-                    position: "right"
-                },
-                { 
-                    speaker: "Персонаж Б", 
-                    text: "Я полностью согласен. UI работает безупречно.", 
-                    sprite: "mei_serious",
-                    position: "left"
-                },
-                { 
-                    background: "https://placehold.co/1920x1080/000000/ffffff?text=КОНЕЦ_АКТА", 
-                    speaker: "", 
-                    text: "Переход к следующей сцене. Продолжайте кликать для завершения главы.",
-                },
-            ]
-        };
-
-        // Группировка сюжетов (ВОССТАНОВЛЕНО ПО ТРЕБОВАНИЮ)
+        // Группировка сюжетов
         const STORY_GROUPS = {
             main: { ru: "Основной сюжет", en: "Main Story", cn: "主线剧情", prefix: "main_" },
             extra: { ru: "Дополнительный сюжет", en: "Extra Story", cn: "额外剧情", prefix: "extra_" },
@@ -286,7 +257,8 @@
             } catch (error) {
                 // Строгое требование: НИКАКОЙ резервной загрузки.
                 console.error(`[Metadata] Критическая ошибка загрузки внешнего файла (${METADATA_FILE}).`, error);
-                alertMessage(i18n[document.getElementById('languageSelect').value].errorFetchMetadataStrict);
+                // Показываем сообщение об ошибке, так как без метаданных UI нефункционален
+                alertMessage(i18n[document.getElementById('languageSelect').value].errorFetchMetadataStrict); 
                 window.storyMetadata = null; 
             }
         }
@@ -312,6 +284,7 @@
         
         /** Mock-функция для создания пути к спрайтам */
         const spritePath = (fileName) => {
+            // Используем плейсхолдеры для спрайтов
             if (fileName && fileName.includes('kiana')) return `https://placehold.co/400x800/800080/ffffff?text=КИАНА`;
             if (fileName && fileName.includes('mei')) return `https://placehold.co/400x800/FF5733/ffffff?text=МЕЙ`;
             return `https://placehold.co/400x800/2a2a2a/ffffff?text=СПРАЙТ`;
@@ -319,8 +292,13 @@
         
         /** Рендерит текущий шаг диалога и обновляет UI. */
         function renderDialogueStep() {
+            // Если контент не загружен, скрываем диалог и спрайты
             if (!dialogueIsLoaded || currentDialogue.length === 0) {
                 document.getElementById('dialogueWrapper').classList.add('hidden');
+                spriteLeftContainer.classList.add('hidden');
+                spriteRightContainer.classList.add('hidden');
+                // Убеждаемся, что фон возвращается к дефолту, если не загружено
+                document.getElementById('vnViewer').style.backgroundImage = `url('${DEFAULT_BG_URL}')`;
                 return;
             }
 
@@ -376,7 +354,7 @@
             currentTextElement.textContent = step.text || "";
         }
         
-        /** Асинхронно загружает выбранную главу (использует Mock Data, так как файлов контента нет). */
+        /** Асинхронно пытается загрузить выбранную главу. */
         async function updateStoryContent(startIndex = 0) {
             const lang = document.getElementById('languageSelect').value; 
             const fullStoryKey = document.getElementById('chapterSelect').value; 
@@ -384,49 +362,59 @@
             
             if (!fullStoryKey) return;
             
-            // Путь к файлу, который должен был быть загружен
             const expectedFilePath = `${STORY_BASE_PATH}${lang}/${fullStoryKey}.json`;
 
             loadTextElement.textContent = "Загрузка...";
             document.getElementById('loadButton').disabled = true;
 
-            let data = null;
             try {
-                // Попытка загрузки реального файла (которая, вероятно, завершится неудачей)
+                // Строгая попытка загрузить файл
                 const response = await fetch(expectedFilePath);
                 if (!response.ok) {
+                    // Если файл не найден или ошибка HTTP, бросаем ошибку
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                data = await response.json();
-                console.log(`[Content] Глава успешно загружена: ${fullStoryKey}`);
+                
+                const data = await response.json();
+                
+                // Если загрузка успешна, обновляем состояние
+                currentDialogue = data.dialogue || [];
+                currentDialogueIndex = Math.min(startIndex, currentDialogue.length - 1);
+                currentDialogueIndex = Math.max(0, currentDialogueIndex); 
+                dialogueIsLoaded = true;
+                
+                loadTextElement.textContent = "Загружено";
+                renderDialogueStep();
+
             } catch (e) {
-                // Скрытый (Silent) Fallback: если загрузка внешнего файла не удалась (ожидаемо в песочнице),
-                // silently используем встроенный контент. Никаких предупреждений пользователю.
-                console.error(`[Content] Ошибка загрузки внешнего файла (${expectedFilePath}). Используется встроенный контент.`, e);
-                data = MOCKED_DIALOGUE_DATA;
+                // Если загрузка не удалась, НЕ загружаем ничего и НЕ сообщаем пользователю.
+                console.error(`[Content] Ошибка загрузки главы ${fullStoryKey}. Содержимое не отображается.`, e);
+                
+                // Сбрасываем состояние, чтобы UI оставался в исходном виде
+                dialogueIsLoaded = false; 
+                currentDialogue = [];
+                currentDialogueIndex = 0;
+                
+                // Принудительно скрываем диалоговый UI и сбрасываем фон
+                renderDialogueStep(); 
+                
+            } finally {
+                // Возвращаем кнопку в исходное состояние
+                setTimeout(() => {
+                    loadTextElement.textContent = i18n[lang].loadText;
+                    document.getElementById('loadButton').disabled = false;
+                }, 1500);
             }
-
-            // --- SUCCESS: Update Global State ---
-            currentDialogue = data.dialogue || [];
-            currentDialogueIndex = Math.min(startIndex, currentDialogue.length - 1);
-            currentDialogueIndex = Math.max(0, currentDialogueIndex); 
-            dialogueIsLoaded = true;
-
-            // --- UI Updates ---
-            loadTextElement.textContent = "Загружено";
-
-            renderDialogueStep();
-
-            setTimeout(() => {
-                loadTextElement.textContent = i18n[lang].loadText;
-                document.getElementById('loadButton').disabled = false;
-            }, 1500);
         }
 
         // ====================================================================
         // === UI & I18N FUNCTIONS ===
         // ====================================================================
 
+        /**
+         * Показывает временное сообщение вверху экрана.
+         * Используется только для системных сообщений (сброс, конец истории, ошибка метаданных).
+         */
         function alertMessage(message) {
             const header = document.getElementById('header');
             const msgBox = document.createElement('div');
@@ -471,9 +459,7 @@
             }
         }
 
-        /** * Обновляет выпадающий список глав. 
-         * Зависит ИСКЛЮЧИТЕЛЬНО от window.storyMetadata. Если он null, ничего не заполняет.
-         */
+        /** * Обновляет выпадающий список глав. */
         function updateChapterSelect(skipSideEffects = false) {
             const typeKey = document.getElementById('storyTypeSelect').value;
             const select = document.getElementById('chapterSelect');
@@ -505,7 +491,7 @@
                 for (const fullChapterKey in window.storyMetadata) {
                     if (fullChapterKey.startsWith(prefix)) {
                         const chapterData = window.storyMetadata[fullChapterKey];
-                        // Используем ru как ключ для метаданных, так как cn/en может отсутствовать в файлах
+                        // Используем ru как ключ для метаданных
                         if (chapterData && chapterData[lang]) {
                             const option = document.createElement('option');
                             option.value = fullChapterKey; 
