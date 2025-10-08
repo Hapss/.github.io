@@ -207,49 +207,6 @@
          * Используется для применения эффектов (затемнение/скрытие) на предыдущий спрайт.
          */
         let currentSpriteElement = null; 
-        
-        // --- ПРИМЕР СТРУКТУРЫ JSON (для демонстрации новых свойств) ---
-        //
-        // {
-        //   "dialogue": [
-        //     // Пример 1: Спрайт появляется. Фоновая картинка.
-        //     { 
-        //       "speaker": "Киана", 
-        //       "text": "Привет! Я рада тебя видеть!",
-        //       "background": "url(https://placehold.co/1920x1080/003366/ffffff?text=Улица+в+Школе)",
-        //       "sprite": "kiana_happy.png", 
-        //       "sprite_id": "kiana", 
-        //       "sprite_x": 70 
-        //     },
-        //     // Пример 2: Меняется спикер. Спрайт Кианы должен быть затемнен ('dim').
-        //     { 
-        //       "speaker": "Броня", 
-        //       "text": "Киана слишком эмоциональна, Броня так не считает.",
-        //       "sprite": "bronya_neutral.png", 
-        //       "sprite_id": "bronya",
-        //       "sprite_x": 30,
-        //       "action_prev_sprite": "dim" // Затемнить предыдущий спрайт
-        //     },
-        //     // Пример 3: Киана отвечает. Спрайт Брони затемняется.
-        //     { 
-        //       "speaker": "Киана", 
-        //       "text": "Эй! Я не слишком эмоциональна!",
-        //       "sprite": "kiana_angry.png", 
-        //       "sprite_id": "kiana", 
-        //       "sprite_x": 70,
-        //       "action_prev_sprite": "dim" // Затемнить предыдущий спрайт
-        //     },
-        //     // Пример 4: Смена сцены. Спрайт Брони исчезает ('hide').
-        //     { 
-        //       "speaker": "Голос за кадром", 
-        //       "text": "Сцена внезапно изменилась.",
-        //       "background": "url(https://placehold.co/1920x1080/333333/ffffff?text=Темный+Переулок)",
-        //       "action_prev_sprite": "hide" // Скрыть предыдущий спрайт (kiana)
-        //     }
-        //   ]
-        // }
-
-
         // --- I18N DATA ---
         const i18n = {
             ru: {
@@ -292,7 +249,7 @@
             main: {
                 ru: "Основной сюжет", en: "Main Story", cn: "主线剧情",
                 chapters: {
-                    ch1: { ru: "Глава 1 (Демо)", en: "Chapter 1 (Demo)", cn: "章节 1 (演示)" },
+                    ch1: { ru: "Глава 1", en: "Chapter 1", cn: "章节 1" },
                     ch2: { ru: "Глава 2", en: "Chapter 2", cn: "章节 2" },
                 }
             },
@@ -303,74 +260,6 @@
                 }
             }
         };
-        
-        // --- ДАННЫЕ ДЛЯ ДЕМОНСТРАЦИИ (ВМЕСТО ЗАГРУЗКИ JSON) ---
-        // В реальном приложении это загружалось бы из story/ru/main_ch1.json
-        const mockDialogueData = {
-            'main_ch1': {
-                dialogue: [
-                    { 
-                      "speaker": "Системное сообщение", 
-                      "text": "Демонстрация работы спрайтов. Нажмите Далее.",
-                      "background": "https://placehold.co/1920x1080/2a2a2a/fca5a5?text=Начало+Сцены"
-                    },
-                    // KIANA APPEARS (left side)
-                    { 
-                      "speaker": "Киана", 
-                      "text": "Всем привет! Какое прекрасное утро!",
-                      "sprite": "https://placehold.co/200x400/FF0000/FFFFFF?text=Киана", 
-                      "sprite_id": "kiana", 
-                      "sprite_x": 75,
-                      "background": "https://placehold.co/1920x1080/003366/ffffff?text=Школьный+Двор"
-                    },
-                    // BRONYA APPEARS (dimming Kiana)
-                    { 
-                      "speaker": "Броня", 
-                      "text": "Привет. Броня не считает, что утро прекрасное. Броня просто хочет спать.",
-                      "sprite": "https://placehold.co/200x400/0000FF/FFFFFF?text=Броня", 
-                      "sprite_id": "bronya",
-                      "sprite_x": 25,
-                      "action_prev_sprite": "dim" // Киана затемняется
-                    },
-                    // KIANA SPEAKS (undimming Kiana, dimming Bronya)
-                    { 
-                      "speaker": "Киана", 
-                      "text": "Эй, не будь такой унылой! Посмотри, какой сегодня день!",
-                      "sprite": "https://placehold.co/200x400/FF0000/FFFFFF?text=Киана", // Спрайт Кианы (может быть другим)
-                      "sprite_id": "kiana", 
-                      "sprite_x": 75,
-                      "action_prev_sprite": "dim" // Броня затемняется
-                    },
-                    // BRONYA SPEAKS (undimming Bronya, dimming Kiana)
-                    { 
-                      "speaker": "Броня", 
-                      "text": "Броня уже посмотрела. И хочет домой. Но что-то чувствуется...",
-                      "sprite": "https://placehold.co/200x400/0000FF/FFFFFF?text=Броня+2", // Новый спрайт Брони
-                      "sprite_id": "bronya",
-                      "sprite_x": 25,
-                      "action_prev_sprite": "dim" // Киана затемняется
-                    },
-                     // BRONYA HIDDEN (Kiana remains dim)
-                    { 
-                      "speaker": "Голос за кадром", 
-                      "text": "Странный звук раздался позади Брони...",
-                      "action_prev_sprite": "hide" // Скрыть предыдущий спрайт (Броню)
-                    },
-                    // KIANA HIDDEN
-                    { 
-                      "speaker": "Киана", 
-                      "text": "Что это было?! Я не хочу оставаться здесь одна!",
-                      "action_prev_sprite": "hide" // Скрыть предыдущий спрайт (Киану)
-                    },
-                    // SCENE ENDS (No sprites left)
-                     { 
-                      "speaker": "Системное сообщение", 
-                      "text": "Спрайты скрыты. Сцена завершена. Нажмите Далее, чтобы вернуться в меню.",
-                      "background": "https://placehold.co/1920x1080/2a2a2a/fca5a5?text=Сцена+Завершена"
-                    }
-                ]
-            }
-        }
 
 
         // --- CORE UI FUNCTIONS ---
