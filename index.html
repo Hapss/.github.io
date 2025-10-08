@@ -274,7 +274,7 @@
     <script>
         // --- GLOBAL CONSTANTS ---
         const STORAGE_KEY = 'hg2_story_progress';
-        const STORY_BASE_PATH = 'story/'; // Базовый путь, куда смотрим файлы
+        const STORY_BASE_PATH = 'story/'; // Базовый путь: story/
         const SPRITE_BASE_PATH = 'https://placehold.co/'; 
         const AUDIO_BASE_PATH = 'audio/'; 
         const DEFAULT_BG_URL = 'https://placehold.co/1920x1080/2a2a2a/fca5a5?text=Выберите+сюжет+и+нажмите+Загрузить';
@@ -628,6 +628,7 @@
 
         /** Асинхронно загружает выбранную главу сюжета. */
         async function updateStoryContent(startIndex = 0) {
+            const lang = document.getElementById('languageSelect').value; // Получаем выбранный язык
             // fullStoryKey: например, "main_ch1", "extra_ex1", "vn_vn1"
             const fullStoryKey = document.getElementById('chapterSelect').value; 
             
@@ -636,8 +637,9 @@
                 return;
             }
 
-            // ФОРМИРОВАНИЕ ПРАВИЛЬНОГО ПУТИ К ФАЙЛУ В ПАПКЕ STORY/
-            const filePath = `${STORY_BASE_PATH}${fullStoryKey}.json`;
+            // ФОРМИРОВАНИЕ ПРАВИЛЬНОГО ПУТИ К ФАЙЛУ В ПАПКЕ STORY/ С УЧЕТОМ ЯЗЫКА
+            // Пример пути: story/ru/main_ch1.json
+            const filePath = `${STORY_BASE_PATH}${lang}/${fullStoryKey}.json`;
             console.log(`[Load] Запрос файла: ${filePath}`);
 
             document.getElementById('loadText').textContent = "Загрузка...";
