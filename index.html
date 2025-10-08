@@ -121,17 +121,6 @@
                 
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mt-2">
                     <p id="currentText" class="text-xl sm:text-2xl leading-relaxed transition-opacity duration-300">Текст диалога...</p>
-                    
-                    <!-- Control buttons (LLM and Navigation) -->
-                    <div class="flex flex-col space-y-2 mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
-                        <!-- LLM Context Buttons -->
-                        <button id="contextButton" onclick="handleLLMCall('character')" class="w-full sm:w-auto px-4 py-2 bg-purple-700 hover:bg-purple-800 text-white font-medium rounded-full text-sm transition duration-150 shadow-md">
-                            ✨ Справка о персонаже
-                        </button>
-                        <button id="analysisButton" onclick="handleLLMCall('analysis')" class="w-full sm:w-auto px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white font-medium rounded-full text-sm transition duration-150 shadow-md">
-                            ✨ Анализ сцены
-                        </button>
-                    </div>
                 </div>
             </div>
 
@@ -149,41 +138,6 @@
 
     </main>
 
-    <!-- Modal for LLM Output and Loading -->
-    <div id="llmModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center hidden" onclick="closeModal(event)">
-        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl max-w-lg w-11/12 transform transition-all duration-300 scale-95" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-3">
-                <h3 id="modalTitle" class="text-xl font-bold text-red-400">Загрузка...</h3>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-white transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-            <div id="modalContent">
-                <!-- Content and spinner will be dynamically inserted here -->
-                <div id="modalSpinner" class="flex justify-center items-center py-8">
-                    <svg class="animate-spin -ml-1 mr-3 h-8 w-8 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <p class="text-gray-300">Ожидание ответа от LLM...</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Help Modal -->
-    <div id="helpModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center hidden" onclick="showHelpModal()">
-        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl max-w-lg w-11/12 transform transition-all duration-300 scale-95" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-3">
-                <h3 class="text-xl font-bold text-red-400">О приложении</h3>
-                <button onclick="showHelpModal()" class="text-gray-400 hover:text-white transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-            <p id="helpContent" class="text-gray-300 leading-relaxed"></p>
-        </div>
-    </div>
-
     <script>
         const API_KEY = "";
         const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=" + API_KEY;
@@ -200,16 +154,9 @@
                 labelStoryType: "Тип сюжета",
                 labelChapter: "Сюжет (Глава)",
                 loadText: "Загрузить",
-                resetProgress: "Сброс",
-                characterContext: "✨ Справка о персонаже",
-                sceneAnalysis: "✨ Анализ сцены",
-                modalTitleCharacter: "Справка о персонаже",
-                modalTitleAnalysis: "Анализ сцены",
-                modalLoading: "Ожидание ответа от LLM...",
                 errorFetch: "Ошибка загрузки контента: файл не найден или проблема с сетью.",
-                errorLLM: "Ошибка LLM: Не удалось получить ответ.",
                 helpTitle: "Как пользоваться архивом:",
-                helpText: "Это интерактивный архив сюжетов Honkai Gakuen 2.\n\n1. Используйте верхние выпадающие списки, чтобы выбрать **Тип сюжета** и конкретную **Главу**.\n2. Нажмите **'Загрузить'**.\n3. В окне визуальной новеллы используйте кнопки **Далее/Назад** для просмотра диалога. **Ваш прогресс автоматически сохраняется**.\n4. Нажмите **'Справка о персонаже'** или **'Анализ сцены'**, чтобы получить контекст лора от Gemini API в реальном времени."
+                helpText: "Это интерактивный архив сюжетов Honkai Gakuen 2.\n\n1. Используйте верхние выпадающие списки, чтобы выбрать [Тип сюжета] и конкретную [Главу].\n2. Нажмите [Загрузить].\n3. В окне визуальной новеллы используйте кнопки [Далее/Назад] для просмотра диалога. Ваш прогресс автоматически сохраняется."
             },
             en: {
                 headerTitle: "Houkai Gakuen 2 Story Archive",
@@ -217,15 +164,9 @@
                 labelChapter: "Story (Chapter)",
                 loadText: "Load",
                 resetProgress: "Reset",
-                characterContext: "✨ Character Context",
-                sceneAnalysis: "✨ Scene Analysis",
-                modalTitleCharacter: "Character Context",
-                modalTitleAnalysis: "Scene Analysis",
-                modalLoading: "Waiting for LLM response...",
                 errorFetch: "Content loading error: file not found or network issue.",
-                errorLLM: "LLM Error: Failed to get response.",
                 helpTitle: "How to use the Archive:",
-                helpText: "This is an interactive story archive for Honkai Gakuen 2.\n\n1. Use the top dropdowns to select the **Story Type** and a specific **Chapter**.\n2. Click **'Load'**.\n3. In the Visual Novel viewer, use the **Next/Prev** buttons to advance the dialogue. **Your progress is saved automatically**.\n4. Click **'Character Context'** or **'Scene Analysis'** to get real-time lore context from the Gemini API."
+                helpText: "This is an interactive story archive for Honkai Gakuen 2.\n\n1. Use the top dropdowns to select the [Story Type] and specific [Chapter].\n2. Click [Load].\n3. In the Visual Novel viewer, use the [Next/Prev] buttons to advance the dialogue. Your progress is saved automatically."
             },
             cn: {
                 headerTitle: "崩坏学园2 剧情档案",
@@ -233,15 +174,9 @@
                 labelChapter: "剧情 (章节)",
                 loadText: "加载",
                 resetProgress: "重置",
-                characterContext: "✨ 角色资料",
-                sceneAnalysis: "✨ 场景分析",
-                modalTitleCharacter: "角色资料",
-                modalTitleAnalysis: "场景分析",
-                modalLoading: "等待 LLM 响应...",
                 errorFetch: "内容加载错误：未找到文件或网络问题。",
-                errorLLM: "LLM 错误：未能获取响应。",
                 helpTitle: "如何使用档案：",
-                helpText: "这是一个崩坏学园2的交互式剧情档案。\n\n1. 使用顶部下拉列表选择**剧情类型**和特定**章节**。\n2. 点击**'加载'**。\n3. 在视觉小说查看器中，使用**下一页/上一页**按钮推进对话。**您的进度将自动保存**。\n4. 点击**'角色资料'**或**'场景分析'**以获取来自 Gemini API 的实时背景信息。"
+                helpText: "这是一个崩坏学园2的交互式剧情档案。\n\n1. 使用顶部下拉列表选择剧情类型和特定章节。\n2. 点击加载。\n3. 在视觉小说查看器中，使用下一页/上一页按钮推进对话。您的进度将自动保存。\n4. 点击角色资料或场景分析以获取来自 Gemini API 的实时背景信息。"
             }
         };
 
@@ -258,26 +193,26 @@
             extra: {
                 ru: "Дополнительный сюжет", en: "Extra Story", cn: "额外剧情",
                 chapters: {
-                    ex1: { ru: "Экстра 1: Берегись", en: "Extra 1: Be Careful", cn: "额外 1: 小心" },
+                    ex1: { ru: "Экстра 1: Берегись", en: "Extra 1: Beware", cn: "额外 1: 小心" },
                     ex2: { ru: "Экстра 2: Неутолимое желание", en: "Extra 2: Insatiable Desire", cn: "额外 2: 不可满足的欲望" }
                 }
             },
             bosses: {
-                ru: "Боссы", en: "Boss Fights", cn: "首领战",
+                ru: "Боссы", en: "Bosses", cn: "BOSS",
                 chapters: {
-                    b1: { ru: "Босс: Химэко", en: "Boss: Himeko", cn: "首领：姬子" }
+                    b1: { ru: "Босс", en: "Boss", cn: "首领" }
                 }
             },
             vn: {
                 ru: "Визуальная новелла", en: "Visual Novel", cn: "视觉小说",
                 chapters: {
-                    vn1: { ru: "VN: Последняя Роза", en: "VN: Last Rose", cn: "视觉小说：最后的玫瑰" }
+                    vn1: { ru: "VN", en: "VN", cn: "视觉小说" }
                 }
             },
             romance: {
                 ru: "Роман", en: "Romance", cn: "小说",
                 chapters: {
-                    r1: { ru: "Роман: Встреча в Нагазоре", en: "Novel: Meeting in Nagazora", cn: "小说：长空市的相遇" }
+                    r1: { ru: "Роман", en: "Novel", cn: "小说" }
                 }
             }
         };
