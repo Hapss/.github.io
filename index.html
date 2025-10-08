@@ -167,12 +167,13 @@
             </div>
 
             <div class="flex-1 min-w-[250px]">
-                <label for="chapterSelect" id="labelChapter" class="block text-sm font-medium mb-1 text-gray-300">Сюжет</label>
+                <label for="chapterSelect" id="labelChapter" class="block text-sm font-medium mb-1 text-gray-300">Сюжет (Глава)</label>
                 <select id="chapterSelect" onchange="enableLoadButton(); saveProgress()" class="w-full bg-gray-800 text-white rounded-lg p-2.5 cursor-pointer focus:ring-red-400 focus:border-red-400 transition">
                     <!-- Options populated by JS -->
                 </select>
             </div>
             
+            <!-- Кнопка "Загрузить" с привязанным обработчиком -->
             <button id="loadButton" onclick="updateStoryContent(0)" class="min-w-[120px] bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition duration-150 disabled:opacity-50" disabled>
                 <span id="loadText">Загрузить</span>
             </button>
@@ -307,7 +308,7 @@
             ru: {
                 headerTitle: "Houkai Gakuen 2 Архив Сюжета",
                 labelStoryType: "Тип сюжета",
-                labelChapter: "Сюжет",
+                labelChapter: "Сюжет (Глава)",
                 loadText: "Загрузить",
                 resetProgress: "Сброс",
                 errorFetch: "Ошибка загрузки контента: файл не найден или проблема с сетью.",
@@ -557,6 +558,7 @@
         }
 
         function enableLoadButton() {
+            // Кнопка включена только если выбрана глава
             const storyId = document.getElementById('chapterSelect').value;
             document.getElementById('loadButton').disabled = !storyId;
         }
@@ -679,14 +681,15 @@
             const lang = document.getElementById('languageSelect').value; 
             const fullStoryKey = document.getElementById('chapterSelect').value; 
             
+            console.log(`[ACTION] Кнопка "Загрузить" нажата. Загрузка сюжета: ${fullStoryKey} (${lang})`);
+
             if (!fullStoryKey) {
-                console.error("Story chapter is not selected.");
+                console.error("Story chapter is not selected. Aborting load.");
                 return;
             }
 
             const filePath = `${STORY_BASE_PATH}${lang}/${fullStoryKey}.json`;
-            console.log(`[Load] Запрос файла: ${filePath}`);
-
+            
             document.getElementById('loadText').textContent = "Загрузка...";
             document.getElementById('loadButton').disabled = true;
 
@@ -743,6 +746,7 @@
                 dialogueIsLoaded = false;
                 currentDialogue = [];
             } finally {
+                // Всегда восстанавливаем возможность нажатия
                 setTimeout(() => {
                     document.getElementById('loadButton').disabled = false;
                 }, 500);
