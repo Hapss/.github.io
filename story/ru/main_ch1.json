@@ -1,12 +1,12 @@
 {
     "chapter_title": "Глава 1: Выброс Хоукая",
-     "background": "images/background/bg_stage1.png",
     "dialogue": [
         { 
             "speaker": "", 
             "sprite": "", 
             "position": "", 
             "text": "В ночь до выброса Хоукая я не могла уснуть...", 
+            "background": "images/background/bg_stage1.png",
         },
         { "speaker": "", "sprite": "", "position": "", "text": "14:07:47. Выброс [Хоукая] возник в академии Чиба. Вероятность выживания – 0.000000001%."},
         { "speaker": "", "sprite": "", "position": "", "text": "Тууу, тууу... Абонент временно недоступен, перезвоните позже"},
