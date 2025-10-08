@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Архив Сюжета Houkai Gakuen 2</title>
+    <title>Архив Сюжета ВН</title>
     <!-- Подключение Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -309,8 +309,8 @@
             return fileName; 
         };
         
-        /** * Загружает ЛОКАЛЬНОЕ изображение с агрессивным обходом кэша.
-         * Используется для гарантированной загрузки актуальной версии из папки.
+        /** * * Загружает ЛОКАЛЬНОЕ изображение с агрессивным обходом кэша.
+         * * Включает обработку ошибок: скрывает спрайт, если файл не найден.
          */
         function loadLocalImage(url, element, isBackground = false) {
             // Агрессивный обход кэша
@@ -319,6 +319,11 @@
 
             if (!isBackground) {
                 // Логика для спрайтов (<img>)
+                element.onerror = () => {
+                    // Скрываем контейнер, если спрайт не загрузился
+                    element.parentElement.classList.add('hidden');
+                    console.warn(`[Local Image Load] Не удалось загрузить спрайт: ${url}. Контейнер скрыт.`);
+                };
                 element.src = finalUrl; 
             } else {
                 // Логика для фона (CSS background-image)
