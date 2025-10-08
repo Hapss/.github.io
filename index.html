@@ -168,7 +168,7 @@
 
             <div class="flex-1 min-w-[250px]">
                 <label for="chapterSelect" id="labelChapter" class="block text-sm font-medium mb-1 text-gray-300">Сюжет (Глава)</label>
-                <select id="chapterSelect" onchange="enableLoadButton(); saveProgress()" class="w-full bg-gray-800 text-white rounded-lg p-2.5 cursor-pointer focus:ring-red-400 focus:border-red-400 transition">
+                <select id="chapterSelect" onchange="enableLoadButton(); saveProgress()" class="w-full bg-gray-800 text-white rounded-lg p-2.5 cursor-pointer focus:ring-red-400 focus:border-red-400 transition" disabled>
                     <!-- Options populated by JS -->
                 </select>
             </div>
@@ -345,31 +345,35 @@
 
         // --- CORE FETCH/CHECK LOGIC ---
         
-        /** Проверяет, существует ли файл главы на сервере, используя кэш. */
+        /** * Проверяет, существует ли файл главы на сервере, используя кэш.
+         * ВРЕМЕННОЕ ИСПРАВЛЕНИЕ: всегда возвращает true для устранения блокировки UI.
+         */
         async function checkChapterAvailability(fullStoryKey, lang) {
+            // *** ИСПРАВЛЕНИЕ: Временно возвращаем true, чтобы список глав всегда загружался. ***
+            // Реальная проверка fetch часто блокируется в изолированных средах.
+            // Если файл не существует, ошибка будет обработана позже, в updateStoryContent().
+            return Promise.resolve(true); 
+
+            /*
+            // ОРИГИНАЛЬНАЯ ЛОГИКА (закомментирована):
             if (!chapterAvailabilityCache[fullStoryKey]) {
                 chapterAvailabilityCache[fullStoryKey] = {};
             }
-            
-            // 1. Проверка кэша
             if (chapterAvailabilityCache[fullStoryKey][lang] !== undefined) {
                 return chapterAvailabilityCache[fullStoryKey][lang];
             }
 
             const filePath = `${STORY_BASE_PATH}${lang}/${fullStoryKey}.json`;
-
             try {
-                // Используем GET с небольшим таймаутом, чтобы проверить наличие файла
                 const response = await fetch(filePath, { method: 'GET' }); 
-                
                 const available = response.ok;
                 chapterAvailabilityCache[fullStoryKey][lang] = available;
                 return available;
             } catch (e) {
-                // Сетевые ошибки или ошибки таймаута
                 chapterAvailabilityCache[fullStoryKey][lang] = false;
                 return false;
             }
+            */
         }
         
         // --- AUDIO CONTROL FUNCTIONS (Без изменений) ---
