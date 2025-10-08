@@ -185,13 +185,6 @@
         // Базовые пути, указанные пользователем
         const SPRITE_BASE_PATH = 'images/sprites/';
         const BACKGROUND_BASE_PATH = 'images/background/';
-
-        // Base64-кодированные SVG для надежных плейсхолдеров
-        const KIANA_SPRITE_B64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjODAwMDgwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5LSUFOQTwvdGV4dD48L3N2Zz4='; // Пурпурный
-        const MEI_SPRITE_B64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRkY1NzMzIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5NRUk8L3RleHQ+PC9zdmc+'; // Красный
-        const DEFAULT_SPRITE_B64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjIyMjIyIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5TUFJJSVQ8L3RleHQ+PC9zdmc+';
-        const DEFAULT_BG_B64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyMCIgaGVpZ2h0PSIxMDgwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMyYjJkM2EiLz48L3N2Zz4='; // Темный фон без текста
-        
         const STORAGE_KEY = 'vn_story_progress_v4';
         const METADATA_FILE = 'story/story_metadata.json'; 
         const STORY_BASE_PATH = 'story/'; 
@@ -301,72 +294,62 @@
         }
         
         /** * Определяет путь/URL к спрайту. */
-        const spritePath = (fileName) => {
-            if (!fileName) return DEFAULT_SPRITE_B64;
+// 2. Sprites & Dimming 
+            // 2a. Сброс: очищаем эффекты и пути.
+            spriteLeftContainer.classList.add('hidden');
+            spriteRightContainer.classList.add('hidden');
+            spriteLeftElement.classList.remove('dimmed-sprite');
+            spriteRightElement.classList.remove('dimmed-sprite');
             
-            const lowerCaseName = fileName.toLowerCase();
+            spriteLeftElement.src = '';
+            spriteRightElement.src = ''; 
+            
+            // 2b. Логика установки активного спрайта (Усиленная проверка пути)
+            if (step.sprite && step.position) {
+                const isLeft = step.position.toLowerCase() === 'left';
+                const container = isLeft ? spriteLeftContainer : spriteRightContainer;
+                const imageElement = isLeft ? spriteLeftElement : spriteRightElement;
+                
+                let spritePath;
+                let spriteFileName = step.sprite.trim(); // Удаляем пробелы
 
-            // Если это Base64-плейсхолдер
-            if (lowerCaseName.includes('kiana')) return KIANA_SPRITE_B64;
-            if (lowerCaseName.includes('mei')) return MEI_SPRITE_B64;
-            
-            // Если это не плейсхолдер, возвращаем имя файла
-            return fileName; 
-        };
-        
-        /** * Загружает ВНЕШНЕЕ изображение (или фон) с механизмом постоянного повтора. */
-        function loadExternalImageWithPersistence(url, element, isBackground = false, attempt = 1) {
-            // Если достигнут лимит попыток, останавливаемся
-            if (attempt > MAX_PERSISTENT_IMAGE_RETRIES) {
-                 console.error(`[Image Load] Достигнут лимит попыток (${MAX_PERSISTENT_IMAGE_RETRIES}) для ${url}. Загрузка прекращена.`);
-                 if (!isBackground) element.parentElement.classList.add('hidden');
-                 return;
+                // 1. Проверка на внешний URL (http/https)
+                if (spriteFileName.startsWith('http')) {
+                    spritePath = spriteFileName;
+                } else {
+                    // 2. Локальный файл: гарантируем, что префикс 'sprites/' будет добавлен только один раз.
+                    let bareFileName = spriteFileName;
+                    const basePrefix = SPRITE_BASE_PATH.toLowerCase();
+
+                    // Если имя файла уже содержит префикс 'sprites/', удаляем его, чтобы избежать дублирования.
+                    if (bareFileName.toLowerCase().startsWith(basePrefix)) {
+                        bareFileName = bareFileName.substring(basePrefix.length);
+                    }
+                    
+                    // Добавляем префикс. Теперь 'Kiana 1.png' -> 'sprites/Kiana 1.png'
+                    spritePath = SPRITE_BASE_PATH + bareFileName;
+                }
+                
+                console.log(`[Sprite] Финальный путь для загрузки: ${spritePath}`);
+
+                // Устанавливаем src.
+                imageElement.src = spritePath;
+                container.classList.remove('hidden');
             }
-            
-            // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Всегда добавляем уникальный параметр для надежности, чтобы обойти кэш
-            const cacheBuster = `?t=${Date.now()}_${attempt}`;
-            const finalUrl = url + cacheBuster;
 
-            console.log(`[Image Load] Попытка загрузки ВНЕШНЕГО URL: ${finalUrl} (Попытка ${attempt})`);
-
-
-            // --- Логика для спрайтов (<img>) с внешним URL ---
-            if (!isBackground) {
-                // Очищаем обработчики перед новой попыткой
-                element.onload = null;
-                element.onerror = null;
-
-                element.onload = () => {
-                    console.log(`[Sprite Load] Успешно загружен: ${finalUrl} (Попытка ${attempt})`);
-                };
-
-                element.onerror = () => {
-                    console.warn(`[Sprite Load] ОШИБКА: ${finalUrl}. Повтор через ${PERSISTENT_IMAGE_RETRY_DELAY_MS} мс.`);
-                    // Повторяем попытку с оригинальным URL, но persistence добавит новый cacheBuster
-                    setTimeout(() => loadExternalImageWithPersistence(url, element, isBackground, attempt + 1), PERSISTENT_IMAGE_RETRY_DELAY_MS);
-                };
+            // 2c. Логика диммирования (притухания спрайтов)
+            if (step.sprite_dimmed) {
+                const dimmedSpriteFilename = step.sprite_dimmed; 
                 
-                // Присваиваем src в конце, используя уникальный URL
-                element.src = finalUrl; 
-
-            } else {
-                // --- Логика для фона (CSS background-image) с внешним URL ---
-                const tempImg = new Image();
-                tempImg.onload = () => {
-                    console.log(`[Background Load] Успешно загружен: ${finalUrl} (Попытка ${attempt})`);
-                    element.style.backgroundImage = `url('${finalUrl}')`;
-                    currentBackgroundUrl = finalUrl; // Обновляем глобальную переменную при успешной загрузке
-                };
+                // Проверка, что загруженный путь спрайта содержит имя диммируемого файла
+                if (!spriteLeftContainer.classList.contains('hidden') && spriteLeftElement.src.includes(dimmedSpriteFilename)) {
+                    spriteLeftElement.classList.add('dimmed-sprite');
+                } 
                 
-                tempImg.onerror = () => {
-                    console.warn(`[Background Load] ОШИБКА: ${finalUrl}. Повтор через ${PERSISTENT_IMAGE_RETRY_DELAY_MS} мс.`);
-                    // Повторяем попытку с оригинальным URL, но persistence добавит новый cacheBuster
-                    setTimeout(() => loadExternalImageWithPersistence(url, element, isBackground, attempt + 1), PERSISTENT_IMAGE_RETRY_DELAY_MS);
-                };
-                
-                tempImg.src = finalUrl;
+                if (!spriteRightContainer.classList.contains('hidden') && spriteRightElement.src.includes(dimmedSpriteFilename)) {
+                    spriteRightElement.classList.add('dimmed-sprite');
+                } 
             }
-        }
 
         /** Рендерит текущий шаг диалога и обновляет UI. */
         function renderDialogueStep() {
