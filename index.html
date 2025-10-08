@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Архив Сюжета Houkai Gakuen 2</title>
+    <title>Архив Сюжета ВН</title>
     <!-- Подключение Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -182,7 +182,7 @@
         // === КОНСТАНТЫ И ДАННЫЕ ===
         // ====================================================================
         
-        // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Новые базовые пути для внешних ресурсов
+        // Базовые пути, указанные пользователем
         const SPRITE_BASE_PATH = 'images/sprites/';
         const BACKGROUND_BASE_PATH = 'images/background/';
 
@@ -304,11 +304,11 @@
             
             const lowerCaseName = fileName.toLowerCase();
 
-            // Если это Base64-плейсхолдер, возвращаем его
+            // Если это Base64-плейсхолдер
             if (lowerCaseName.includes('kiana')) return KIANA_SPRITE_B64;
             if (lowerCaseName.includes('mei')) return MEI_SPRITE_B64;
             
-            // Если это не плейсхолдер, возвращаем имя файла (которое будет дополнено путем позже)
+            // Если это не плейсхолдер, возвращаем имя файла
             return fileName; 
         };
         
@@ -336,7 +336,8 @@
 
                 element.onerror = () => {
                     console.warn(`[Sprite Load] ОШИБКА: ${url}. Повтор через ${PERSISTENT_IMAGE_RETRY_DELAY_MS} мс.`);
-                    element.src = ""; 
+                    // НЕ очищаем element.src здесь, так как это может вызвать CLS. 
+                    // Просто ждем таймаута для следующей попытки.
                     setTimeout(() => loadExternalImageWithPersistence(url, element, isBackground, attempt + 1), PERSISTENT_IMAGE_RETRY_DELAY_MS);
                 };
                 
@@ -377,16 +378,14 @@
             const currentSpeakerElement = document.getElementById('currentSpeaker');
             const currentTextElement = document.getElementById('currentText');
 
-            // 1. Фон 
+            // 1. Фон (Работает)
             const bgFileName = step.background; 
             let finalBgUrl;
 
             if (bgFileName && !bgFileName.startsWith('data:')) {
-                // ИСПРАВЛЕНИЕ: Добавляем базовый путь к фону
                 finalBgUrl = BACKGROUND_BASE_PATH + bgFileName; 
                 loadExternalImageWithPersistence(finalBgUrl, vnViewerElement, true);
             } else {
-                // Прямое присвоение Base64 или дефолта
                 finalBgUrl = bgFileName || DEFAULT_BG_B64;
                 vnViewerElement.style.backgroundImage = `url('${finalBgUrl}')`;
             }
@@ -417,8 +416,12 @@
                     finalSpriteUrl = spriteFileNameOrB64;
                     imageElement.src = finalSpriteUrl;
                 } else {
-                    // ИСПРАВЛЕНИЕ: Добавляем базовый путь к спрайту
+                    // Внешний URL
                     finalSpriteUrl = SPRITE_BASE_PATH + spriteFileNameOrB64; 
+                    
+                    // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Сброс src перед вызовом загрузчика для внешних файлов
+                    imageElement.src = ""; 
+                    
                     // Использование механизма повтора для внешних URL
                     loadExternalImageWithPersistence(finalSpriteUrl, imageElement, false);
                 }
