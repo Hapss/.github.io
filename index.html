@@ -16,7 +16,54 @@
 <!-- Компактные фильтры -->
 <div class="controls-container">
     <div class="story-type-selector">
-        <h2 class="selector-title">📚 Тип сюжета</h2>
+        <h2 class="selector-title">📚 Тип сюжета</h2><!-- Верхняя панель с заголовком и выбором языка -->
+<link href="main.css" rel="stylesheet">
+<div class="top-bar">
+    <h1 class="site-title">Houkai Gakuen 2 архив сюжета</h1>
+    <div class="language-container">
+        <div class="language-dropdown">
+            <select class="language-select" id="languageSelect">
+                <option value="ru">Русский</option>
+                <option value="en">English</option>
+                <option value="cn">中文</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<!-- Компактные фильтры -->
+<div class="controls-container">
+    <div class="selector">
+        <h2 class="selector-title">Тип сюжета</h2>
+        <div class="select-wrapper">
+            <select class="selector-dropdown" id="storyType">
+                <option value="main">Основной сюжет</option>
+                <option value="extra">Дополнительный сюжет</option>
+                <!-- остальные варианты -->
+            </select>
+        </div>
+    </div>
+    
+    <div class="selector">
+        <h2 class="selector-title">Сюжет</h2>
+        <div class="select-wrapper">
+            <select class="selector-dropdown" id="storySelection">
+                <option value="prologue">Глава 1: Выброс Хоукая</option>
+                <!-- остальные варианты -->
+            </select>
+        </div>
+    </div>
+    
+    <div class="selector">
+        <h2 class="selector-title">Этап</h2>
+        <div class="select-wrapper">
+            <select class="selector-dropdown" id="stageSelection">
+                <option value="stage1">Этап 1</option>
+                <!-- остальные варианты -->
+            </select>
+        </div>
+    </div>
+</div>
         <div class="select-wrapper">
             <select class="selector-dropdown" id="storyType">
                 <option value="main">Основной сюжет</option>
