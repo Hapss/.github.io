@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Архив Сюжета Houkai Gakuen 2</title>
+    <title>Архив Сюжета ВН</title>
     <!-- Подключение Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -34,22 +34,25 @@
         .sprite-position {
             position: absolute;
             bottom: 0;
-            max-height: 95%; 
+            /* Усиление: контейнер спрайта занимает почти всю высоту и 45% ширины */
+            height: 95%; 
+            width: 45%;
             transition: opacity 0.3s ease, transform 0.3s ease;
             z-index: 10;
             display: flex; 
             justify-content: center;
             align-items: flex-end;
-            width: 50%;
-            height: 100%;
         }
         .sprite-position.left { left: 0; }
         .sprite-position.right { right: 0; }
         .sprite-image {
-            max-height: 100%; 
+            /* КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Гарантируем, что изображение заполняет контейнер */
+            height: 100%; 
             width: auto;
+            max-height: 100%; 
             object-fit: contain;
             opacity: 1; 
+            display: block; /* Убеждаемся, что это блочный элемент */
         }
         .dimmed-sprite {
             opacity: 0.4;
@@ -179,11 +182,13 @@
         // === КОНСТАНТЫ И ДАННЫЕ ===
         // ====================================================================
 
-        const SPRITE_BASE_PATH = 'images/sprites'; 
-        const BACKGROUND_BASE_PATH = 'images/background'; 
+        // Base64-кодированные SVG для надежных плейсхолдеров
+        const KIANA_SPRITE_B64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjODAwMDgwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5LSUFOQTwvdGV4dD48L3N2Zz4='; // Пурпурный
+        const MEI_SPRITE_B64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRkY1NzMzIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5NRUk8L3RleHQ+PC9zdmc+'; // Красный
+        const DEFAULT_SPRITE_B64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjIyMjIyIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5TUFJJSVQ8L3RleHQ+PC9zdmc+';
+        const DEFAULT_BG_B64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyMCIgaGVpZ2h0PSIxMDgwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMyYjJkM2EiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjQwcHgiIGZpbGw9IiNkMWQxZDEiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlpERU0gTE9HSSBLT05URU5UQTwvdGV4dD48L3N2Zz4='; // Серый фон с текстом
         
         const STORAGE_KEY = 'vn_story_progress_v4';
-        const DEFAULT_BG_URL = DEFAULT_BG_B64; // Использование Base64 по умолчанию
         const METADATA_FILE = 'story/story_metadata.json'; 
         const STORY_BASE_PATH = 'story/'; 
         
@@ -208,7 +213,7 @@
         let currentDialogueIndex = 0;
         let dialogueIsLoaded = false;
         
-        // Переводы UI
+        // Переводы UI (без изменений)
         const i18n = {
             ru: {
                 headerTitle: "Архив Сюжета ВН",
@@ -236,6 +241,7 @@
 
         let spriteLeftContainer, spriteRightContainer;
         let spriteLeftElement, spriteRightElement;
+        let vnViewerElement;
         window.storyMetadata = null; 
 
         // ====================================================================
@@ -247,22 +253,21 @@
             spriteRightContainer = document.getElementById('spriteRightContainer');
             spriteLeftElement = document.getElementById('spriteLeft');
             spriteRightElement = document.getElementById('spriteRight');
+            vnViewerElement = document.getElementById('vnViewer');
             
             // Устанавливаем дефолтный фон сразу после загрузки DOM
-            document.getElementById('vnViewer').style.backgroundImage = `url('${DEFAULT_BG_URL}')`;
+            vnViewerElement.style.backgroundImage = `url('${DEFAULT_BG_B64}')`;
 
             loadProgress(); 
         });
 
-        /** * Асинхронно загружает метаданные глав из story/story_metadata.json. */
+        /** * Асинхронно загружает метаданные глав. */
         async function fetchChapterMetadata() {
             try {
                 const response = await fetch(METADATA_FILE); 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 window.storyMetadata = await response.json();
-                console.log("[Metadata] Загрузка глав с внешнего сервера завершена.");
+                console.log("[Metadata] Загрузка глав завершена.");
             } catch (error) {
                 console.error(`[Metadata] Критическая ошибка загрузки внешнего файла (${METADATA_FILE}).`, error);
                 alertMessage(i18n[document.getElementById('languageSelect').value].errorFetchMetadataStrict); 
@@ -288,52 +293,48 @@
                 alertMessage(i18n[document.getElementById('languageSelect').value].startOfStory);
             }
         }
-    
         
-        /** * Загружает изображение (или фон) с механизмом постоянного повтора, пока не удастся.
-         * Если используется Base64 URL, загрузка будет мгновенной.
+        /** * Определяет путь/URL к спрайту.
+         * Возвращает Base64-строку, если имя соответствует плейсхолдеру, или исходный URL.
          */
-        function loadImageWithPersistence(url, element, isBackground = false, attempt = 1) {
-            // Если URL пуст или является Base64 по умолчанию, мы его обрабатываем
-            if (!url || url === BACKGROUND_BASE_PATH) {
-                if (!isBackground) element.parentElement.classList.add('hidden');
-                if (isBackground) element.style.backgroundImage = `url('${BACKGROUND_BASE_PATH}')`;
-                return;
-            }
+        const spritePath = (fileName) => {
+            if (!fileName) return DEFAULT_SPRITE_B64;
             
+            const lowerCaseName = fileName.toLowerCase();
+
+            // Если это Base64-плейсхолдер, возвращаем его
+            if (lowerCaseName.includes('kiana')) return KIANA_SPRITE_B64;
+            if (lowerCaseName.includes('mei')) return MEI_SPRITE_B64;
+            
+            // Если это не плейсхолдер, возвращаем имя файла (предполагая, что это внешний URL)
+            return fileName; 
+        };
+        
+        /** * Загружает ВНЕШНЕЕ изображение (или фон) с механизмом постоянного повтора.
+         * Используется ТОЛЬКО для внешних/относительных URL, НЕ для Base64.
+         */
+        function loadExternalImageWithPersistence(url, element, isBackground = false, attempt = 1) {
             // Если достигнут лимит попыток, останавливаемся
             if (attempt > MAX_PERSISTENT_IMAGE_RETRIES) {
                  console.error(`[Image Load] Достигнут лимит попыток (${MAX_PERSISTENT_IMAGE_RETRIES}) для ${url}. Загрузка прекращена.`);
                  if (!isBackground) element.parentElement.classList.add('hidden');
                  return;
             }
-            
-            // Успех, если это Base64
-            if (url.startsWith('data:')) {
-                if (!isBackground) {
-                    element.src = url;
-                    element.parentElement.classList.remove('hidden'); 
-                } else {
-                    element.style.backgroundImage = `url('${url}')`;
-                }
-                return;
-            }
 
             // --- Логика для спрайтов (<img>) с внешним URL ---
             if (!isBackground) {
+                // Очищаем обработчики перед новой попыткой
                 element.onload = null;
                 element.onerror = null;
 
                 element.onload = () => {
                     console.log(`[Sprite Load] Успешно загружен: ${url} (Попытка ${attempt})`);
-                    element.parentElement.classList.remove('hidden'); 
-                    element.style.opacity = '1';
                 };
 
                 element.onerror = () => {
                     console.warn(`[Sprite Load] Ошибка загрузки: ${url}. Попытка ${attempt} не удалась. Повтор через ${PERSISTENT_IMAGE_RETRY_DELAY_MS} мс.`);
                     element.src = ""; 
-                    setTimeout(() => loadImageWithPersistence(url, element, isBackground, attempt + 1), PERSISTENT_IMAGE_RETRY_DELAY_MS);
+                    setTimeout(() => loadExternalImageWithPersistence(url, element, isBackground, attempt + 1), PERSISTENT_IMAGE_RETRY_DELAY_MS);
                 };
                 
                 const cacheBuster = attempt > 1 ? `?t=${Date.now()}` : '';
@@ -349,7 +350,7 @@
                 
                 tempImg.onerror = () => {
                     console.warn(`[Background Load] Ошибка загрузки фона: ${url}. Попытка ${attempt} не удалась. Повтор через ${PERSISTENT_IMAGE_RETRY_DELAY_MS} мс.`);
-                    setTimeout(() => loadImageWithPersistence(url, element, isBackground, attempt + 1), PERSISTENT_IMAGE_RETRY_DELAY_MS);
+                    setTimeout(() => loadExternalImageWithPersistence(url, element, isBackground, attempt + 1), PERSISTENT_IMAGE_RETRY_DELAY_MS);
                 };
                 
                 const cacheBuster = attempt > 1 ? `?t=${Date.now()}` : '';
@@ -359,46 +360,60 @@
 
         /** Рендерит текущий шаг диалога и обновляет UI. */
         function renderDialogueStep() {
+            // Если контент не загружен, скрываем диалог и спрайты
             if (!dialogueIsLoaded || currentDialogue.length === 0) {
                 document.getElementById('dialogueWrapper').classList.add('hidden');
                 spriteLeftContainer.classList.add('hidden');
                 spriteRightContainer.classList.add('hidden');
-                document.getElementById('vnViewer').style.backgroundImage = `url('${DEFAULT_BG_URL}')`;
+                vnViewerElement.style.backgroundImage = `url('${DEFAULT_BG_B64}')`;
                 return;
             }
 
             const step = currentDialogue[currentDialogueIndex];
-            const vnViewer = document.getElementById('vnViewer');
             const currentSpeakerElement = document.getElementById('currentSpeaker');
             const currentTextElement = document.getElementById('currentText');
 
-            // 1. Фон - Используем функцию с постоянным повтором (Base64 пройдет мгновенно)
-            const bgUrl = step.background || DEFAULT_BG_URL;
-            loadImageWithPersistence(bgUrl, vnViewer, true);
+            // 1. Фон 
+            const bgUrl = step.background;
+            if (bgUrl && !bgUrl.startsWith('data:')) {
+                loadExternalImageWithPersistence(bgUrl, vnViewerElement, true);
+            } else {
+                // Прямое присвоение Base64 или дефолта
+                vnViewerElement.style.backgroundImage = `url('${bgUrl || DEFAULT_BG_B64}')`;
+            }
+
 
             // 2. Спрайты и Затемнение
             const activeSpeakerPosition = step.position ? step.position.toLowerCase() : null;
 
+            // Сброс и скрытие всех спрайтов
             spriteLeftContainer.classList.add('hidden');
             spriteRightContainer.classList.add('hidden');
             spriteLeftElement.classList.remove('dimmed-sprite');
             spriteRightElement.classList.remove('dimmed-sprite');
             
-            // Сбрасываем src, чтобы убедиться, что новая логика загрузки срабатывает
-            spriteLeftElement.src = '';
-            spriteRightElement.src = '';
-
-            // Обновление и показ спрайтов
+            // Обновление и показ нужного спрайта
             if (step.sprite && step.position) {
                 const isLeft = step.position.toLowerCase() === 'left';
                 const container = isLeft ? spriteLeftContainer : spriteRightContainer;
                 const imageElement = isLeft ? spriteLeftElement : spriteRightElement;
                 
-                // Используем spritePath, который теперь возвращает Base64, если нет реального URL
                 const path = spritePath(step.sprite); 
                 
-                container.classList.remove('hidden');
-                loadImageWithPersistence(path, imageElement);
+                // --- ДЕБАГ ЛОГ ---
+                const logUrl = path.startsWith('data:') ? 'Base64 Placeholder' : path;
+                console.log(`[DEBUG RENDER] Спрайт: ${step.sprite}, Позиция: ${step.position}, Используется URL: ${logUrl}`);
+                // ---------------
+
+                container.classList.remove('hidden'); // Показываем контейнер спрайта
+                
+                if (path.startsWith('data:')) {
+                    // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: ПРЯМОЕ ПРИСВОЕНИЕ ДЛЯ BASE64
+                    imageElement.src = path;
+                } else {
+                    // Использование механизма повтора для внешних URL
+                    loadExternalImageWithPersistence(path, imageElement, false);
+                }
             } 
             
             // Применение Затемнения
@@ -476,6 +491,13 @@
 
                     // Рекурсивный вызов через setTimeout для повтора
                     setTimeout(() => {
+                        // Максимальное количество попыток для загрузки контента
+                        if (attempt >= 5) {
+                            loadTextElement.textContent = "Ошибка загрузки";
+                            console.error(`[Content] Окончательный сбой загрузки контента главы после 5 попыток.`);
+                            loadButton.disabled = false;
+                            return;
+                        }
                         attemptLoad(attempt + 1);
                     }, delay);
                 }
@@ -486,7 +508,7 @@
         }
 
         // ====================================================================
-        // === UI & I18N FUNCTIONS ===
+        // === UI & I18N FUNCTIONS (без изменений) ===
         // ====================================================================
 
         /**
@@ -663,8 +685,7 @@
             
             loadProgress(); 
             
-            const vnViewer = document.getElementById('vnViewer');
-            vnViewer.style.backgroundImage = `url('${DEFAULT_BG_URL}')`;
+            vnViewerElement.style.backgroundImage = `url('${DEFAULT_BG_B64}')`;
             
             document.getElementById('spriteLeftContainer').classList.add('hidden');
             document.getElementById('spriteRightContainer').classList.add('hidden');
