@@ -76,14 +76,6 @@
         .log-entry:hover {
             background-color: #333;
         }
-        .log-speaker {
-            font-weight: bold;
-            color: #ca7cfe;
-            display: block;
-        }
-        .log-text {
-            color: #ccc;
-        }
         .current-log-entry {
             background-color: #4a4a4a !important; /* Выделение текущей реплики */
             border-left: 3px solid #ca7cfe;
@@ -206,16 +198,16 @@
                 
                 <!-- Left Sprite (Persistent element) -->
                 <div id="spriteLeftContainer" class="sprite-position left hidden">
-                    <!-- Обратите внимание: onerror теперь выводит ошибку в консоль и скрывает контейнер -->
+                    <!-- Улучшенный обработчик ошибки: выводит в консоль и скрывает контейнер -->
                     <img id="spriteLeft" class="sprite-image" src="" alt="Левый персонаж" 
-                         onerror="console.error('Ошибка загрузки спрайта:', this.src); this.parentElement.classList.add('hidden');">
+                         onerror="console.error('Ошибка загрузки спрайта (Левый): Файл не найден по пути:', this.src); this.parentElement.classList.add('hidden');">
                 </div>
                 
                 <!-- Right Sprite (Persistent element) -->
                 <div id="spriteRightContainer" class="sprite-position right hidden">
-                    <!-- Обратите внимание: onerror теперь выводит ошибку в консоль и скрывает контейнер -->
+                    <!-- Улучшенный обработчик ошибки: выводит в консоль и скрывает контейнер -->
                     <img id="spriteRight" class="sprite-image" src="" alt="Правый персонаж" 
-                         onerror="console.error('Ошибка загрузки спрайта:', this.src); this.parentElement.classList.add('hidden');">
+                         onerror="console.error('Ошибка загрузки спрайта (Правый): Файл не найден по пути:', this.src); this.parentElement.classList.add('hidden');">
                 </div>
 
             </div>
@@ -275,7 +267,7 @@
         // --- GLOBAL CONSTANTS ---
         const STORAGE_KEY = 'hg2_story_progress';
         const STORY_BASE_PATH = 'story/'; // Базовый путь для JSON: story/ru/main_ch1.json
-        const SPRITE_BASE_PATH = 'sprites/'; // Новый базовый путь для спрайтов
+        const SPRITE_BASE_PATH = 'sprites/'; // Базовый путь для спрайтов
         const AUDIO_BASE_PATH = 'audio/'; 
         const DEFAULT_BG_URL = 'https://placehold.co/1920x1080/2a2a2a/fca5a5?text=Выберите+сюжет+и+нажмите+Загрузить';
         
@@ -288,18 +280,12 @@
         let chapterAudio; 
         
         // --- STORY METADATA (Синхронно доступные названия глав) ---
-        // Ключи соответствуют полному имени файла без расширения (например, main_ch1)
         const KNOWN_CHAPTERS = {
-            // Main Story (main_)
             "main_ch1": { ru: "Глава 1: Выброс Хоукая", en: "Chapter 1: The Honkai Eruption", cn: "章节 1: 崩坏爆发" }, 
             "main_ch2": { ru: "Глава 2: Заражение", en: "Chapter 2: The Infection", cn: "章节 2: 感染" },
-            // Extra Story (extra_)
             "extra_ex1": { ru: "Экстра 1: Летний пляж", en: "Extra 1: Summer Beach", cn: "额外 1: 夏日沙滩" },
-            // Bosses (boss_)
             "boss_b1": { ru: "Босс 1: Херувим", en: "Boss 1: Cherubim", cn: "首领 1: 智天使" },
-            // Visual Novel (vn_)
             "vn_vn1": { ru: "VN 1: Пролог Кианы", en: "VN 1: Kiana's Prologue", cn: "VN 1: 琪亚娜序章" },
-            // Novel / Romance (ln_)
             "ln_r1": { ru: "Роман 1: Признание", en: "Novel 1: Confession", cn: "小说 1: 告白" }
         };
 
@@ -402,7 +388,7 @@
             const progress = {
                 lang: document.getElementById('languageSelect').value,
                 type: document.getElementById('storyTypeSelect').value,
-                chapter: document.getElementById('chapterSelect').value, // Сохраняем полный ключ (напр., main_ch1)
+                chapter: document.getElementById('chapterSelect').value, 
                 index: currentDialogueIndex,
                 volume: volumeInput ? parseFloat(volumeInput.value) / 100 : 0.5 
             };
@@ -441,7 +427,7 @@
             // 3. Restore Story Type
             if (progress.type && STORY_GROUPS[progress.type]) {
                 typeSelect.value = progress.type;
-                updateChapterSelect(true); // Populate chapters for the selected type
+                updateChapterSelect(true); 
             }
             
             // 4. Restore Chapter
@@ -577,10 +563,7 @@
             }
         }
 
-        /** Populates the Chapter dropdown based on the selected Story Type.
-         * The value of the option is the full file key (e.g., 'main_ch1').
-         * @param {boolean} skipSideEffects - If true, skips saving progress and enabling the load button.
-         */
+        /** Populates the Chapter dropdown based on the selected Story Type. */
         function updateChapterSelect(skipSideEffects = false) {
             const typeKey = document.getElementById('storyTypeSelect').value;
             const select = document.getElementById('chapterSelect');
@@ -606,7 +589,7 @@
 
                     if (chapterData && chapterData[lang]) {
                         const option = document.createElement('option');
-                        option.value = fullChapterKey; // <--- ЭТОТ КЛЮЧ ИСПОЛЬЗУЕТСЯ ДЛЯ ПОСТРОЕНИЯ ПУТИ
+                        option.value = fullChapterKey; 
                         option.textContent = chapterData[lang]; 
                         
                         if (fullChapterKey === currentChapterKey) {
@@ -628,8 +611,7 @@
 
         /** Асинхронно загружает выбранную главу сюжета. */
         async function updateStoryContent(startIndex = 0) {
-            const lang = document.getElementById('languageSelect').value; // Получаем выбранный язык
-            // fullStoryKey: например, "main_ch1", "extra_ex1", "vn_vn1"
+            const lang = document.getElementById('languageSelect').value; 
             const fullStoryKey = document.getElementById('chapterSelect').value; 
             
             if (!fullStoryKey) {
@@ -637,8 +619,6 @@
                 return;
             }
 
-            // ФОРМИРОВАНИЕ ПРАВИЛЬНОГО ПУТИ К ФАЙЛУ В ПАПКЕ STORY/ С УЧЕТОМ ЯЗЫКА
-            // Пример пути: story/ru/main_ch1.json
             const filePath = `${STORY_BASE_PATH}${lang}/${fullStoryKey}.json`;
             console.log(`[Load] Запрос файла: ${filePath}`);
 
@@ -689,7 +669,7 @@
 
             } catch (e) {
                 console.error("Failed to load dialogue data:", e);
-                document.getElementById('loadText').textContent = i18n[document.getElementById('languageSelect').value].errorFetch; // Используем локализованную ошибку
+                document.getElementById('loadText').textContent = i18n[document.getElementById('languageSelect').value].errorFetch; 
                 setTimeout(() => {
                     document.getElementById('loadText').textContent = i18n[document.getElementById('languageSelect').value].loadText;
                 }, 4000);
@@ -714,7 +694,8 @@
             const vnViewer = document.getElementById('vnViewer');
             const currentSpeakerElement = document.getElementById('currentSpeaker');
             const currentTextElement = document.getElementById('currentText');
-            const dialogueWrapper = document.getElementById('dialogueWrapper');
+            // dialogueWrapper больше не используется для затемнения
+            // const dialogueWrapper = document.getElementById('dialogueWrapper'); 
 
             // 1. Background
             if (step.background) {
@@ -724,56 +705,59 @@
             } 
 
             // 2. Sprites & Dimming 
-            // Сбрасываем все эффекты и скрываем
+            // 2a. Сброс: очищаем эффекты и пути.
             spriteLeftContainer.classList.add('hidden');
             spriteRightContainer.classList.add('hidden');
             spriteLeftElement.classList.remove('dimmed-sprite');
             spriteRightElement.classList.remove('dimmed-sprite');
             
-            // Логика установки активного спрайта
+            // Важно: Сброс src, чтобы не отображался старый спрайт или сломанная иконка,
+            // если текущий шаг не содержит спрайта.
+            spriteLeftElement.src = '';
+            spriteRightElement.src = ''; 
+            
+            // 2b. Логика установки активного спрайта
             if (step.sprite && step.position) {
                 const isLeft = step.position.toLowerCase() === 'left';
                 const container = isLeft ? spriteLeftContainer : spriteRightContainer;
                 const imageElement = isLeft ? spriteLeftElement : spriteRightElement;
                 
+                // Формирование пути: либо абсолютный URL, либо с префиксом 'sprites/'
+                const spritePath = step.sprite.startsWith('http') ? step.sprite : SPRITE_BASE_PATH + step.sprite;
+                
+                // Устанавливаем src. Если загрузка не удастся, сработает onerror,
+                // который выведет ошибку в консоль и скроет контейнер.
+                imageElement.src = spritePath;
+                
+                // Делаем контейнер видимым ТОЛЬКО после установки src
                 container.classList.remove('hidden');
-                // *** ИСПРАВЛЕНО: Добавление SPRITE_BASE_PATH, если путь не является полной ссылкой ***
-                imageElement.src = step.sprite.startsWith('http') ? step.sprite : SPRITE_BASE_PATH + step.sprite;
             }
 
-            // Логика диммирования (притухания)
-            // Притушает спрайт, который не говорит (если указан sprite_dimmed)
+            // 2c. Логика диммирования (притухания спрайтов)
             if (step.sprite_dimmed) {
                 const dimmedSpriteFilename = step.sprite_dimmed; 
                 
-                // Проверяем левый спрайт
-                if (!spriteLeftContainer.classList.contains('hidden') && spriteLeftElement.src.includes(dimmedSpriteFilename)) {
+                // Если левый спрайт видим и его путь содержит имя для диммирования, диммируем
+                if (!spriteLeftContainer.classList.contains('hidden') && spriteLeftElement.src.endsWith(dimmedSpriteFilename)) {
                     spriteLeftElement.classList.add('dimmed-sprite');
-                } else {
-                     // Убеждаемся, что спрайт, который должен быть активным, не притушен
-                     spriteLeftElement.classList.remove('dimmed-sprite');
-                }
+                } 
                 
-                // Проверяем правый спрайт
-                if (!spriteRightContainer.classList.contains('hidden') && spriteRightElement.src.includes(dimmedSpriteFilename)) {
+                // Если правый спрайт видим и его путь содержит имя для диммирования, диммируем
+                if (!spriteRightContainer.classList.contains('hidden') && spriteRightElement.src.endsWith(dimmedSpriteFilename)) {
                     spriteRightElement.classList.add('dimmed-sprite');
-                } else {
-                    // Убеждаемся, что спрайт, который должен быть активным, не притушен
-                    spriteRightElement.classList.remove('dimmed-sprite');
-                }
+                } 
             }
 
 
             // 3. Dialogue Text and Speaker Name
+            // Имя говорящего скрывается, если поле пустое, но контейнер диалога остается полностью непрозрачным.
             if (step.speaker && step.speaker !== '') {
                 currentSpeakerElement.textContent = step.speaker;
                 currentSpeakerElement.parentElement.style.opacity = '1';
-                dialogueWrapper.classList.remove('opacity-50');
             } else {
-                // Это происходит, когда идет повествование (нет говорящего)
+                // ПОВЕСТВОВАНИЕ: имя говорящего скрывается.
                 currentSpeakerElement.textContent = '';
                 currentSpeakerElement.parentElement.style.opacity = '0'; 
-                dialogueWrapper.classList.add('opacity-50'); // Контейнер диалога притухает
             }
             
             currentTextElement.textContent = step.text || ' ';
