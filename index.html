@@ -30,7 +30,7 @@
             border-top-right-radius: 8px;
             display: inline-block;
             font-weight: bold;
-            /* Увеличен размер шрифта имени говорящего до xl */
+            /* Увеличенный размер шрифта имени говорящего */
             font-size: 1.25rem; /* text-xl */
         }
 
@@ -109,12 +109,7 @@
                     <input type="range" id="volumeInput" min="0" max="100" value="50" class="h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer range-sm">
                 </div>
                 
-                 <!-- Sprite Visibility Mode Select -->
-                <select id="spriteModeSelect" onchange="saveProgress()" class="bg-gray-700 text-white rounded-lg p-2 cursor-pointer transition hover:ring-2 ring-red-400">
-                    <option value="hide">Скрывать</option>
-                    <option value="dim">Затемнять</option>
-                </select>
-
+                <!-- Кнопка сброса и помощь -->
                 <button id="resetButton" onclick="resetProgress()" class="px-3 py-1 bg-red-800 hover:bg-red-700 rounded-full transition duration-150 text-sm">Сброс</button>
                 <button id="helpButton" onclick="showHelpModal()" class="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-full transition duration-150 text-sm">?</button>
                 <select id="languageSelect" onchange="updateUI()" class="bg-gray-700 text-white rounded-lg p-2 cursor-pointer transition hover:ring-2 ring-red-400">
@@ -169,12 +164,14 @@
                 
                 <!-- Left Sprite (Persistent element) -->
                 <div id="spriteLeftContainer" class="sprite-position left hidden">
+                    <!-- Заглушка для спрайта -->
                     <img id="spriteLeft" class="sprite-image" src="" alt="Левый персонаж" 
                          onerror="this.parentElement.classList.add('hidden')">
                 </div>
                 
                 <!-- Right Sprite (Persistent element) -->
                 <div id="spriteRightContainer" class="sprite-position right hidden">
+                    <!-- Заглушка для спрайта -->
                     <img id="spriteRight" class="sprite-image" src="" alt="Правый персонаж" 
                          onerror="this.parentElement.classList.add('hidden')">
                 </div>
@@ -186,8 +183,7 @@
                 
                 <!-- Speaker Name Container (Above the main box) -->
                 <div id="speakerNameContainer" class="text-left mb-0 ml-8"> 
-                    <!-- Обновлен до text-xl -->
-                    <div id="currentSpeaker" class="speaker-name text-xl rounded-t-lg rounded-b-none"></div>
+                    <div id="currentSpeaker" class="speaker-name rounded-t-lg rounded-b-none"></div>
                 </div>
                 
                 <!-- Dialogue Text Content Box -->
@@ -195,7 +191,7 @@
                     class="vn-overlay w-[900px] h-[200px] p-8 flex items-start justify-start text-left
                             rounded-xl shadow-2xl overflow-hidden"
                     onclick="event.stopPropagation()"> 
-                    <!-- Обновлен до text-xl -->
+                    <!-- Увеличенный размер шрифта текста диалога -->
                     <p id="currentText" class="text-xl leading-tight transition-opacity duration-300">Текст диалога...</p>
                 </div>
             </div>
@@ -238,6 +234,49 @@
         const SPRITE_BASE_PATH = 'https://placehold.co/'; 
         const AUDIO_BASE_PATH = 'audio/'; // Base path for audio files
         
+        // --- ДАННЫЕ ДЛЯ ЗАГЛУШКИ (Для демонстрации функционала) ---
+        // otherAction: 
+        //  'dim' (по умолчанию, если не указано) - затемняет неактивный спрайт.
+        //  'hide' - полностью скрывает неактивный спрайт.
+        const initialChapterData = {
+            audio: null, // Имя файла аудио: "chapter_bgm.mp3"
+            dialogue: [
+                { 
+                    background: "https://placehold.co/1920x1080/2a2a2a/fca5a5?text=Выберите+и+загрузите+главу", 
+                    speaker: null, 
+                    text: "Архитектура готова! Добавьте свои данные в структуру 'storyData' и 'initialChapterData' в этом файле.", 
+                    sprite: null, 
+                    position: null 
+                },
+                // Тест: Персонаж А (слева) говорит. Персонаж Б (справа) ДОЛЖЕН БЫТЬ СКРЫТ.
+                { 
+                    background: "https://placehold.co/1920x1080/000033/ffffff?text=Scene+1", 
+                    speaker: "Персонаж А", 
+                    text: "Я говорю. Персонаж Б должен быть скрыт (otherAction: 'hide').", 
+                    sprite: "400x900/ca7cfe/ffffff?text=Sprite+A", 
+                    position: "left",
+                    otherAction: "hide" // <--- НОВЫЙ КЛЮЧ
+                },
+                // Тест: Персонаж Б (справа) говорит. Персонаж А (слева) ДОЛЖЕН БЫТЬ ЗАТЕМНЕН (по умолчанию).
+                { 
+                    background: "https://placehold.co/1920x1080/000033/ffffff?text=Scene+2", 
+                    speaker: "Персонаж Б", 
+                    text: "Я отвечаю. Персонаж А должен быть затемнен (default: 'dim').", 
+                    sprite: "400x900/ff6666/ffffff?text=Sprite+B", 
+                    position: "right"
+                    // otherAction здесь отсутствует, значит, используется 'dim'
+                },
+                // Тест: Повествование. Оба спрайта должны быть затемнены, так как они были видны.
+                { 
+                    background: "https://placehold.co/1920x1080/000033/ffffff?text=Scene+2", 
+                    speaker: null, 
+                    text: "Повествование. Оба спрайта затемнены. Кликните для перехода назад.", 
+                    sprite: null, 
+                    position: null 
+                },
+            ]
+        };
+        
         let currentDialogue = [];
         let currentDialogueIndex = 0;
         let dialogueIsLoaded = false;
@@ -249,7 +288,7 @@
         // --- I18N DATA ---
         const i18n = {
             ru: {
-                headerTitle: "Houkai Gakuen 2 архив сюжета",
+                headerTitle: "Houkai Gakuen 2 Архив Сюжета",
                 labelStoryType: "Тип сюжета",
                 labelChapter: "Сюжет (Глава)",
                 loadText: "Загрузить",
@@ -283,28 +322,27 @@
             }
         };
 
-        // --- STORY DATA STRUCTURE (Mocked) ---
-        // Includes sprites and positions for demonstrating dimming/hiding
-        const mockChapterData = {
-            audio: "chapter_bgm.mp3", // NEW: Mock audio file name
-            dialogue: [
-                { background: "https://placehold.co/1920x1080/000033/ffffff?text=Scene+1", speaker: "Киана", text: "Привет, Мэй! Мы здесь впервые, да?", sprite: "400x900/ca7cfe/ffffff?text=Kiana", position: "left" },
-                { background: "https://placehold.co/1920x1080/000033/ffffff?text=Scene+1", speaker: "Мэй", text: "Да, Киана. Место выглядит заброшенным. Будь осторожна.", sprite: "400x900/ff6666/ffffff?text=Mei", position: "right" },
-                { background: "https://placehold.co/1920x1080/000033/ffffff?text=Scene+1", speaker: "Киана", text: "Смотри, это какая-то странная надпись на стене!", sprite: "400x900/ca7cfe/ffffff?text=Kiana", position: "left" },
-                { background: "https://placehold.co/1920x1080/000033/ffffff?text=Scene+1", speaker: null, text: "Надпись выглядела очень древней. Никто из них не мог разобрать ни слова. (Аудио: chapter_bgm.mp3 должно играть)", sprite: null, position: null },
-                { background: "https://placehold.co/1920x1080/000033/ffffff?text=Scene+1", speaker: "Мэй", text: "Нужно двигаться дальше. Возможно, мы найдем подсказки в другом месте.", sprite: "400x900/ff6666/ffffff?text=Mei", position: "right" },
-                { background: "https://placehold.co/1920x1080/330000/ffffff?text=Scene+2", speaker: "Киана", text: "Хорошо, пошли! Новая сцена и новый фон!", sprite: "400x900/ca7cfe/ffffff?text=Kiana", position: "left" },
-            ]
-        };
+        // --- STORY DATA STRUCTURE (Чистая структура для вашего контента) ---
         const storyData = {
             main: {
-                ru: "Основной сюжет", en: "Main Story", cn: "主线剧情",
+                ru: "Основной сюжет", 
+                en: "Main Story", 
+                cn: "主线剧情",
                 chapters: {
-                    ch1: { ru: "Глава 1: Тест (Спрайты и Аудио)", en: "Chapter 1: Test (Sprites & Audio)", cn: "章节 1: 测试 (精灵与音频)" },
+                    // ch1: { ru: "Глава 1: Пролог", en: "Chapter 1: Prologue", cn: "章节 1: 序章" }
+                    // Добавьте свои главы здесь, используя шаблон выше.
                 }
             },
-            // Other mock data omitted for brevity but retained structure
+            event: {
+                ru: "События", 
+                en: "Events", 
+                cn: "活动",
+                chapters: {
+                    // event1: { ru: "Событие 1: Тема", en: "Event 1: Theme", cn: "活动 1: 主题" }
+                }
+            }
         };
+
 
         // --- AUDIO CONTROL FUNCTIONS ---
         
@@ -345,7 +383,6 @@
                 }
                 
                 // Attempt to play (may fail due to browser auto-play restrictions)
-                // This promise handling avoids unhandled rejection warnings
                 const playPromise = chapterAudio.play();
                 if (playPromise !== undefined) {
                     playPromise.catch(e => {
@@ -361,7 +398,7 @@
 
         // --- PROGRESS MANAGEMENT ---
         
-        /** Saves current progress (language, type, chapter, index, spriteMode, volume) to localStorage. */
+        /** Saves current progress (language, type, chapter, index, volume) to localStorage. */
         function saveProgress() {
             const volumeInput = document.getElementById('volumeInput');
             const progress = {
@@ -369,8 +406,6 @@
                 type: document.getElementById('storyTypeSelect').value,
                 chapter: document.getElementById('chapterSelect').value,
                 index: currentDialogueIndex,
-                spriteMode: document.getElementById('spriteModeSelect').value,
-                // Save volume as 0.0 to 1.0
                 volume: volumeInput ? parseFloat(volumeInput.value) / 100 : 0.5 
             };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
@@ -388,11 +423,7 @@
             if (i18n[progress.lang]) {
                 langSelect.value = progress.lang;
             }
-            // Restore sprite mode
-            const modeSelect = document.getElementById('spriteModeSelect');
-            if (modeSelect) {
-                modeSelect.value = progress.spriteMode || 'hide';
-            }
+
             // Restore volume
             const volumeInput = document.getElementById('volumeInput');
             if (volumeInput) {
@@ -400,7 +431,6 @@
                 volumeInput.value = savedVolume * 100;
                 setVolume(savedVolume); // Apply volume immediately
             }
-
 
             // Restore story type
             const typeSelect = document.getElementById('storyTypeSelect');
@@ -428,14 +458,12 @@
         function resetProgress() {
             localStorage.removeItem(STORAGE_KEY);
             document.getElementById('dialogueWrapper').classList.add('hidden');
-            // Удалены ссылки на navButtons
             document.getElementById('logToggleButton').classList.add('hidden'); 
             document.getElementById('logModal').classList.add('hidden');
             document.getElementById('logContent').classList.add('translate-x-full');
 
             // Reset selectors and audio
             document.getElementById('languageSelect').value = 'ru';
-            document.getElementById('spriteModeSelect').value = 'hide';
             
             // Reset volume
             document.getElementById('volumeInput').value = 50;
@@ -517,7 +545,7 @@
             document.getElementById('loadText').textContent = text.loadText;
             document.getElementById('resetButton').textContent = text.resetProgress;
             
-            // Обновлено описание, чтобы подчеркнуть навигацию по клику
+            // Обновлено описание
             document.getElementById('helpContent').innerHTML = `
                 <h4 class="text-lg font-semibold text-red-400 mb-2">${text.helpTitle}</h4>
                 <p class="whitespace-pre-line">${text.helpText}</p>`;
@@ -567,11 +595,19 @@
 
             if (typeKey && storyData[typeKey] && storyData[typeKey].chapters) {
                 const chapters = storyData[typeKey].chapters;
-                for (const key in chapters) {
-                    const option = document.createElement('option');
-                    option.value = key;
-                    option.textContent = chapters[key][lang];
-                    select.appendChild(option);
+                // Заглушка: Добавьте тестовую главу, если список пуст
+                if (Object.keys(chapters).length === 0 && typeKey === 'main') {
+                    const placeholderOption = document.createElement('option');
+                    placeholderOption.value = "demo";
+                    placeholderOption.textContent = "Демонстрационная глава (для теста)";
+                    select.appendChild(placeholderOption);
+                } else {
+                    for (const key in chapters) {
+                        const option = document.createElement('option');
+                        option.value = key;
+                        option.textContent = chapters[key][lang];
+                        select.appendChild(option);
+                    }
                 }
                 select.disabled = false;
             } else {
@@ -580,9 +616,8 @@
             enableLoadButton();
         }
 
-        /** Asynchronously loads the selected story chapter JSON. 
-         * For this mock, it loads fixed `mockChapterData`.
-         * @param {number} startIndex - The dialogue index to start viewing from.
+        /** Асинхронно загружает выбранную главу сюжета.
+         * @param {number} startIndex - Индекс диалога, с которого начать просмотр.
          */
         async function updateStoryContent(startIndex = 0) {
             const storyType = document.getElementById('storyTypeSelect').value;
@@ -598,11 +633,12 @@
             loadText.textContent = i18n[currentLang].loadText + '...';
             
             try {
-                // In a real app, you'd fetch from a file path based on storyType/storyId/currentLang
-                // Example: const response = await fetch(`story/${currentLang}/${storyType}_${storyId}.json`);
+                // В реальном приложении здесь должна быть логика загрузки JSON файла.
+                // const response = await fetch(`story/${currentLang}/${storyType}_${storyId}.json`);
+                // const data = await response.json(); 
                 
-                // For this demonstration, we use the hardcoded mock data for Chapter 1
-                const data = mockChapterData; 
+                // Для этого примера используем заглушку initialChapterData. 
+                const data = initialChapterData; 
                 
                 if (!data.dialogue || !Array.isArray(data.dialogue)) {
                     throw new Error("JSON structure error: 'dialogue' array not found.");
@@ -615,11 +651,11 @@
 
                 dialogueIsLoaded = true;
 
-                if (currentDialogue.length > 0 && currentDialogue[currentDialogueIndex].background) {
-                    vnViewer.style.backgroundImage = `url('${currentDialogue[currentDialogueIndex].background}')`;
-                } else {
-                    vnViewer.style.backgroundImage = `url('https://placehold.co/1920x1080/2a2a2a/fca5a5?text=${storyData[storyType][currentLang]}')`;
-                }
+                // Устанавливаем фон из первой реплики (или дефолтный)
+                const defaultBackgroundUrl = `url('https://placehold.co/1920x1080/2a2a2a/fca5a5?text=Глава+загружена')`;
+                const initialBackground = currentDialogue.length > 0 ? currentDialogue[currentDialogueIndex].background : null;
+                
+                vnViewer.style.backgroundImage = initialBackground ? `url('${initialBackground}')` : defaultBackgroundUrl;
 
                 document.getElementById('dialogueWrapper').classList.remove('hidden');
                 document.getElementById('logToggleButton').classList.remove('hidden'); 
@@ -706,54 +742,53 @@
             const currentSpeaker = document.getElementById('currentSpeaker');
             const currentText = document.getElementById('currentText');
             const speakerNameContainer = document.getElementById('speakerNameContainer');
-            const spriteMode = document.getElementById('spriteModeSelect').value;
 
-            // 1. Update Background
-            if (dialogue.background) {
-                vnViewer.style.backgroundImage = `url('${dialogue.background}')`;
-            }
-
-            // 2. Update Sprites based on current dialogue line and mode
+            // NEW: Determine action for other (inactive) sprites. Default is 'dim'.
             const activePosition = dialogue.position; 
             const activeSpriteSrc = dialogue.sprite ? SPRITE_BASE_PATH + dialogue.sprite : null;
-
+            const inactiveAction = dialogue.otherAction || 'dim'; 
+            
             const sprites = [
                 { container: spriteLeftContainer, element: spriteLeftElement, position: 'left' },
                 { container: spriteRightContainer, element: spriteRightElement, position: 'right' }
             ];
             
+            // 1. Update Background
+            if (dialogue.background) {
+                vnViewer.style.backgroundImage = `url('${dialogue.background}')`;
+            }
+
+            // 2. Update Sprites
             sprites.forEach(sprite => {
                 const isActiveSpeaker = sprite.position === activePosition;
-
-                // First, reset classes for smooth transition/logic
+                
+                // Reset visual state
                 sprite.container.classList.remove('dimmed-sprite');
 
-                if (isActiveSpeaker && activeSpriteSrc) {
-                    // Current speaker: Ensure image is correct, show, and make bright
-                    sprite.element.src = activeSpriteSrc;
+                if (isActiveSpeaker) {
+                    // ACTIVE SPEAKER: Show and make bright
+                    if (activeSpriteSrc) {
+                        sprite.element.src = activeSpriteSrc; // Update image if provided
+                    }
                     sprite.container.classList.remove('hidden');
-                    sprite.container.style.opacity = '1'; // Ensure no dimming from CSS is overridden
-                } else if (spriteMode === 'hide') {
-                    // Hide mode: Hide all non-active sprites, or all sprites if no speaker (narration)
-                    sprite.container.classList.add('hidden');
-                } else if (spriteMode === 'dim') {
-                    // Dim mode: Dim inactive sprites, or dim all if no speaker, but keep them visible if they were already there
-                    
-                    if (!activePosition) {
-                        // Narration line: dim all visible sprites
-                        sprite.container.classList.add('dimmed-sprite');
-                    } else if (!isActiveSpeaker) {
-                        // Inactive speaker: dim the sprite
-                        sprite.container.classList.add('dimmed-sprite');
+                } else {
+                    // INACTIVE SPRITE OR NARRATION
+                    const isSpriteVisible = !sprite.container.classList.contains('hidden') || sprite.element.src;
+
+                    if (isSpriteVisible) {
+                         if (!activePosition) {
+                            // Case A: Narration (No active speaker): dim all visible sprites
+                             sprite.container.classList.add('dimmed-sprite');
+                         } else {
+                            // Case B: Dialogue is happening, but this is the INACTIVE sprite
+                            if (inactiveAction === 'hide') {
+                                sprite.container.classList.add('hidden');
+                            } else if (inactiveAction === 'dim') {
+                                sprite.container.classList.add('dimmed-sprite');
+                            }
+                         }
                     }
-                    
-                    // If a sprite is NOT the current one, check if it should be hidden
-                    if (sprite.element.src && !sprite.container.classList.contains('hidden')) {
-                        // Keep visible if there is content and it hasn't been explicitly hidden
-                    } else {
-                        // If it has no content, ensure it is hidden
-                        sprite.container.classList.add('hidden');
-                    }
+                    // Note: If the sprite was never shown (no src), it remains hidden.
                 }
             });
 
@@ -766,7 +801,6 @@
 
             if (dialogue.speaker) {
                 currentSpeaker.textContent = dialogue.speaker;
-                // Класс text-xl уже установлен в HTML для .speaker-name
                 speakerNameContainer.classList.remove('hidden');
             } else {
                 currentSpeaker.textContent = '';
@@ -820,6 +854,14 @@
         // --- INITIALIZATION ---
         window.onload = () => {
             initializeAppElements(); // Setup persistent elements
+            
+            // Если главы не определены, загружаем демо-данные, чтобы показать функционал.
+            if (Object.keys(storyData.main.chapters).length === 0) {
+                 currentDialogue = initialChapterData.dialogue;
+                 dialogueIsLoaded = true;
+                 renderDialogue(); // Рендерим стартовый экран
+            }
+
             loadProgress(); 
             updateUI(); 
         };
