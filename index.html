@@ -179,10 +179,8 @@
         // === КОНСТАНТЫ И ДАННЫЕ ===
         // ====================================================================
 
-        // Base64-кодированные SVG для надежных плейсхолдеров
-        const KIANA_SPRITE_B64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjODAwMDgwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5LSUFOQTwvdGV4dD48L3N2Zz4='; // Пурпурный
-        const MEI_SPRITE_B64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRkY1NzMzIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5NRUk8L3RleHQ+PC9zdmc+'; // Красный
-        const DEFAULT_BG_B64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyMCIgaGVpZ2h0PSIxMDgwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMyYjJkM2EiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkludGVyIiBmb250LXNpemU9IjQwcHgiIGZpbGw9IiNkMWQxZDEiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlpERU0gTE9HSSBLT05URU5UQTwvdGV4dD48L3N2Zz4='; // Серый фон с текстом
+        const SPRITE_BASE_PATH = 'images/sprites'; 
+        const BACKGROUND_BASE_PATH = 'images/background'; 
         
         const STORAGE_KEY = 'vn_story_progress_v4';
         const DEFAULT_BG_URL = DEFAULT_BG_B64; // Использование Base64 по умолчанию
@@ -290,28 +288,16 @@
                 alertMessage(i18n[document.getElementById('languageSelect').value].startOfStory);
             }
         }
-        
-        /** * Определяет путь/URL к спрайту.
-         * Использует Base64-плейсхолдеры, если не предоставлен реальный URL.
-         */
-        const spritePath = (fileName) => {
-            if (fileName && fileName.includes('kiana')) return KIANA_SPRITE_B64;
-            if (fileName && fileName.includes('mei')) return MEI_SPRITE_B64;
-            // Если вы используете реальные URL в своем JSON, просто верните их:
-            // return `assets/sprites/${fileName}.png`; 
-            
-            // Возвращаем универсальный плейсхолдер Base64
-            return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjIyMjIyIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5TUFJJSVQ8L3RleHQ+PC9zdmc+';
-        };
+    
         
         /** * Загружает изображение (или фон) с механизмом постоянного повтора, пока не удастся.
          * Если используется Base64 URL, загрузка будет мгновенной.
          */
         function loadImageWithPersistence(url, element, isBackground = false, attempt = 1) {
             // Если URL пуст или является Base64 по умолчанию, мы его обрабатываем
-            if (!url || url === DEFAULT_BG_URL) {
+            if (!url || url === BACKGROUND_BASE_PATH) {
                 if (!isBackground) element.parentElement.classList.add('hidden');
-                if (isBackground) element.style.backgroundImage = `url('${DEFAULT_BG_URL}')`;
+                if (isBackground) element.style.backgroundImage = `url('${BACKGROUND_BASE_PATH}')`;
                 return;
             }
             
