@@ -9,6 +9,19 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        
+        /* Глобальные правила для предотвращения выделения */
+        body, #vnViewer, .sprite-image {
+            /* Запрет выделения текста и изображений */
+            user-select: none;
+            -webkit-user-select: none; 
+            -moz-user-select: none;
+            -ms-user-select: none;
+            /* Запрет перетаскивания (для некоторых браузеров) */
+            user-drag: none;
+            -webkit-user-drag: none;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background-color: #5c5c5c; 
@@ -144,11 +157,11 @@
             <div id="spriteContainer" class="absolute inset-0 z-10 pointer-events-none flex justify-center items-end p-4">
                 
                 <div id="spriteLeftContainer" class="sprite-position left hidden">
-                    <img id="spriteLeft" class="sprite-image" src="" alt="Левый персонаж">
+                    <img id="spriteLeft" class="sprite-image" src="" alt="Левый персонаж" ondragstart="return false;">
                 </div>
                 
                 <div id="spriteRightContainer" class="sprite-position right hidden">
-                    <img id="spriteRight" class="sprite-image" src="" alt="Правый персонаж">
+                    <img id="spriteRight" class="sprite-image" src="" alt="Правый персонаж" ondragstart="return false;">
                 </div>
             </div>
 
@@ -185,11 +198,11 @@
             STORAGE: {
                 KEY: 'vn_story_progress_v4',
             },
-            // Настройки для загрузки JSON-файлов глав (используем Backoff для надежности)
+            // Настройки для загрузки JSON-файлов глав (ИЗМЕНЕНО: уменьшена задержка и число попыток)
             BACKOFF: {
-                INITIAL_DELAY_MS: 2000, 
-                MAX_DELAY_MS: 30000,    
-                MAX_ATTEMPTS: 5,        
+                INITIAL_DELAY_MS: 750,  // Быстрее начинаем
+                MAX_DELAY_MS: 7500,     // Ограничиваем максимальное ожидание
+                MAX_ATTEMPTS: 3,        // Только 3 попытки, чтобы не было "бесконечных повторов"
             },
             // Base64-кодированные SVG для мгновенных плейсхолдеров
             PLACEHOLDERS: {
@@ -220,12 +233,14 @@
                 loadText: "Загрузить", resetProgress: "Сброс", endOfStory: "История закончилась!",
                 startOfStory: "Это начало истории.", placeholderMetadata: "--- Метаданные не загружены ---",
                 errorFetchMetadataStrict: "Критическая ошибка: не удалось загрузить метаданные глав. Файл story/story_metadata.json отсутствует или недоступен.",
+                errorChapterNotFound: "Файл главы не найден" // Новое сообщение
             },
             en: {
                 headerTitle: "VN Story Archive", labelStoryType: "Story Type", labelChapter: "Chapter",
                 loadText: "Load", resetProgress: "Reset", endOfStory: "Story finished!",
                 startOfStory: "This is the start of the story.", placeholderMetadata: "--- Metadata not loaded ---",
                 errorFetchMetadataStrict: "Critical Error: Failed to load chapter metadata. The file story/story_metadata.json is missing or inaccessible.",
+                errorChapterNotFound: "Chapter file not found" // Новое сообщение
             }
         };
 
@@ -446,7 +461,7 @@
                     data = await response.json();
                     success = true;
                 } catch (e) {
-                    console.error(`[Content] Ошибка загрузки главы (Попытка ${attempt}).`);
+                    console.error(`[Content] Ошибка загрузки главы (Попытка ${attempt}).`, e);
                 }
 
                 if (success && data) {
@@ -468,8 +483,10 @@
                 } else {
                     // --- ПОВТОРНАЯ ПОПЫТКА (Exponential Backoff) ---
                     if (attempt >= MAX_ATTEMPTS) {
-                        loadText.textContent = "Ошибка загрузки";
+                        // ИЗМЕНЕНО: Более четкое сообщение об ошибке и немедленный выход.
+                        loadText.textContent = i18n[lang].errorChapterNotFound;
                         loadButton.disabled = false;
+                        console.error(`[Content] Критическая ошибка: Не удалось загрузить главу "${fullStoryKey}" после ${MAX_ATTEMPTS} попыток. Файл, вероятно, отсутствует.`);
                         return;
                     }
                     
