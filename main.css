@@ -63,27 +63,13 @@ body {
     background: rgba(255, 255, 255, 0.1);
     padding: 12px 15px; /* Уменьшили отступы */
     flex-grow: 1; /* Элементы растягиваются по ширине */
+    max-width: 120px;
 }
 
 .filter-title {
     font-size: 0.9rem; /* Уменьшили размер шрифта */
     margin-bottom: 8px;
     color: #ff6ec7;
-}
-
-.select-wrapper {
-    position: relative;
-}
-
-.select-wrapper::after {
-    content: "▼";
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-    color: #ff6ec7;
-    pointer-events: none;
-    font-size: 0.7rem; /* Уменьшили стрелку */
 }
 
 .selector-dropdown {
