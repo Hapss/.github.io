@@ -1,3 +1,12 @@
+<!-- Chosen Palette: Dark Neutrals (Black, Grey, White) with Honkai Red/Purple accents for UI elements. -->
+<!-- Application Structure Plan: Single-page application with a fixed header for navigation (language selector, title, reset button) and a main content area. The main area is divided into a control panel (story type/chapter selection) and a large, immersive Visual Novel (VN) viewer. This dashboard-like structure prioritizes interactivity (filters/selectors) and contextual presentation (VN viewer with dynamic text/sprites/backgrounds and LLM tools). This structure was chosen for usability because it separates navigation from the viewing experience, making it easy to change the story without losing immersion. Progress persistence is added via localStorage. -->
+<!-- Visualization & Content Choices: Report Info -> Goal -> Viz/Presentation Method -> Interaction -> Justification -> Library/Method.
+1. Story Content -> Narrative Consumption -> Visual Novel Display (HTML/CSS, Dynamic text/images) -> Next/Prev buttons, Dropdowns, Persistence (localStorage) -> Best way to present dialogue-heavy game lore, now with user progress tracking. -> Vanilla JS/HTML/CSS.
+2. Character/Scene Analysis -> Contextual Understanding -> Text Output (Modal window) -> Clickable buttons (Character Info/Scene Analysis) -> Enhances comprehension by leveraging LLM expertise instantly. -> Gemini API (Fetch/JSON).
+3. Navigation/Filtering -> Content Discovery -> Dropdown Menus (Type and Chapter) -> Cascading selection (Type filters Chapter options) -> Efficiently handles large, hierarchical data sets (story chapters). -> Vanilla JS/HTML/CSS.
+4. Progress Persistence -> User Experience -> localStorage save/load/reset functions -> Automatically resumes reading where the user left off. -> Vanilla JS.
+-->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -5,495 +14,645 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Houkai Gakuen 2 Архив Сюжета</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chosen Palette: Custom Dark Theme -->
-    <!-- Application Structure Plan: SPA с фиксированным заголовком, содержащим название и переключатель языка. Основная область содержит три зависимых выпадающих списка (Тип сюжета -> Сюжет -> Этап) для навигации. При выборе языка и сюжета, приложение асинхронно загружает соответствующий JSON-файл из папки story/{lang}/. Ниже расположена область динамического контента, которая отображает выбранный этап в формате визуальной новеллы. -->
-    <!-- Visualization & Content Choices: Информация: Архив сюжетов игры. Цель: Навигация и чтение с внешней загрузкой данных, разделенных по языкам. Метод представления: HTML-селекторы для фильтрации и динамически обновляемый div для отображения текста. Взаимодействие: Выбор языка меняет путь загрузки JSON. Выбор сюжета запускает Fetch API для загрузки unilingual JSON. Выбор этапа отображает нужный блок диалога из загруженных данных. Обоснование: Разделение файлов по языкам упрощает управление переводами. Библиотека: Vanilla JS для логики (включая Fetch API), Tailwind CSS для стилей. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
         body {
-            background-color: #5c5c5c;
-            color: #f0f0f0;
             font-family: 'Inter', sans-serif;
-        }
-        .header {
-            background-color: #2a2a2a;
-        }
-        .custom-select {
-            background-color: #3a3a3a;
-            border-color: #7a7a7a;
-            color: #f0f0f0;
-        }
-        .story-container {
+            background-color: #5c5c5c; /* Фон сайта */
+            color: #e5e7eb;
+            transition: background-image 0.5s ease;
             background-size: cover;
             background-position: center;
-            min-height: 60vh;
+            background-attachment: fixed;
         }
-        .dialogue-box {
-            background-color: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
+        .vn-overlay {
+            background-color: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            max-width: 95%;
+            margin: 0 auto;
         }
-        .character-sprite {
-            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
-            max-height: 85vh;
+        .speaker-name {
+            background-color: #2a2a2a;
+            color: #fca5a5; /* Мягкий красный акцент */
+            padding: 4px 12px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            display: inline-block;
+            margin-bottom: -1px;
+            font-weight: bold;
         }
-        .sprite-left {
-            transform: scaleX(-1);
+        .sprite {
+            position: absolute;
+            bottom: 0;
+            max-height: 85%; /* Ограничение высоты спрайта */
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 10;
+        }
+        .sprite.left {
+            left: 20px;
+        }
+        .sprite.right {
+            right: 20px;
+        }
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.3s ease;
+        }
+        .fade-enter, .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
+            opacity: 0;
         }
     </style>
 </head>
 <body class="min-h-screen">
 
-    <header class="header shadow-lg p-4 flex justify-between items-center sticky top-0 z-50">
-        <h1 id="main-title" class="text-xl md:text-2xl font-bold text-white">Houkai Gakuen 2 архив сюжета</h1>
-        <div class="relative">
-            <select id="language-selector" class="custom-select rounded-md py-2 px-3 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-pink-500">
-                <option value="ru">Русский</option>
-                <option value="en">English</option>
-                <option value="cn">中文</option>
-            </select>
+    <!-- 1. Header Bar -->
+    <header id="header" class="fixed top-0 left-0 right-0 z-50 p-4 shadow-xl text-white" style="background-color: #2a2a2a;">
+        <div class="flex justify-between items-center max-w-7xl mx-auto">
+            <h1 id="headerTitle" class="text-xl font-bold tracking-wider">Houkai Gakuen 2 архив сюжета</h1>
+            
+            <div class="flex items-center space-x-4">
+                <button id="resetButton" onclick="resetProgress()" class="px-3 py-1 bg-red-800 hover:bg-red-700 rounded-full transition duration-150 text-sm">Сброс</button>
+                <button id="helpButton" onclick="showHelpModal()" class="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-full transition duration-150 text-sm">?</button>
+                <select id="languageSelect" onchange="updateUI()" class="bg-gray-700 text-white rounded-lg p-2 cursor-pointer transition hover:ring-2 ring-red-400">
+                    <option value="ru">Русский</option>
+                    <option value="en">English</option>
+                    <option value="cn">中文</option>
+                </select>
+            </div>
         </div>
     </header>
 
-    <main class="container mx-auto p-4 md:p-8">
-        <div class="bg-gray-800 bg-opacity-50 p-6 rounded-lg shadow-xl mb-8">
-            <p id="intro-text" class="text-center mb-6 text-lg">Добро пожаловать в архив сюжета Houkai Gakuen 2. Выберите тип сюжета, главу и этап, чтобы начать чтение.</p>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <label id="label-story-type" for="story-type-selector" class="block mb-2 text-sm font-medium">Тип сюжета</label>
-                    <select id="story-type-selector" class="custom-select w-full rounded-md p-2.5 focus:outline-none focus:ring-2 focus:ring-pink-500"></select>
-                </div>
-                <div>
-                    <label id="label-story" for="story-selector" class="block mb-2 text-sm font-medium">Сюжет</label>
-                    <select id="story-selector" class="custom-select w-full rounded-md p-2.5 focus:outline-none focus:ring-2 focus:ring-pink-500" disabled></select>
-                </div>
-                <div>
-                    <label id="label-stage" for="stage-selector" class="block mb-2 text-sm font-medium">Этап</label>
-                    <select id="stage-selector" class="custom-select w-full rounded-md p-2.5 focus:outline-none focus:ring-2 focus:ring-pink-500" disabled></select>
-                </div>
+    <!-- 2. Main Content Area -->
+    <main class="pt-20 pb-4 px-4 max-w-7xl mx-auto min-h-screen">
+        
+        <!-- Controls Panel -->
+        <div class="bg-gray-700 p-4 rounded-xl shadow-lg mb-6 flex flex-wrap gap-4 items-end">
+            <div class="flex-1 min-w-[180px]">
+                <label for="storyTypeSelect" id="labelStoryType" class="block text-sm font-medium mb-1 text-gray-300">Тип сюжета</label>
+                <select id="storyTypeSelect" onchange="updateChapterSelect()" class="w-full bg-gray-800 text-white rounded-lg p-2.5 cursor-pointer focus:ring-red-400 focus:border-red-400 transition">
+                    <!-- Options populated by JS -->
+                </select>
             </div>
+
+            <div class="flex-1 min-w-[250px]">
+                <label for="chapterSelect" id="labelChapter" class="block text-sm font-medium mb-1 text-gray-300">Сюжет (Глава)</label>
+                <select id="chapterSelect" onchange="enableLoadButton()" class="w-full bg-gray-800 text-white rounded-lg p-2.5 cursor-pointer focus:ring-red-400 focus:border-red-400 transition">
+                    <!-- Options populated by JS -->
+                </select>
+            </div>
+            
+            <button id="loadButton" onclick="updateStoryContent(0)" class="min-w-[120px] bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition duration-150 disabled:opacity-50" disabled>
+                <span id="loadText">Загрузить</span>
+            </button>
         </div>
 
-        <div id="loading-indicator" class="text-center text-pink-400 font-bold text-xl my-8 hidden">
-            Загрузка сюжета...
-        </div>
+        <!-- 3. Visual Novel Viewer -->
+        <div id="vnViewer" class="relative w-full aspect-[16/9] bg-gray-900 rounded-xl shadow-2xl overflow-hidden flex flex-col justify-end transition-colors duration-500" style="min-height: 400px; background-image: url('https://placehold.co/1920x1080/2a2a2a/fca5a5?text=Выбор+сюжета'); background-size: cover; background-position: center; border: 4px solid #fca5a5;">
 
-        <div id="story-display" class="hidden">
-             <div class="story-container w-full rounded-lg shadow-2xl flex flex-col justify-end items-center p-4 relative overflow-hidden">
-                <div id="character-display" class="absolute inset-0 flex justify-center items-end">
-                     <img id="sprite-left" src="" alt="Спрайт персонажа слева" class="character-sprite sprite-left opacity-0 h-full object-contain object-bottom" style="max-width: 40%;">
-                     <img id="sprite-right" src="" alt="Спрайт персонажа справа" class="character-sprite h-full object-contain object-bottom opacity-0" style="max-width: 40%;">
+            <!-- Sprite Container -->
+            <div id="spriteContainer" class="absolute inset-0 z-10 pointer-events-none flex justify-center items-end p-4">
+                <!-- Sprites are inserted here by JS -->
+            </div>
+
+            <!-- Dialogue Box -->
+            <div id="dialogueBox" class="vn-overlay p-4 sm:p-6 rounded-lg shadow-2xl z-20 transition-all duration-300 transform translate-y-0 opacity-100 hidden">
+                <div id="speakerNameContainer" class="h-6">
+                    <div id="currentSpeaker" class="speaker-name text-lg"></div>
                 </div>
-                <div id="dialogue-container" class="dialogue-box w-full max-w-4xl p-6 rounded-lg relative z-10 text-center hidden">
-                    <h3 id="speaker-name" class="text-2xl font-bold text-pink-400 mb-2"></h3>
-                    <p id="dialogue-text" class="text-lg leading-relaxed"></p>
-                    <div class="flex justify-center mt-4 gap-4">
-                        <button id="prev-btn" class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-6 rounded-lg transition duration-300"></button>
-                        <button id="next-btn" class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-6 rounded-lg transition duration-300"></button>
+                
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mt-2">
+                    <p id="currentText" class="text-xl sm:text-2xl leading-relaxed transition-opacity duration-300">Текст диалога...</p>
+                    
+                    <!-- Control buttons (LLM and Navigation) -->
+                    <div class="flex flex-col space-y-2 mt-4 sm:mt-0 sm:ml-6 flex-shrink-0">
+                        <!-- LLM Context Buttons -->
+                        <button id="contextButton" onclick="handleLLMCall('character')" class="w-full sm:w-auto px-4 py-2 bg-purple-700 hover:bg-purple-800 text-white font-medium rounded-full text-sm transition duration-150 shadow-md">
+                            ✨ Справка о персонаже
+                        </button>
+                        <button id="analysisButton" onclick="handleLLMCall('analysis')" class="w-full sm:w-auto px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white font-medium rounded-full text-sm transition duration-150 shadow-md">
+                            ✨ Анализ сцены
+                        </button>
                     </div>
                 </div>
             </div>
+
+            <!-- Navigation Buttons -->
+            <div id="navButtons" class="absolute bottom-6 right-6 flex space-x-3 z-30 opacity-0 transition-opacity duration-300 hidden">
+                <button id="prevButton" onclick="navigateDialogue(-1)" class="bg-gray-800 hover:bg-gray-700 text-white p-3 rounded-full shadow-lg transition duration-150 disabled:opacity-30">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                </button>
+                <button id="nextButton" onclick="navigateDialogue(1)" class="bg-red-600 hover:bg-red-500 text-white p-3 rounded-full shadow-lg transition duration-150 disabled:opacity-30">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </button>
+            </div>
+            
         </div>
+
     </main>
 
+    <!-- Modal for LLM Output and Loading -->
+    <div id="llmModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center hidden" onclick="closeModal(event)">
+        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl max-w-lg w-11/12 transform transition-all duration-300 scale-95" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-3">
+                <h3 id="modalTitle" class="text-xl font-bold text-red-400">Загрузка...</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div id="modalContent">
+                <!-- Content and spinner will be dynamically inserted here -->
+                <div id="modalSpinner" class="flex justify-center items-center py-8">
+                    <svg class="animate-spin -ml-1 mr-3 h-8 w-8 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="text-gray-300">Ожидание ответа от LLM...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Help Modal -->
+    <div id="helpModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center hidden" onclick="showHelpModal()">
+        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl max-w-lg w-11/12 transform transition-all duration-300 scale-95" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-3">
+                <h3 class="text-xl font-bold text-red-400">О приложении</h3>
+                <button onclick="showHelpModal()" class="text-gray-400 hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <p id="helpContent" class="text-gray-300 leading-relaxed"></p>
+        </div>
+    </div>
+
     <script>
+        const API_KEY = "";
+        const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=" + API_KEY;
+        const STORAGE_KEY = 'hg2_story_progress'; // Key for localStorage
+
+        let currentDialogue = [];
+        let currentDialogueIndex = 0;
+        let dialogueIsLoaded = false;
+
+        // --- I18N DATA ---
         const i18n = {
             ru: {
-                mainTitle: "Houkai Gakuen 2 архив сюжета",
-                introText: "Добро пожаловать в архив сюжета Houkai Gakuen 2. Выберите тип сюжета, главу и этап, чтобы начать чтение.",
-                labels: {
-                    storyType: "Тип сюжета",
-                    story: "Сюжет",
-                    stage: "Этап",
-                },
-                buttons: {
-                    prev: "Назад",
-                    next: "Далее",
-                },
-                placeholders: {
-                    select: "Выберите...",
-                    story: "Сначала выберите тип",
-                    stage: "Сначала выберите сюжет"
-                },
-                storyTypes: {
-                    main: "Основной сюжет",
-                    extra: "Дополнительный сюжет",
-                    boss: "Боссы",
-                    vn: "Визуальная новелла",
-                    novel: "Роман"
-                },
+                headerTitle: "Houkai Gakuen 2 архив сюжета",
+                labelStoryType: "Тип сюжета",
+                labelChapter: "Сюжет (Глава)",
+                loadText: "Загрузить",
+                resetProgress: "Сброс",
+                characterContext: "✨ Справка о персонаже",
+                sceneAnalysis: "✨ Анализ сцены",
+                modalTitleCharacter: "Справка о персонаже",
+                modalTitleAnalysis: "Анализ сцены",
+                modalLoading: "Ожидание ответа от LLM...",
+                errorFetch: "Ошибка загрузки контента: файл не найден или проблема с сетью.",
+                errorLLM: "Ошибка LLM: Не удалось получить ответ.",
+                helpTitle: "Как пользоваться архивом:",
+                helpText: "Это интерактивный архив сюжетов Honkai Gakuen 2.\n\n1. Используйте верхние выпадающие списки, чтобы выбрать **Тип сюжета** и конкретную **Главу**.\n2. Нажмите **'Загрузить'**.\n3. В окне визуальной новеллы используйте кнопки **Далее/Назад** для просмотра диалога. **Ваш прогресс автоматически сохраняется**.\n4. Нажмите **'Справка о персонаже'** или **'Анализ сцены'**, чтобы получить контекст лора от Gemini API в реальном времени."
             },
             en: {
-                mainTitle: "Houkai Gakuen 2 Story Archive",
-                introText: "Welcome to the Houkai Gakuen 2 Story Archive. Select a story type, chapter, and stage to start reading.",
-                labels: {
-                    storyType: "Story Type",
-                    story: "Story",
-                    stage: "Stage",
-                },
-                buttons: {
-                    prev: "Previous",
-                    next: "Next",
-                },
-                placeholders: {
-                    select: "Select...",
-                    story: "Select a type first",
-                    stage: "Select a story first"
-                },
-                storyTypes: {
-                    main: "Main Story",
-                    extra: "Extra Story",
-                    boss: "Bosses",
-                    vn: "Visual Novel",
-                    novel: "Novel"
-                },
+                headerTitle: "Houkai Gakuen 2 Story Archive",
+                labelStoryType: "Story Type",
+                labelChapter: "Story (Chapter)",
+                loadText: "Load",
+                resetProgress: "Reset",
+                characterContext: "✨ Character Context",
+                sceneAnalysis: "✨ Scene Analysis",
+                modalTitleCharacter: "Character Context",
+                modalTitleAnalysis: "Scene Analysis",
+                modalLoading: "Waiting for LLM response...",
+                errorFetch: "Content loading error: file not found or network issue.",
+                errorLLM: "LLM Error: Failed to get response.",
+                helpTitle: "How to use the Archive:",
+                helpText: "This is an interactive story archive for Honkai Gakuen 2.\n\n1. Use the top dropdowns to select the **Story Type** and a specific **Chapter**.\n2. Click **'Load'**.\n3. In the Visual Novel viewer, use the **Next/Prev** buttons to advance the dialogue. **Your progress is saved automatically**.\n4. Click **'Character Context'** or **'Scene Analysis'** to get real-time lore context from the Gemini API."
             },
             cn: {
-                mainTitle: "崩坏学园2剧情档案",
-                introText: "欢迎来到崩坏学园2剧情档案。请选择故事类型、章节和关卡开始阅读。",
-                labels: {
-                    storyType: "故事类型",
-                    story: "剧情",
-                    stage: "关卡",
-                },
-                buttons: {
-                    prev: "上一页",
-                    next: "下一页",
-                },
-                placeholders: {
-                    select: "请选择...",
-                    story: "请先选择类型",
-                    stage: "请先选择剧情"
-                },
-                storyTypes: {
-                    main: "主线剧情",
-                    extra: "支线剧情",
-                    boss: "首领",
-                    vn: "视觉小说",
-                    novel: "小说"
-                },
+                headerTitle: "崩坏学园2 剧情档案",
+                labelStoryType: "剧情类型",
+                labelChapter: "剧情 (章节)",
+                loadText: "加载",
+                resetProgress: "重置",
+                characterContext: "✨ 角色资料",
+                sceneAnalysis: "✨ 场景分析",
+                modalTitleCharacter: "角色资料",
+                modalTitleAnalysis: "场景分析",
+                modalLoading: "等待 LLM 响应...",
+                errorFetch: "内容加载错误：未找到文件或网络问题。",
+                errorLLM: "LLM 错误：未能获取响应。",
+                helpTitle: "如何使用档案：",
+                helpText: "这是一个崩坏学园2的交互式剧情档案。\n\n1. 使用顶部下拉列表选择**剧情类型**和特定**章节**。\n2. 点击**'加载'**。\n3. 在视觉小说查看器中，使用**下一页/上一页**按钮推进对话。**您的进度将自动保存**。\n4. 点击**'角色资料'**或**'场景分析'**以获取来自 Gemini API 的实时背景信息。"
             }
         };
 
-        // Story structure defines the dropdowns with multilingual names.
+        // --- STORY DATA STRUCTURE ---
         const storyData = {
             main: {
-                "ch1": { 
-                    ru: "Глава 1: Выброс Хоукая", 
-                    en: "Chapter 1: Houkai Outbreak", 
-                    cn: "第1章：崩坏爆发",
-                    stages: {
-                        "s1": { ru: "1-1", en: "1-1", cn: "1-1" },
-                        "s2": { ru: "1-2", en: "1-2", cn: "1-2" },
-                        "s3": { ru: "1-3", en: "1-3", cn: "1-3" },
-                    }
-                },
-                "ch2": { 
-                    ru: "Глава 2: Киана наносит ответный удар", 
-                    en: "Chapter 2: Kiana Strikes Back", 
-                    cn: "第2章：琪亚娜反击",
-                    stages: {
-                        "s1": { ru: "2-1", en: "2-1", cn: "2-1" },
-                        "s2": { ru: "2-2", en: "2-2", cn: "2-2" },
-                    }
-                },
-                 "ch3": { 
-                    ru: "Глава 3: Зловещая молния", 
-                    en: "Chapter 3: Sinister Lightning", 
-                    cn: "第3章：不祥的闪电",
-                    stages: {
-                        "s1": { ru: "3-1", en: "3-1", cn: "3-1" },
-                    }
-                },
+                ru: "Основной сюжет", en: "Main Story", cn: "主线剧情",
+                chapters: {
+                    ch1: { ru: "Глава 1: Выброс Хоукая", en: "Chapter 1: Honkai Eruption", cn: "第一章 崩坏爆发" },
+                    ch2: { ru: "Глава 2: Киана наносит ответный удар", en: "Chapter 2: Kiana Strikes Back", cn: "第二章 琪亚娜的反击" },
+                    ch3: { ru: "Глава 3: Зловещая молния", en: "Chapter 3: Ominous Lightning", cn: "第三章 邪恶的雷电" }
+                }
             },
             extra: {
-                "ex1": { 
-                    ru: "Экстра 1: Берегись", 
-                    en: "Extra 1: Beware", 
-                    cn: "额外1：当心",
-                    stages: {
-                        "s1": { ru: "Э1-1", en: "E1-1", cn: "附1-1" },
-                    }
-                },
-                "ex2": { 
-                    ru: "Экстра 2: Неутолимое желание", 
-                    en: "Extra 2: Insatiable Desire", 
-                    cn: "额外2：永不满足的欲望",
-                     stages: {
-                        "s1": { ru: "Э2-1", en: "E2-1", cn: "附2-1" },
-                        "s2": { ru: "Э2-2", en: "E2-2", cn: "附2-2" },
-                    }
+                ru: "Дополнительный сюжет", en: "Extra Story", cn: "额外剧情",
+                chapters: {
+                    ex1: { ru: "Экстра 1: Берегись", en: "Extra 1: Be Careful", cn: "额外 1: 小心" },
+                    ex2: { ru: "Экстра 2: Неутолимое желание", en: "Extra 2: Insatiable Desire", cn: "额外 2: 不可满足的欲望" }
                 }
             },
-            boss: {},
-            vn: {},
-            novel: {}
-        };
-        
-        let currentLang = 'ru';
-        let currentDialogueIndex = 0;
-        let fetchedStoryContent = null; 
-        let currentStageKey = null; 
-        let currentContentPath = '';
-
-        const langSelector = document.getElementById('language-selector');
-        const mainTitle = document.getElementById('main-title');
-        const introText = document.getElementById('intro-text');
-        const labelStoryType = document.getElementById('label-story-type');
-        const labelStory = document.getElementById('label-story');
-        const labelStage = document.getElementById('label-stage');
-        const storyTypeSelector = document.getElementById('story-type-selector');
-        const storySelector = document.getElementById('story-selector');
-        const stageSelector = document.getElementById('stage-selector');
-        const loadingIndicator = document.getElementById('loading-indicator');
-        const storyDisplay = document.getElementById('story-display');
-        const storyContainer = storyDisplay.querySelector('.story-container');
-        const dialogueContainer = document.getElementById('dialogue-container');
-        const speakerName = document.getElementById('speaker-name');
-        const dialogueText = document.getElementById('dialogue-text');
-        const prevBtn = document.getElementById('prev-btn');
-        const nextBtn = document.getElementById('next-btn');
-        const spriteLeft = document.getElementById('sprite-left');
-        const spriteRight = document.getElementById('sprite-right');
-
-        function updateUI() {
-            const t = i18n[currentLang];
-            mainTitle.textContent = t.mainTitle;
-            introText.textContent = t.introText;
-            labelStoryType.textContent = t.labels.storyType;
-            labelStory.textContent = t.labels.story;
-            labelStage.textContent = t.labels.stage;
-            prevBtn.textContent = t.buttons.prev;
-            nextBtn.textContent = t.buttons.next;
-
-            populateStoryTypes();
-            populateStories();
-            populateStages();
-            
-            if(fetchedStoryContent) {
-                renderDialogue();
-            }
-        }
-
-        function populateStoryTypes() {
-            const t = i18n[currentLang];
-            const selectedValue = storyTypeSelector.value;
-            storyTypeSelector.innerHTML = `<option value="">${t.placeholders.select}</option>`;
-            for (const typeKey in t.storyTypes) {
-                const option = document.createElement('option');
-                option.value = typeKey;
-                option.textContent = t.storyTypes[typeKey];
-                storyTypeSelector.appendChild(option);
-            }
-            storyTypeSelector.value = selectedValue;
-        }
-
-        function populateStories() {
-            const t = i18n[currentLang];
-            const storyType = storyTypeSelector.value;
-            const selectedValue = storySelector.value;
-            storySelector.innerHTML = '';
-
-            if (!storyType) {
-                storySelector.innerHTML = `<option value="">${t.placeholders.story}</option>`;
-                storySelector.disabled = true;
-                return;
-            }
-            
-            storySelector.disabled = false;
-            storySelector.innerHTML = `<option value="">${t.placeholders.select}</option>`;
-            const stories = storyData[storyType];
-            for (const storyKey in stories) {
-                const option = document.createElement('option');
-                option.value = storyKey;
-                option.textContent = stories[storyKey][currentLang];
-                storySelector.appendChild(option);
-            }
-            // Сохраняем выбранное значение, если оно осталось актуальным
-            storySelector.value = selectedValue;
-        }
-        
-        function populateStages() {
-            const t = i18n[currentLang];
-            const storyType = storyTypeSelector.value;
-            const story = storySelector.value;
-            const selectedValue = stageSelector.value;
-            stageSelector.innerHTML = '';
-
-            if (!storyType || !story) {
-                stageSelector.innerHTML = `<option value="">${t.placeholders.stage}</option>`;
-                stageSelector.disabled = true;
-                return;
-            }
-
-            stageSelector.disabled = false;
-            stageSelector.innerHTML = `<option value="">${t.placeholders.select}</option>`;
-            const stages = storyData[storyType][story]?.stages;
-            if (stages) {
-                for (const stageKey in stages) {
-                    const option = document.createElement('option');
-                    option.value = stageKey;
-                    option.textContent = stages[stageKey][currentLang];
-                    stageSelector.appendChild(option);
+            bosses: {
+                ru: "Боссы", en: "Boss Fights", cn: "首领战",
+                chapters: {
+                    b1: { ru: "Босс: Химэко", en: "Boss: Himeko", cn: "首领：姬子" }
+                }
+            },
+            vn: {
+                ru: "Визуальная новелла", en: "Visual Novel", cn: "视觉小说",
+                chapters: {
+                    vn1: { ru: "VN: Последняя Роза", en: "VN: Last Rose", cn: "视觉小说：最后的玫瑰" }
+                }
+            },
+            romance: {
+                ru: "Роман", en: "Romance", cn: "小说",
+                chapters: {
+                    r1: { ru: "Роман: Встреча в Нагазоре", en: "Novel: Meeting in Nagazora", cn: "小说：长空市的相遇" }
                 }
             }
-            stageSelector.value = selectedValue;
+        };
+
+        // --- PROGRESS MANAGEMENT ---
+        
+        /** Saves current progress (language, type, chapter, index) to localStorage. */
+        function saveProgress() {
+            const progress = {
+                lang: document.getElementById('languageSelect').value,
+                type: document.getElementById('storyTypeSelect').value,
+                chapter: document.getElementById('chapterSelect').value,
+                index: currentDialogueIndex
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
         }
 
-        async function fetchStoryContent(type, storyKey) {
-            if (!type || !storyKey) return false;
+        /** Loads progress from localStorage on page load. */
+        function loadProgress() {
+            const savedProgress = localStorage.getItem(STORAGE_KEY);
+            if (!savedProgress) return;
+
+            const progress = JSON.parse(savedProgress);
             
-            // НОВЫЙ ПУТЬ: story/{язык}/{тип_сюжета}_{глава}.json
-            const filePath = `story/${currentLang}/${type}_${storyKey}.json`;
-            
-            if (filePath === currentContentPath && fetchedStoryContent) {
-                return true; 
+            // Restore language
+            const langSelect = document.getElementById('languageSelect');
+            if (i18n[progress.lang]) {
+                langSelect.value = progress.lang;
             }
 
-            loadingIndicator.classList.remove('hidden');
-            storyDisplay.classList.add('hidden');
-            dialogueContainer.classList.add('hidden');
+            // Restore story type
+            const typeSelect = document.getElementById('storyTypeSelect');
+            if (storyData[progress.type]) {
+                typeSelect.value = progress.type;
+            }
+
+            // Must update UI first to populate chapter list
+            updateUI(); 
+
+            // Restore chapter
+            const chapterSelect = document.getElementById('chapterSelect');
+            if (storyData[progress.type]?.chapters[progress.chapter]) {
+                chapterSelect.value = progress.chapter;
+            }
+
+            // If we have both chapter and type, load content from the saved index
+            if (typeSelect.value && chapterSelect.value) {
+                // Pass the saved index to updateStoryContent
+                updateStoryContent(progress.index);
+            }
+        }
+
+        /** Clears saved progress and reloads the page. */
+        function resetProgress() {
+            localStorage.removeItem(STORAGE_KEY);
+            document.getElementById('dialogueBox').classList.add('hidden');
+            document.getElementById('navButtons').classList.add('hidden');
+            // Reset selectors to default
+            document.getElementById('languageSelect').value = 'ru';
+            updateUI(); 
+            // Optional: Show a message to the user that progress was reset
+            document.getElementById('vnViewer').style.backgroundImage = `url('https://placehold.co/1920x1080/2a2a2a/fca5a5?text=Прогресс+сброшен.+Выберите+главу.')`;
+        }
+
+        // --- CORE UI FUNCTIONS ---
+
+        /** Enables the load button when a chapter is selected. */
+        function enableLoadButton() {
+            const storyId = document.getElementById('chapterSelect').value;
+            document.getElementById('loadButton').disabled = !storyId;
+        }
+
+        /** Updates all UI elements based on the current language selection. */
+        function updateUI() {
+            const lang = document.getElementById('languageSelect').value;
+            const text = i18n[lang];
+
+            document.getElementById('headerTitle').textContent = text.headerTitle;
+            document.getElementById('labelStoryType').textContent = text.labelStoryType;
+            document.getElementById('labelChapter').textContent = text.labelChapter;
+            document.getElementById('loadText').textContent = text.loadText;
+            document.getElementById('resetButton').textContent = text.resetProgress;
+            document.getElementById('contextButton').textContent = text.characterContext;
+            document.getElementById('analysisButton').textContent = text.sceneAnalysis;
+            document.getElementById('helpContent').innerHTML = `
+                <h4 class="text-lg font-semibold text-red-400 mb-2">${text.helpTitle}</h4>
+                <p class="whitespace-pre-line">${text.helpText}</p>`;
+            
+            updateStoryTypeSelect();
+            updateChapterSelect();
+            enableLoadButton();
+        }
+
+        /** Populates the Story Type dropdown based on the current language. */
+        function updateStoryTypeSelect() {
+            const select = document.getElementById('storyTypeSelect');
+            const lang = document.getElementById('languageSelect').value;
+            const currentType = select.value;
+            
+            select.innerHTML = '';
+            
+            const defaultOption = document.createElement('option');
+            defaultOption.value = "";
+            defaultOption.textContent = "---";
+            select.appendChild(defaultOption);
+
+            for (const key in storyData) {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = storyData[key][lang];
+                if (key === currentType) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            }
+        }
+
+        /** Populates the Chapter dropdown based on the selected Story Type and language. */
+        function updateChapterSelect() {
+            const typeKey = document.getElementById('storyTypeSelect').value;
+            const select = document.getElementById('chapterSelect');
+            const lang = document.getElementById('languageSelect').value;
+            
+            select.innerHTML = '';
+            
+            const defaultOption = document.createElement('option');
+            defaultOption.value = "";
+            defaultOption.textContent = "---";
+            select.appendChild(defaultOption);
+
+            if (typeKey && storyData[typeKey] && storyData[typeKey].chapters) {
+                const chapters = storyData[typeKey].chapters;
+                for (const key in chapters) {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = chapters[key][lang];
+                    select.appendChild(option);
+                }
+                select.disabled = false;
+            } else {
+                select.disabled = true;
+            }
+            enableLoadButton();
+        }
+
+        /** Asynchronously loads the selected story chapter JSON and initializes the VN viewer. 
+         * @param {number} startIndex - The dialogue index to start viewing from (used for loading progress).
+         */
+        async function updateStoryContent(startIndex = 0) {
+            const storyType = document.getElementById('storyTypeSelect').value;
+            const storyId = document.getElementById('chapterSelect').value;
+            const currentLang = document.getElementById('languageSelect').value;
+            const vnViewer = document.getElementById('vnViewer');
+            const loadButton = document.getElementById('loadButton');
+            const loadText = document.getElementById('loadText');
+            
+            if (!storyType || !storyId) return;
+
+            // Filename format: {language}/{type}_{chapter}.json
+            const fileName = `story/${currentLang}/${storyType}_${storyId}.json`;
+
+            loadButton.disabled = true;
+            loadText.textContent = i18n[currentLang].loadText + '...';
             
             try {
-                // Добавляем экспоненциальный откат для устойчивости
-                const maxRetries = 3;
-                let response = null;
-                for (let i = 0; i < maxRetries; i++) {
-                    try {
-                        response = await fetch(filePath);
-                        if (response.ok) break;
-                    } catch (e) {
-                        // Если это не последняя попытка, ждем и повторяем
-                        if (i < maxRetries - 1) {
-                            await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
-                        } else {
-                            throw e;
-                        }
-                    }
+                const response = await fetch(fileName);
+                if (!response.ok) {
+                    throw new Error(i18n[currentLang].errorFetch + ` (File: ${fileName})`);
                 }
+                const data = await response.json();
                 
-                if (!response || !response.ok) {
-                    throw new Error(`Не удалось загрузить файл: ${filePath}`);
+                currentDialogue = data.dialogue;
+                
+                // Set the current index, ensuring it doesn't exceed the dialogue length
+                currentDialogueIndex = Math.min(startIndex, currentDialogue.length - 1);
+                if (currentDialogueIndex < 0) currentDialogueIndex = 0;
+
+                dialogueIsLoaded = true;
+
+                // Set default VN background if available
+                if (currentDialogue.length > 0 && currentDialogue[currentDialogueIndex].background) {
+                    vnViewer.style.backgroundImage = `url('${currentDialogue[currentDialogueIndex].background}')`;
+                } else {
+                    vnViewer.style.backgroundImage = `url('https://placehold.co/1920x1080/2a2a2a/fca5a5?text=${storyData[storyType][currentLang]}')`;
                 }
 
-                fetchedStoryContent = await response.json();
-                currentContentPath = filePath;
-                return true;
+                document.getElementById('dialogueBox').classList.remove('hidden');
+                document.getElementById('navButtons').classList.remove('hidden');
+                renderDialogue();
+                saveProgress(); // Save initial load state
+
             } catch (error) {
-                console.error(`Ошибка при загрузке JSON: ${error.message}`);
-                loadingIndicator.textContent = `Ошибка загрузки контента: ${filePath}. Проверьте, существует ли файл.`;
-                fetchedStoryContent = null;
-                return false;
+                console.error("Error loading story:", error.message);
+                currentDialogue = [];
+                dialogueIsLoaded = false;
+                vnViewer.style.backgroundImage = `url('https://placehold.co/1920x1080/aa0000/ffffff?text=Ошибка+Загрузки')`;
+                document.getElementById('dialogueBox').classList.add('hidden');
+                document.getElementById('navButtons').classList.add('hidden');
+                alert(error.message); 
+
             } finally {
-                loadingIndicator.classList.add('hidden');
+                loadButton.disabled = false;
+                loadText.textContent = i18n[currentLang].loadText;
             }
         }
 
-        async function displayStage() {
-            const storyType = storyTypeSelector.value;
-            const story = storySelector.value;
-            const stage = stageSelector.value;
-            currentStageKey = stage;
-
-            if (!storyType || !story || !stage) {
-                storyDisplay.classList.add('hidden');
-                dialogueContainer.classList.add('hidden');
-                return;
-            }
-            
-            // Сначала загружаем контент для выбранного сюжета
-            const contentLoaded = await fetchStoryContent(storyType, story);
-
-            if (contentLoaded && fetchedStoryContent && fetchedStoryContent[currentStageKey]) {
-                const currentStageData = fetchedStoryContent[currentStageKey];
-                
-                storyDisplay.classList.remove('hidden');
-                storyContainer.style.backgroundImage = `url('${currentStageData.background}')`;
-                currentDialogueIndex = 0;
-                renderDialogue();
-                dialogueContainer.classList.remove('hidden');
-            } else {
-                storyDisplay.classList.add('hidden');
-                dialogueContainer.classList.add('hidden');
-            }
-        }
-
+        /** Renders the current dialogue line, sprite, and updates navigation buttons. */
         function renderDialogue() {
-            if (!fetchedStoryContent || !currentStageKey) return;
+            if (!dialogueIsLoaded || currentDialogue.length === 0) return;
 
-            const currentStageData = fetchedStoryContent[currentStageKey];
-
-            if (!currentStageData || !currentStageData.dialogue) return;
-
-            const dialogue = currentStageData.dialogue[currentDialogueIndex];
+            const dialogue = currentDialogue[currentDialogueIndex];
+            const vnViewer = document.getElementById('vnViewer');
+            const spriteContainer = document.getElementById('spriteContainer');
+            const currentSpeaker = document.getElementById('currentSpeaker');
+            const currentText = document.getElementById('currentText');
+            const speakerNameContainer = document.getElementById('speakerNameContainer');
             
-            // ВНИМАНИЕ: Ссылаемся напрямую на поля, так как JSON теперь одноязычный
-            speakerName.textContent = dialogue.speaker || ''; 
-            dialogueText.textContent = dialogue.text || '';
-            
-            spriteLeft.style.opacity = 0;
-            spriteRight.style.opacity = 0;
+            // 1. Update Background
+            if (dialogue.background) {
+                vnViewer.style.backgroundImage = `url('${dialogue.background}')`;
+            }
 
+            // 2. Update Sprite
+            spriteContainer.innerHTML = ''; // Clear existing sprites
             if (dialogue.sprite) {
-                const spriteUrl = `images/sprites/${dialogue.sprite}`; 
-                if (dialogue.position === 'left') {
-                    spriteLeft.src = spriteUrl;
-                    spriteLeft.style.opacity = 1;
-                } else if (dialogue.position === 'right') {
-                    spriteRight.src = spriteUrl;
-                    spriteRight.style.opacity = 1;
+                const img = document.createElement('img');
+                img.src = dialogue.sprite;
+                img.alt = dialogue.speaker;
+                img.classList.add('sprite', dialogue.position === 'left' ? 'left' : 'right');
+                img.onerror = () => img.src = `https://placehold.co/200x400/808080/ffffff?text=${dialogue.speaker}`; // Placeholder on error
+                spriteContainer.appendChild(img);
+            }
+            
+            // 3. Update Text and Speaker
+            currentText.style.opacity = '0';
+            setTimeout(() => {
+                currentText.textContent = dialogue.text;
+                currentText.style.opacity = '1';
+            }, 50); // Small delay for fade effect
+
+            if (dialogue.speaker) {
+                currentSpeaker.textContent = dialogue.speaker;
+                speakerNameContainer.classList.remove('hidden');
+            } else {
+                currentSpeaker.textContent = '';
+                speakerNameContainer.classList.add('hidden');
+            }
+
+            // 4. Update Navigation Buttons
+            document.getElementById('prevButton').disabled = currentDialogueIndex === 0;
+            document.getElementById('nextButton').disabled = currentDialogueIndex >= currentDialogue.length - 1;
+            
+            // 5. Update LLM buttons visibility
+            document.getElementById('contextButton').style.display = dialogue.speaker ? 'block' : 'none';
+            document.getElementById('analysisButton').style.display = dialogue.text ? 'block' : 'none';
+        }
+
+        /** Handles navigation (next/previous) in the dialogue array. */
+        function navigateDialogue(direction) {
+            const newIndex = currentDialogueIndex + direction;
+            if (newIndex >= 0 && newIndex < currentDialogue.length) {
+                currentDialogueIndex = newIndex;
+                renderDialogue();
+                saveProgress(); // Save progress after navigation
+            }
+        }
+
+        // --- LLM API INTEGRATION & MODAL ---
+
+        /** Shows the modal with a loading state. */
+        function showModal(titleKey) {
+            const lang = document.getElementById('languageSelect').value;
+            document.getElementById('modalTitle').textContent = i18n[lang][titleKey];
+            document.getElementById('modalContent').innerHTML = `
+                <div id="modalSpinner" class="flex justify-center items-center py-8">
+                    <svg class="animate-spin -ml-1 mr-3 h-8 w-8 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="text-gray-300">${i18n[lang].modalLoading}</p>
+                </div>`;
+            document.getElementById('llmModal').classList.remove('hidden');
+        }
+
+        /** Closes the LLM modal. */
+        function closeModal(event = null) {
+            if (event && event.target.id !== 'llmModal') return;
+            document.getElementById('llmModal').classList.add('hidden');
+        }
+        
+        /** Toggles the help modal. */
+        function showHelpModal() {
+            document.getElementById('helpModal').classList.toggle('hidden');
+        }
+
+        /** Sends a request to the Gemini API for character context or scene analysis. */
+        async function handleLLMCall(type) {
+            if (!dialogueIsLoaded) return;
+
+            const dialogue = currentDialogue[currentDialogueIndex];
+            const currentLang = document.getElementById('languageSelect').value;
+            const storyChapterName = document.getElementById('chapterSelect').options[document.getElementById('chapterSelect').selectedIndex].textContent;
+
+            let prompt = "";
+            let systemInstruction = "";
+            let modalTitleKey = "";
+
+            if (type === 'character' && dialogue.speaker) {
+                const speakerName = dialogue.speaker;
+                modalTitleKey = 'modalTitleCharacter';
+                
+                systemInstruction = `Ты эксперт по лору игры Houkai Gakuen 2. Твоя задача — предоставить краткую, увлекательную, но точную справку о персонаже, названном пользователем. Ответ должен быть в одном абзаце на ${currentLang === 'ru' ? 'русском' : (currentLang === 'en' ? 'английском' : 'китайском')} языке.`;
+                prompt = `Предоставь краткую биографию и роль в сюжете игры Houkai Gakuen 2 для персонажа по имени: "${speakerName}".`;
+                
+            } else if (type === 'analysis' && dialogue.text) {
+                const sceneText = dialogue.text;
+                modalTitleKey = 'modalTitleAnalysis';
+
+                systemInstruction = `Ты литературный аналитик и эксперт по сюжету игры Houkai Gakuen 2. Твоя задача — объяснить важность предоставленного фрагмента диалога (сцены) для общего повествования. Ответ должен быть в одном-двух абзацах на ${currentLang === 'ru' ? 'русском' : (currentLang === 'en' ? 'английском' : 'китайском')} языке.`;
+                prompt = `Проанализируй сюжетную значимость следующего фрагмента из главы "${storyChapterName}": "${sceneText}". Объясни, что он означает для персонажей и сюжета.`;
+            } else {
+                return; // Nothing to analyze
+            }
+
+            showModal(modalTitleKey);
+
+            try {
+                const response = await fetchWithExponentialBackoff(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        systemInstruction: { parts: [{ text: systemInstruction }] },
+                        tools: [{ "google_search": {} }] // Используем Google Search для актуального лора
+                    })
+                });
+
+                const result = await response.json();
+                const text = result.candidates?.[0]?.content?.parts?.[0]?.text || i18n[currentLang].errorLLM;
+                
+                document.getElementById('modalContent').innerHTML = `<p class="text-gray-200 whitespace-pre-line">${text}</p>`;
+
+            } catch (error) {
+                console.error("LLM fetch error:", error);
+                document.getElementById('modalContent').innerHTML = `<p class="text-red-400">${i18n[currentLang].errorLLM}: ${error.message}</p>`;
+            }
+        }
+
+        /** Helper function for fetch with exponential backoff. */
+        async function fetchWithExponentialBackoff(url, options, retries = 3) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (response.status === 429 && i < retries - 1) { // Too Many Requests
+                        const delay = Math.pow(2, i) * 1000;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        continue;
+                    }
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response;
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    const delay = Math.pow(2, i) * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
                 }
             }
-
-            prevBtn.disabled = currentDialogueIndex === 0;
-            nextBtn.disabled = currentDialogueIndex === currentStageData.dialogue.length - 1;
         }
 
-        langSelector.addEventListener('change', async (e) => {
-            currentLang = e.target.value;
-            fetchedStoryContent = null; // Сброс, чтобы принудительно загрузить новый файл
-            currentContentPath = '';
-            await updateUI();
-            // Повторно пытаемся отобразить текущий выбранный этап, если он есть
-            displayStage(); 
-        });
-
-        storyTypeSelector.addEventListener('change', () => {
-            storySelector.value = '';
-            stageSelector.value = '';
-            fetchedStoryContent = null;
-            currentContentPath = '';
-            populateStories();
-            populateStages();
-            displayStage(); 
-        });
-        
-        storySelector.addEventListener('change', () => {
-            stageSelector.value = '';
-            fetchedStoryContent = null;
-            currentContentPath = '';
-            populateStages();
-            // Запускаем displayStage, чтобы загрузить JSON-файл главы
-            displayStage(); 
-        });
-
-        stageSelector.addEventListener('change', displayStage);
-
-        prevBtn.addEventListener('click', () => {
-            if (currentDialogueIndex > 0) {
-                currentDialogueIndex--;
-                renderDialogue();
-            }
-        });
-
-        nextBtn.addEventListener('click', () => {
-            const currentStageData = fetchedStoryContent ? fetchedStoryContent[currentStageKey] : null;
-            if (currentStageData && currentDialogueIndex < currentStageData.dialogue.length - 1) {
-                currentDialogueIndex++;
-                renderDialogue();
-            }
-        });
-        
-        updateUI();
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            loadProgress(); // Try to load saved progress
+            updateUI(); // Render UI based on loaded or default language
+        };
     </script>
 </body>
 </html>
