@@ -34,7 +34,7 @@
         .sprite {
             position: absolute;
             bottom: 0;
-            max-height: 85%; /* Ограничение высоты спрайта */
+            max-height: 95%; /* Ограничение высоты спрайта */
             transition: opacity 0.3s ease, transform 0.3s ease;
             z-index: 10;
         }
@@ -140,9 +140,9 @@
                     <div id="currentSpeaker" class="speaker-name text-lg rounded-t-lg rounded-b-none"></div>
                 </div>
                 
-                <!-- Dialogue Text Content Box (Fixed size: 150px W x 60px H as requested) -->
+                <!-- Dialogue Text Content Box -->
                 <div id="dialogueContentBox" 
-                    class="vn-overlay w-[150px] h-[60px] p-2 flex items-center justify-center 
+                    class="vn-overlay w-[900px] h-[150px] p-2 flex items-center justify-center 
                             rounded-xl shadow-2xl text-center overflow-hidden"
                     onclick="event.stopPropagation()"> <!-- Предотвращаем срабатывание клика по VN Viewer -->
                     <p id="currentText" class="text-sm leading-tight transition-opacity duration-300">Текст диалога...</p>
