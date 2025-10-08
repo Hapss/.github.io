@@ -112,7 +112,7 @@
                 <!-- Кнопка сброса и помощь -->
                 <button id="resetButton" onclick="resetProgress()" class="px-3 py-1 bg-red-800 hover:bg-red-700 rounded-full transition duration-150 text-sm">Сброс</button>
                 <button id="helpButton" onclick="showHelpModal()" class="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-full transition duration-150 text-sm">?</button>
-                <select id="languageSelect" onchange="updateUI()" class="bg-gray-700 text-white rounded-lg p-2 cursor-pointer transition hover:ring-2 ring-red-400">
+                <select id="languageSelect" onchange="initializeOrUpdateUI()" class="bg-gray-700 text-white rounded-lg p-2 cursor-pointer transition hover:ring-2 ring-red-400">
                     <option value="ru">Русский</option>
                     <option value="en">English</option>
                     <option value="cn">中文</option>
@@ -128,7 +128,7 @@
         <div class="bg-gray-700 p-4 rounded-xl shadow-lg mb-6 flex flex-wrap gap-4 items-end">
             <div class="flex-1 min-w-[180px]">
                 <label for="storyTypeSelect" id="labelStoryType" class="block text-sm font-medium mb-1 text-gray-300">Тип сюжета</label>
-                <select id="storyTypeSelect" onchange="updateChapterSelect()" class="w-full bg-gray-800 text-white rounded-lg p-2.5 cursor-pointer focus:ring-red-400 focus:border-red-400 transition">
+                <select id="storyTypeSelect" onchange="updateChapterSelect(); saveProgress()" class="w-full bg-gray-800 text-white rounded-lg p-2.5 cursor-pointer focus:ring-red-400 focus:border-red-400 transition">
                     <!-- Options populated by JS -->
                 </select>
             </div>
@@ -146,8 +146,9 @@
         </div>
 
         <!-- 3. Visual Novel Viewer (Main View) -->
+        <!-- VN Viewer starts with a neutral background and hidden dialogue box -->
         <div id="vnViewer" class="relative w-full aspect-[16/9] bg-gray-900 rounded-xl shadow-2xl overflow-hidden flex flex-col justify-end transition-colors duration-500" 
-             style="min-height: 400px; background-image: url('https://placehold.co/1920x1080/2a2a2a/fca5a5?text=Выбор+сюжета'); background-size: cover; background-position: center;"
+             style="min-height: 400px; background-image: url('https://placehold.co/1920x1080/2a2a2a/fca5a5?text=Выберите+сюжет+и+нажмите+Загрузить'); background-size: cover; background-position: center;"
              onclick="handleVnClick(event)"> 
 
             <!-- Log Toggle Button -->
@@ -233,57 +234,29 @@
         const STORAGE_KEY = 'hg2_story_progress';
         const SPRITE_BASE_PATH = 'https://placehold.co/'; 
         const AUDIO_BASE_PATH = 'audio/'; // Base path for audio files
+        const DEFAULT_BG_URL = 'https://placehold.co/1920x1080/2a2a2a/fca5a5?text=Выберите+сюжет+и+нажмите+Загрузить'; // New constant for default background
         
-        // --- ДАННЫЕ ДЛЯ ЗАГЛУШКИ (Для демонстрации функционала) ---
-        // otherAction: 
-        //  'dim' (по умолчанию, если не указано) - затемняет неактивный спрайт.
-        //  'hide' - полностью скрывает неактивный спрайт.
-        const initialChapterData = {
-            audio: null, // Имя файла аудио: "chapter_bgm.mp3"
-            dialogue: [
-                { 
-                    background: "https://placehold.co/1920x1080/2a2a2a/fca5a5?text=Выберите+и+загрузите+главу", 
-                    speaker: null, 
-                    text: "Архитектура готова! Для тестирования сохранения прогресса, выберите демо-главу 'Пролог' и обновите страницу после нескольких кликов.", 
-                    sprite: null, 
-                    position: null 
-                },
-                // Тест: Персонаж А (слева) говорит. Персонаж Б (справа) ДОЛЖЕН БЫТЬ СКРЫТ.
-                { 
-                    background: "https://placehold.co/1920x1080/000033/ffffff?text=Scene+1", 
-                    speaker: "Персонаж А", 
-                    text: "Я говорю. Персонаж Б должен быть скрыт (otherAction: 'hide').", 
-                    sprite: "400x900/ca7cfe/ffffff?text=Sprite+A", 
-                    position: "left",
-                    otherAction: "hide" // <--- НОВЫЙ КЛЮЧ
-                },
-                // Тест: Персонаж Б (справа) говорит. Персонаж А (слева) ДОЛЖЕН БЫТЬ ЗАТЕМНЕН (по умолчанию).
-                { 
-                    background: "https://placehold.co/1920x1080/000033/ffffff?text=Scene+2", 
-                    speaker: "Персонаж Б", 
-                    text: "Я отвечаю. Персонаж А должен быть затемнен (default: 'dim').", 
-                    sprite: "400x900/ff6666/ffffff?text=Sprite+B", 
-                    position: "right"
-                    // otherAction здесь отсутствует, значит, используется 'dim'
-                },
-                // Тест: Повествование. Оба спрайта должны быть затемнены, так как они были видны.
-                { 
-                    background: "https://placehold.co/1920x1080/000033/ffffff?text=Scene+2", 
-                    speaker: null, 
-                    text: "Повествование. Оба спрайта затемнены. Это конец демо-главы. Кликните для перехода назад.", 
-                    sprite: null, 
-                    position: null 
-                },
-            ]
-        };
-        
-        let currentDialogue = [];
+        let currentDialogue = []; // Start with an empty dialogue array
         let currentDialogueIndex = 0;
         let dialogueIsLoaded = false;
         
         let spriteLeftContainer, spriteRightContainer;
         let spriteLeftElement, spriteRightElement;
         let chapterAudio; // Global Audio object reference
+        
+        // --- STORY METADATA (Синхронно доступные названия глав) ---
+        const STORY_METADATA_SOURCE = {
+            "ch1": { ru: "Глава 1: Пробуждение", en: "Chapter 1: The Awakening", cn: "章节 1: 觉醒" },
+            "ch2": { ru: "Глава 2: Заражение", en: "Chapter 2: The Infection", cn: "章节 2: 感染" },
+            "ch3": { ru: "Глава 3: Возвращение", en: "Chapter 3: The Return", cn: "章节 3: 归来" },
+            "ex1": { ru: "Экстра 1: Летний пляж", en: "Extra 1: Summer Beach", cn: "额外 1: 夏日沙滩" },
+            "ex2": { ru: "Экстра 2: Зимняя сказка", en: "Extra 2: Winter Tale", cn: "额外 2: 冬日童话" },
+            "b1": { ru: "Босс 1: Херувим", en: "Boss 1: Cherubim", cn: "首领 1: 智天使" },
+            "vn1": { ru: "VN 1: Пролог Кианы", en: "VN 1: Kiana's Prologue", cn: "VN 1: 琪亚娜序章" },
+            "r1": { ru: "Роман 1: Признание", en: "Novel 1: Confession", cn: "小说 1: 告白" }
+        };
+        // Глобальный кеш для метаданных - теперь это просто прямое присвоение
+        let storyMetadata = STORY_METADATA_SOURCE; 
 
         // --- I18N DATA ---
         const i18n = {
@@ -296,7 +269,7 @@
                 errorFetch: "Ошибка загрузки контента: файл не найден или проблема с сетью.",
                 logTitle: "Лог Диалогов",
                 helpTitle: "Как пользоваться архивом:",
-                helpText: "Это интерактивный архив сюжетов Honkai Gakuen 2.\n\n1. Используйте верхние выпадающие списки, чтобы выбрать [Тип сюжета] и конкретную [Главу].\n2. Нажмите [Загрузить].\n3. **В окне визуальной новеллы используйте клик в правой части для перехода Далее и клик в левой части для перехода Назад.**\n4. Ваш прогресс автоматически сохраняется.\n5. Чтобы открыть [Лог диалогов], нажмите на иконку книги в правом верхнем углу VN-окна. Вы можете настроить **громкость** аудио через ползунок в заголовке."
+                helpText: "Это интерактивный архив сюжетов Honkai Gakuen 2.\n\n1. Используйте верхние выпадающие списки, чтобы выбрать [Тип сюжета] и конкретную [Главу].\n2. Нажмите [Загрузить].\n3. **В окне визуальной новеллы используйте клик в правой части для перехода Далее и клик в левой части для перехода Назад.**\n4. Ваш прогресс автоматически сохраняется. Сайт запомнит выбранную главу и реплику, на которой вы остановились.\n5. Чтобы открыть [Лог диалогов], нажмите на иконку книги в правом верхнем углу VN-окна. Вы можете настроить **громкость** аудио через ползунок в заголовке."
             },
             en: {
                 headerTitle: "Houkai Gakuen 2 Story Archive",
@@ -307,7 +280,7 @@
                 errorFetch: "Content loading error: file not found or network issue.",
                 logTitle: "Dialogue Log",
                 helpTitle: "How to use the Archive:",
-                helpText: "This is an interactive story archive for Honkai Gakuen 2.\n\n1. Use the top dropdowns to select the [Story Type] and a specific [Chapter].\n2. Click [Load].\n3. **In the Visual Novel viewer, use click on the right side to go Next and click on the left side to go Back.**\n4. Your progress is saved automatically.\n5. To open the [Dialogue Log], click the book icon in the top right of the VN viewer. You can adjust the **audio volume** using the slider in the header."
+                helpText: "This is an interactive story archive for Honkai Gakuen 2.\n\n1. Use the top dropdowns to select the [Story Type] and a specific [Chapter].\n2. Click [Load].\n3. **In the Visual Novel viewer, use click on the right side to go Next and click on the left side to go Back.**\n4. Your progress is saved automatically. The site will remember the selected chapter and the dialogue line you stopped at.\n5. To open the [Dialogue Log], click the book icon in the top right of the VN viewer. You can adjust the **audio volume** using the slider in the header."
             },
             cn: {
                 headerTitle: "崩坏学园2 剧情档案",
@@ -318,33 +291,35 @@
                 errorFetch: "内容加载错误：未找到文件或网络问题。",
                 logTitle: "对话记录",
                 helpTitle: "如何使用档案：",
-                helpText: "这是一个崩坏学园2的交互式剧情档案。\n\n1. 使用顶部下拉列表选择剧情类型和特定章节。\n2. 点击加载。\n3. **在视觉小说查看器中，使用右侧点击进行下一页，左侧点击进行上一页。**\n4. 您的进度将自动保存。\n5. 要打开对话记录，请点击 VN 查看器右上角的书本图标。您可以使用标题中的滑块调整**音频音量**。"
+                helpText: "这是一个崩坏学园2的交互式剧情档案。\n\n1. 使用顶部下拉列表选择剧情类型和特定章节。\n2. 点击加载。\n3. **在视觉小说查看器中，使用右侧点击进行下一页，左侧点击进行上一页。**\n4. 您的进度将自动保存。网站会记住选择的章节和您停止的对话行。\n5. 要打开对话记录，请点击 VN 查看器右上角的书本图标。您可以使用标题中的滑块调整**音频音量**。"
             }
         };
 
-        // --- STORY DATA STRUCTURE (Чистая структура для вашего контента) ---
+        // --- STORY DATA STRUCTURE (Только ключи, названия из метаданных) ---
         const storyData = {
             main: {
-                ru: "Основной сюжет", 
-                en: "Main Story", 
-                cn: "主线剧情",
-                chapters: {
-                    ch1: { ru: "Пролог (Демо)", en: "Prologue (Demo)", cn: "序章 (演示)" } // Добавлена демо-глава
-                    // Добавьте свои главы здесь, используя шаблон выше.
-                }
+                ru: "Основной сюжет", en: "Main Story", cn: "主线剧情",
+                chapters: ["ch1", "ch2", "ch3"]
             },
-            event: {
-                ru: "События", 
-                en: "Events", 
-                cn: "活动",
-                chapters: {
-                    // event1: { ru: "Событие 1: Тема", en: "Event 1: Theme", cn: "活动 1: 主题" }
-                }
+            extra: {
+                ru: "Дополнительный сюжет", en: "Extra Story", cn: "额外剧情",
+                chapters: ["ex1", "ex2"]
+            },
+            bosses: {
+                ru: "Боссы", en: "Boss Fights", cn: "首领战",
+                chapters: ["b1"]
+            },
+            vn: {
+                ru: "Визуальная новелла", en: "Visual Novel", cn: "视觉小说",
+                chapters: ["vn1"]
+            },
+            romance: {
+                ru: "Роман", en: "Romance", cn: "小说",
+                chapters: ["r1"]
             }
         };
 
-
-        // --- AUDIO CONTROL FUNCTIONS ---
+        // --- AUDIO CONTROL FUNCTIONS (Без изменений) ---
         
         /** Sets the volume of the chapter audio and updates the icon. */
         function setVolume(volume) {
@@ -412,13 +387,10 @@
             console.log('Progress saved:', progress);
         }
 
-        /** * Loads progress from localStorage on page load and attempts to restore state. 
-         * This function must run after initial selectors are populated.
-         */
+        /** Loads progress from localStorage on page load and attempts to restore state. */
         function loadProgress() {
             const savedProgress = localStorage.getItem(STORAGE_KEY);
             if (!savedProgress) {
-                // If no progress, just ensure UI strings are set and return
                 updateI18nStrings(); 
                 return;
             }
@@ -436,7 +408,7 @@
                 langSelect.value = progress.lang;
             }
             updateI18nStrings(); 
-
+            
             // 2. Restore Volume
             if (volumeInput) {
                 const savedVolume = progress.volume !== undefined ? progress.volume : 0.5;
@@ -445,27 +417,23 @@
             }
 
             // 3. Restore Story Type
-            // Check if the saved type is actually present in storyData
             if (storyData[progress.type]) {
                 typeSelect.value = progress.type;
-                // Populate chapters for the selected type
-                updateChapterSelect(true); 
+                // Populate chapters for the selected type, skip side effects
+                updateChapterSelect(true); // Теперь синхронный вызов
             }
             
             // 4. Restore Chapter
-            // Check if the saved chapter is actually present under the restored type
-            if (typeSelect.value && storyData[typeSelect.value]?.chapters[progress.chapter]) {
+            if (typeSelect.value && storyData[typeSelect.value] && storyData[typeSelect.value].chapters.includes(progress.chapter)) {
                 chapterSelect.value = progress.chapter;
                 shouldAutoLoad = true;
             }
 
             // 5. Auto Load Content and restore dialogue index
             if (shouldAutoLoad && progress.index !== undefined && chapterSelect.value) {
-                // Pass the saved index to updateStoryContent
                 updateStoryContent(progress.index);
             }
 
-            // Ensure load button state is correct
             enableLoadButton();
             console.log('Progress loaded and restored.');
         }
@@ -475,8 +443,9 @@
             localStorage.removeItem(STORAGE_KEY);
             dialogueIsLoaded = false;
             currentDialogueIndex = 0;
-            currentDialogue = [];
+            currentDialogue = []; // Reset to empty array
 
+            // Hide dialogue box and log button
             document.getElementById('dialogueWrapper').classList.add('hidden');
             document.getElementById('logToggleButton').classList.add('hidden'); 
             document.getElementById('logModal').classList.add('hidden');
@@ -490,11 +459,14 @@
             setVolume(0.5); 
             if (chapterAudio) chapterAudio.pause(); // Stop audio on reset
 
-            updateUI(); 
-            // Inform the user
-            const currentLang = document.getElementById('languageSelect').value;
+            initializeOrUpdateUI(); 
+            // Reset background
             const vnViewer = document.getElementById('vnViewer');
-            vnViewer.style.backgroundImage = `url('https://placehold.co/1920x1080/2a2a2a/fca5a5?text=${i18n[currentLang].loadText.replace('Загрузить', 'Прогресс сброшен')}')`;
+            vnViewer.style.backgroundImage = `url('${DEFAULT_BG_URL}')`;
+            
+            // Ensure sprites are hidden
+            document.getElementById('spriteLeftContainer').classList.add('hidden');
+            document.getElementById('spriteRightContainer').classList.add('hidden');
         }
 
         // --- CORE UI FUNCTIONS ---
@@ -531,7 +503,8 @@
 
         /** Handles click on VN Viewer area for navigation. */
         function handleVnClick(event) {
-            if (!dialogueIsLoaded || !document.getElementById('logModal').classList.contains('hidden')) return;
+            // Only allow navigation if dialogue is loaded AND log is hidden
+            if (!dialogueIsLoaded || !document.getElementById('logModal').classList.contains('hidden') || currentDialogue.length === 0) return;
             
             const vnViewer = document.getElementById('vnViewer');
             const rect = vnViewer.getBoundingClientRect();
@@ -571,11 +544,11 @@
                 <p class="whitespace-pre-line">${text.helpText}</p>`;
         }
 
-        /** Updates all UI elements including dropdowns and saves progress. */
-        function updateUI() {
+        /** Initializes all UI elements including dropdowns and saves progress. */
+        function initializeOrUpdateUI() {
             updateI18nStrings();
             updateStoryTypeSelect();
-            updateChapterSelect(); // This will save progress and enable load button
+            updateChapterSelect(); // Синхронный вызов
             saveProgress(); 
         }
 
@@ -603,7 +576,7 @@
             }
         }
 
-        /** * Populates the Chapter dropdown based on the selected Story Type and language.
+        /** Populates the Chapter dropdown based on the selected Story Type and language.
          * @param {boolean} skipSideEffects - If true, skips calling enableLoadButton and saveProgress. Used during loadProgress.
          */
         function updateChapterSelect(skipSideEffects = false) {
@@ -611,7 +584,7 @@
             const select = document.getElementById('chapterSelect');
             const lang = document.getElementById('languageSelect').value;
             const currentChapter = select.value;
-            
+
             select.innerHTML = '';
             
             const defaultOption = document.createElement('option');
@@ -620,17 +593,24 @@
             select.appendChild(defaultOption);
 
             if (typeKey && storyData[typeKey] && storyData[typeKey].chapters) {
-                const chapters = storyData[typeKey].chapters;
+                const chapterKeys = storyData[typeKey].chapters;
                 
-                for (const key in chapters) {
-                    const option = document.createElement('option');
-                    option.value = key;
-                    option.textContent = chapters[key][lang];
-                    // Re-select the current chapter if it still exists
-                    if (key === currentChapter) {
-                         option.selected = true;
+                for (const key of chapterKeys) {
+                    // Используем синхронно доступные метаданные для получения перевода
+                    const chapterData = storyMetadata[key]; 
+
+                    if (chapterData && chapterData[lang]) {
+                        const option = document.createElement('option');
+                        option.value = key;
+                        // Используем динамически загруженное название
+                        option.textContent = chapterData[lang]; 
+                        
+                        // Re-select the current chapter if it still exists
+                        if (key === currentChapter) {
+                             option.selected = true;
+                        }
+                        select.appendChild(option);
                     }
-                    select.appendChild(option);
                 }
                 select.disabled = false;
             } else {
@@ -643,7 +623,7 @@
             }
         }
 
-        /** Асинхронно загружает выбранную главу сюжета.
+        /** Асинхронно загружает выбранную главу сюжета (имитация загрузки контента).
          * @param {number} startIndex - Индекс диалога, с которого начать просмотр.
          */
         async function updateStoryContent(startIndex = 0) {
@@ -660,12 +640,41 @@
             loadText.textContent = i18n[currentLang].loadText + '...';
             
             try {
-                // В реальном приложении здесь должна быть логика загрузки JSON файла.
-                // const response = await fetch(`story/${currentLang}/${storyType}_${storyId}.json`);
-                // const data = await response.json(); 
-                
-                // Для этого примера используем заглушку initialChapterData. 
-                const data = initialChapterData; 
+                // Имитация задержки загрузки основного контента (не названий)
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                // --- DATA MOCK (Заглушка для реального контента) ---
+                const chapterTitle = storyMetadata[storyId] ? storyMetadata[storyId][currentLang] : storyId;
+
+                const data = {
+                    audio: null,
+                    dialogue: [
+                        { 
+                            background: "https://placehold.co/1920x1080/003366/ffffff?text=Глава+загружена%3A+" + encodeURIComponent(chapterTitle), 
+                            speaker: "Система", 
+                            text: `Вы загрузили сюжет типа "${storyType}" - главу "${chapterTitle}". Нажмите здесь, чтобы продолжить.`, 
+                            sprite: null, 
+                            position: null 
+                        },
+                         { 
+                            background: "https://placehold.co/1920x1080/663300/ffffff?text=Сцена+2%3A+Лесной+Пейзаж", 
+                            speaker: "Kiana", 
+                            text: `Наконец-то мы здесь! Лес выглядит... мрачно.`, 
+                            sprite: "400x900/ca7cfe/ffffff?text=Sprite+Kiana", 
+                            position: "left",
+                            otherAction: "dim"
+                        },
+                        { 
+                            background: "https://placehold.co/1920x1080/663300/ffffff?text=Сцена+2%3A+Лесной+Пейзаж", 
+                            speaker: "Mei", 
+                            text: `Будь осторожна, Киана. Что-то чувствую... Нажми слева, чтобы вернуться к реплике Кианы.`, 
+                            sprite: "400x900/fecaca/ffffff?text=Sprite+Mei", 
+                            position: "right",
+                            otherAction: "dim"
+                        },
+                    ]
+                };
+                // --- END DATA MOCK ---
                 
                 if (!data.dialogue || !Array.isArray(data.dialogue)) {
                     throw new Error("JSON structure error: 'dialogue' array not found.");
@@ -678,15 +687,6 @@
 
                 dialogueIsLoaded = true;
 
-                // Устанавливаем фон из текущей реплики
-                const currentDialogueLine = currentDialogue[currentDialogueIndex];
-                const initialBackground = currentDialogueLine ? currentDialogueLine.background : null;
-                
-                vnViewer.style.backgroundImage = initialBackground ? `url('${initialBackground}')` : `url('https://placehold.co/1920x1080/2a2a2a/fca5a5?text=Глава+загружена')`;
-
-                document.getElementById('dialogueWrapper').classList.remove('hidden');
-                document.getElementById('logToggleButton').classList.remove('hidden'); 
-                
                 // NEW: Handle Chapter Audio
                 if (data.audio) {
                     playChapterAudio(data.audio);
@@ -699,10 +699,12 @@
 
             } catch (error) {
                 console.error("Error loading story:", error.message);
-                currentDialogue = [];
+                currentDialogue = []; // Reset to empty array on error
+                currentDialogueIndex = 0;
                 dialogueIsLoaded = false;
                 vnViewer.style.backgroundImage = `url('https://placehold.co/1920x1080/aa0000/ffffff?text=Ошибка+Загрузки')`;
                 
+                // Hide dialogue box and log button
                 document.getElementById('dialogueWrapper').classList.add('hidden');
                 document.getElementById('logToggleButton').classList.add('hidden');
                 if (chapterAudio) chapterAudio.pause();
@@ -713,6 +715,8 @@
             }
         }
 
+        // --- REMAINDERING FUNCTIONS ---
+        
         /** Populates the dialogue log. */
         function populateDialogueLog() {
             const logContainer = document.getElementById('logContainer');
@@ -762,7 +766,15 @@
 
         /** Renders the current dialogue line, sprite, and updates log. */
         function renderDialogue() {
-            if (!dialogueIsLoaded || currentDialogue.length === 0) return;
+            // If no dialogue is loaded, ensure everything is hidden except the background
+            if (currentDialogue.length === 0) {
+                 document.getElementById('dialogueWrapper').classList.add('hidden');
+                 document.getElementById('logToggleButton').classList.add('hidden');
+                 // Also ensure sprites are hidden
+                 spriteLeftContainer.classList.add('hidden');
+                 spriteRightContainer.classList.add('hidden');
+                 return;
+            }
 
             const dialogue = currentDialogue[currentDialogueIndex];
             const vnViewer = document.getElementById('vnViewer');
@@ -833,7 +845,15 @@
                 currentSpeaker.textContent = '';
                 speakerNameContainer.classList.add('hidden');
             }
-
+            
+            // Show/Hide dialogue box based on whether there's content to display
+             if (dialogue.text && dialogue.text !== "") {
+                 document.getElementById('dialogueWrapper').classList.remove('hidden');
+                 document.getElementById('logToggleButton').classList.remove('hidden'); 
+             } else {
+                 document.getElementById('dialogueWrapper').classList.add('hidden');
+             }
+             
             // 4. Update Log Highlighting
             if (!document.getElementById('logModal').classList.contains('hidden')) {
                 populateDialogueLog();
@@ -886,13 +906,13 @@
             updateStoryTypeSelect(); 
             
             // 2. Attempt to load saved progress (language, type, chapter, index)
-            loadProgress();
+            loadProgress(); 
             
-            // If the story wasn't loaded from storage, ensure the initial state is visible
+            // 3. If no progress loaded, ensure the starting state is correct (empty dialogue, default BG)
             if (!dialogueIsLoaded) {
-                 // Fallback for initial state or if progress was corrupted/non-existent
-                 updateChapterSelect(); // Populates chapters for the current type, saves progress, enables load button
-                 renderDialogue(); // Show the initial instruction dialogue
+                 updateChapterSelect(); 
+                 document.getElementById('dialogueWrapper').classList.add('hidden'); // Ensure dialogue box is hidden on startup
+                 // Background is already set in HTML to DEFAULT_BG_URL
             }
         };
     </script>
