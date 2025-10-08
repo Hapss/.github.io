@@ -7,22 +7,23 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <h1>Houkai Gakuen 2 архив сюжета</h1>
-        </header>
+    <!-- Верхняя полоса с заголовком и выбором языка -->
+    <div class="top-bar">
+        <div class="top-bar-content">
+            <h1 class="site-title">Houkai Gakuen 2 архив сюжета</h1>
+            <div class="language-dropdown">
+                <select class="language-select" id="languageSelect">
+                    <option value="ru">Русский</option>
+                    <option value="en">English</option>
+                    <option value="cn">中文</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Основной контент -->
         
         <div class="selector-grid">
-            <!-- Блок выбора языка -->
-            <div class="language-selector">
-                <h2 class="selector-title">🌐 Язык / Language</h2>
-                <div class="btn-group">
-                    <button class="selector-btn active" data-lang="ru">Русский</button>
-                    <button class="selector-btn" data-lang="en">English</button>
-                    <button class="selector-btn" data-lang="cn">中文</button>
-                </div>
-            </div>
-            
             <!-- Блок выбора типа сюжета -->
             <div class="story-type-selector">
                 <h2 class="selector-title">📚 Тип сюжета</h2>
@@ -42,8 +43,8 @@
                 <h2 class="selector-title">📖 Сюжет</h2>
                 <div class="select-wrapper">
                     <select class="selector-dropdown" id="storySelection">
-                        <option value="prologue">Пролог: Прорыв Хокая</option>
-                        <!-- Остальные варианты подгружаются через JS -->
+                        <option value="prologue">Глава 1: Выброс Хокая</option>
+                        <!-- Остальные варианты будут подгружаться через JS -->
                     </select>
                 </div>
             </div>
@@ -53,16 +54,16 @@
                 <h2 class="selector-title">🎮 Этап</h2>
                 <div class="select-wrapper">
                     <select class="selector-dropdown" id="stageSelection">
-                        <option value="stage1">Этап 1: Начало</option>
-                        <!-- Остальные варианты подгружаются через JS -->
+                        <option value="stage1">Этап 1</option>
+                        <!-- Остальные варианты будут подгружаться через JS -->
                     </select>
                 </div>
             </div>
         </div>
         
-        <!-- Сюда будет выводиться контент -->
+        <!-- Область для отображения контента -->
         <div class="content-display" id="contentDisplay">
-            <! -- Контент будет загружаться здесь через JavaScript -->
+            <p>Выберите параметры выше, чтобы отобразить контент...</p>
         </div>
     </div>
     
