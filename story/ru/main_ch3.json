@@ -35,37 +35,37 @@
             "speaker": "Мэй",
             "text": "......",
             "sprite": "Mei 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Киана",
             "text": "А! Это... студент? Кто бы подумал, что здесь окажется человек, не заражённый Хонкаем... Глядя на твою форму ты, должно быть, старшекурсница. Как тебя зовут?",
             "sprite": "Kiana 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Мэй",
             "text": "......",
             "sprite": "Mei 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Киана",
             "text": "Эй! Ты оглохла? Можешь хоть что-то ответить?",
             "sprite": "Kiana 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Мэй",
             "text": "......",
             "sprite": "Mei 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Киана",
             "text": "Эй~ Похоже она в ужасе... Как бы то ни было, я не могу защитить тебя, так что найди укромный уголок и спрячься там.",
             "sprite": "Kiana 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Зомби",
@@ -75,13 +75,13 @@
             "speaker": "Киана",
             "text": "Тц! Здесь больше небезопасно... Коли ты не хочешь выжить, то тебя никто и не спасёт... Прощай и не вини меня.",
             "sprite": "Kiana 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Мэй",
             "text": "......",
             "sprite": "Mei 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "",
@@ -91,98 +91,98 @@
             "speaker": "Киана",
             "text": "Эй! Ну что за неудача! Пошли со мной!",
             "sprite": "Kiana 2.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Киана",
             "text": "Фу~ух. Кажется было перебором отбиваться от зомби, защищая нормального человека... Эй! Ты в порядке?",
             "background": "bg_old_classroom.png",
             "sprite": "Kiana 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Мэй",
             "text": "......",
             "sprite": "Mei 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Киана",
             "text": "Тц... Я такая идиотка. И зачем я её спасла? Даже не может сказать спасибо за все мои труды! Что ж, оставайся здесь. Это старое здание академии, какое-то время здесь будет безопасно. Я не собираюсь и дальше оставаться и помогать тебе, так что теперь ты сама по себе~",
             "sprite": "Kiana 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Мэй",
             "text": "...Зачем ты спасла меня?",
             "sprite": "Mei 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Киана",
             "text": "Э? Ты наконец заговорила.",
             "sprite": "Kiana 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Мэй",
             "text": "Подобные мне люди должны умереть и быть забыты... Возможно даже моё рождение было ошибкой...",
             "sprite": "Mei 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Киана",
             "text": "Ха? О чём ты вообще? Да кто вообще так о себе отзывается!",
             "sprite": "Kiana 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Мэй",
             "text": "Оставь меня... Оставь своё лицемерие, в любом случае, ты притворилась, чтобы подобраться ко мне, Райден Мэй...",
             "sprite": "Mei 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Киана",
             "text": "Райден Мэй? Кажется я слышала о ком-то подобном... Кажется это знаменитость в академии Чиба... Кажется дочка президента корпорации КЭ, верно?",
             "sprite": "Kiana 3.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Мэй",
             "text": "......",
             "sprite": "Mei 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Киана",
             "text": "Девушка, о которой ходят слухи, что она в один день отшила 12 парней, по прозвищу \"Королева Грома\". И теперь она выглядит обескураженной, какая редкость~",
             "sprite": "Kiana 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Мэй",
             "text": "Ты тоже пришла, чтобы посмеяться надо мной... Конечно же все люди прогнившие.",
             "sprite": "Mei 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Киана",
             "text": "Не пойми меня неправильно, я не за этим здесь. Я просто хочу сказать, что вместо обвинения людей вокруг лучше найти способ измениться.",
             "sprite": "Kiana 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Мэй",
             "text": "Измениться? Верно... Верно... Не я здесь ошибаюсь, а этот чёртов мир! Этот лицемерный мир должен быть уничтожен!",
             "sprite": "Mei 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Киана",
             "text": "Эй, мне кажется это неправильным, эй! Да что не так с тобой!?",
             "sprite": "Kiana 3.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "",
@@ -221,13 +221,13 @@
             "speaker": "Заражённая Мэй",
             "text": "Когда этот лицемерный мир будет разрушен... Всё сможет вернуться на место... Мой отец и все остальные обязательно вернутся ко мне!",
             "sprite": "Mei 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Киана",
             "text": "Эй! Куда ты собралась!? Не блуждай в такое время! Погоди меня!",
             "sprite": "Kiana 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "",
@@ -242,7 +242,7 @@
         "speaker": "Киана",
             "text": "Зомби становится всё больше и больше, если я пойду дальше...",
             "sprite": "Kiana 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Зомби",
@@ -253,13 +253,13 @@
             "speaker": "Мэй",
             "text": "Ооо, все собрались вокруг меня. Пока папа и другие здесь, всё остальное меня не волнует~",
             "sprite": "Mei 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Киана",
             "text": "Вот она! Чёрт! Она окружена зомби!",
             "sprite": "Kiana 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "",
@@ -269,19 +269,19 @@
         {
             "speaker": "Киана",
             "text": "Мёртвые ублюдки! А ну прочь от этой девушки!!",
-            "sprite": "Kiana 4.png",
+            "sprite": "Kiana 4.png"
         },
         {
             "speaker": "Мэй",
             "text": "Почему ты... снова здесь, чтобы разрушить моё счастье!",
             "sprite": "Mei 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Киана",
             "text": "Да о чём ты!? Я пришла спасти тебя!",
             "sprite": "Kiana 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Заражённая Мэй",
@@ -298,31 +298,31 @@
             "speaker": "Киана",
             "text": "Агх! Что с этими зомби вокруг тебя...",
             "sprite": "Kiana 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Мэй",
             "text": "Исчезни!",
             "sprite": "Mei 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Киана",
             "text": "Эй! Ты куда собралась?! Чёрт... Когда я покончу с этими зомби, мне следует преподать этой своенравной юной леди урок! Наконец-то я догнала тебя!",
             "sprite": "Kiana 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Мэй",
             "text": "Подожди немного... Отец, подожди чуток и Мэй станет такой, какой отец хочёт её видеть!",
             "sprite": "Mei 1.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Киана",
             "text": "Да что с ней произошло? Она вдруг переменилась... И реакция окружающих её зомби немного странная... Приблизившись к ней, они не стали её атаковать, а наоборот. Они замедлились и последовали за ней.",
             "sprite": "Kiana 3.png",
-            "position": "left",
+            "position": "left"
         },
         {
             "speaker": "Заражённая Мэй",
@@ -414,7 +414,7 @@
         {
             "speaker": "Киана",
             "text": "Прочь!",
-            "sprite": "Kiana 4.png",
+            "sprite": "Kiana 4.png"
         },
         {
             "speaker": "Заражённая Мэй",
