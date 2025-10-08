@@ -216,6 +216,7 @@
         let currentDialogue = []; 
         let currentDialogueIndex = 0;
         let dialogueIsLoaded = false;
+        let currentBackgroundUrl = null; // Глобальная переменная для отслеживания текущего фона
         
         // Переводы UI (без изменений)
         const i18n = {
@@ -261,7 +262,8 @@
             
             // Устанавливаем дефолтный фон сразу после загрузки DOM
             vnViewerElement.style.backgroundImage = `url('${DEFAULT_BG_B64}')`;
-
+            currentBackgroundUrl = DEFAULT_BG_B64; // Инициализируем текущий фон
+            
             loadProgress(); 
         });
 
@@ -336,8 +338,6 @@
 
                 element.onerror = () => {
                     console.warn(`[Sprite Load] ОШИБКА: ${url}. Повтор через ${PERSISTENT_IMAGE_RETRY_DELAY_MS} мс.`);
-                    // НЕ очищаем element.src здесь, так как это может вызвать CLS. 
-                    // Просто ждем таймаута для следующей попытки.
                     setTimeout(() => loadExternalImageWithPersistence(url, element, isBackground, attempt + 1), PERSISTENT_IMAGE_RETRY_DELAY_MS);
                 };
                 
@@ -351,6 +351,7 @@
                 tempImg.onload = () => {
                     console.log(`[Background Load] Успешно загружен: ${url} (Попытка ${attempt})`);
                     element.style.backgroundImage = `url('${url}')`;
+                    currentBackgroundUrl = url; // Обновляем глобальную переменную при успешной загрузке
                 };
                 
                 tempImg.onerror = () => {
@@ -371,6 +372,7 @@
                 spriteLeftContainer.classList.add('hidden');
                 spriteRightContainer.classList.add('hidden');
                 vnViewerElement.style.backgroundImage = `url('${DEFAULT_BG_B64}')`;
+                currentBackgroundUrl = DEFAULT_BG_B64;
                 return;
             }
 
@@ -378,16 +380,29 @@
             const currentSpeakerElement = document.getElementById('currentSpeaker');
             const currentTextElement = document.getElementById('currentText');
 
-            // 1. Фон (Работает)
+            // 1. Фон (КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Реализация персистентности)
             const bgFileName = step.background; 
-            let finalBgUrl;
+            let finalBgUrl = null;
 
-            if (bgFileName && !bgFileName.startsWith('data:')) {
-                finalBgUrl = BACKGROUND_BASE_PATH + bgFileName; 
-                loadExternalImageWithPersistence(finalBgUrl, vnViewerElement, true);
+            if (bgFileName) { 
+                // Если фон указан в шаге, загружаем и обновляем персистентный URL
+                if (!bgFileName.startsWith('data:')) {
+                    finalBgUrl = BACKGROUND_BASE_PATH + bgFileName; 
+                    // loadExternalImageWithPersistence обновит currentBackgroundUrl при успехе
+                    loadExternalImageWithPersistence(finalBgUrl, vnViewerElement, true);
+                } else {
+                    // Base64 или специфический плейсхолдер
+                    finalBgUrl = bgFileName;
+                    vnViewerElement.style.backgroundImage = `url('${finalBgUrl}')`;
+                    currentBackgroundUrl = finalBgUrl; 
+                }
+            } else if (currentBackgroundUrl) { 
+                // Если фон НЕ указан в шаге, используем сохраненный персистентный URL
+                vnViewerElement.style.backgroundImage = `url('${currentBackgroundUrl}')`;
             } else {
-                finalBgUrl = bgFileName || DEFAULT_BG_B64;
-                vnViewerElement.style.backgroundImage = `url('${finalBgUrl}')`;
+                // Если это первый шаг и нет фона, используем дефолт
+                 vnViewerElement.style.backgroundImage = `url('${DEFAULT_BG_B64}')`;
+                 currentBackgroundUrl = DEFAULT_BG_B64;
             }
 
 
@@ -489,6 +504,9 @@
                     currentDialogueIndex = Math.min(startIndex, currentDialogue.length - 1);
                     currentDialogueIndex = Math.max(0, currentDialogueIndex); 
                     dialogueIsLoaded = true;
+                    
+                    // Сбрасываем текущий фон, чтобы первый шаг его установил
+                    currentBackgroundUrl = null; 
                     
                     // --- Обновление UI ---
                     loadTextElement.textContent = "Загружено";
@@ -695,6 +713,7 @@
             dialogueIsLoaded = false;
             currentDialogueIndex = 0;
             currentDialogue = []; 
+            currentBackgroundUrl = DEFAULT_BG_B64; // Сброс персистентного фона
 
             document.getElementById('dialogueWrapper').classList.add('hidden');
             document.getElementById('languageSelect').value = 'ru';
