@@ -1,4 +1,3 @@
-<!-- Chosen Palette: Dark Neutrals (Black, Grey, White) with Honkai Red/Purple accents for UI elements. -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -180,6 +179,10 @@
 
     <script>
         const STORAGE_KEY = 'hg2_story_progress';
+        
+        // --- NEW: Базовый путь для спрайтов ---
+        // Если ваши спрайты лежат в папке 'images/sprites/' относительно index.html
+        const SPRITE_BASE_PATH = 'images/sprites/'; 
 
         let currentDialogue = [];
         let currentDialogueIndex = 0;
@@ -222,7 +225,7 @@
             }
         };
 
-        // --- STORY DATA STRUCTURE ---
+        // --- STORY DATA STRUCTURE (Mocked) ---
         const storyData = {
             main: {
                 ru: "Основной сюжет", en: "Main Story", cn: "主线剧情",
@@ -470,7 +473,6 @@
                 }
 
                 document.getElementById('dialogueBox').classList.remove('hidden');
-                // Navigation buttons are now hidden, but show log
                 document.getElementById('navButtons').classList.add('hidden'); 
                 document.getElementById('logContainer').classList.remove('hidden');
                 document.getElementById('logTitle').classList.remove('hidden');
@@ -555,10 +557,19 @@
             spriteContainer.innerHTML = ''; // Clear existing sprites
             if (dialogue.sprite) {
                 const img = document.createElement('img');
-                img.src = dialogue.sprite;
+                
+                // --- FIX: Конкатенация базового пути и имени файла спрайта ---
+                const spriteSrc = SPRITE_BASE_PATH + dialogue.sprite;
+                img.src = spriteSrc; 
+                // -----------------------------------------------------------
+                
                 img.alt = dialogue.speaker;
                 img.classList.add('sprite', dialogue.position === 'left' ? 'left' : 'right');
-                img.onerror = () => img.src = `https://placehold.co/200x400/808080/ffffff?text=${dialogue.speaker}`; // Placeholder on error
+                img.onerror = () => {
+                    // Используем заглушку, если спрайт не загрузился по указанному пути
+                    img.src = `https://placehold.co/200x400/808080/ffffff?text=${dialogue.speaker}`; 
+                    console.error(`Sprite not found at: ${spriteSrc}. Check your file path.`);
+                }; 
                 spriteContainer.appendChild(img);
             }
             
@@ -588,8 +599,6 @@
                     entry.classList.add('current-log-entry');
                 }
             });
-
-            // Navigation status is now controlled by the click handler, not buttons
         }
 
         /** Handles navigation (next/previous) in the dialogue array. */
