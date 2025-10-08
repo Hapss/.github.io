@@ -246,7 +246,8 @@
         
         // --- STORY METADATA (Синхронно доступные названия глав) ---
         const STORY_METADATA_SOURCE = {
-            "ch1": { ru: "Глава 1: Пробуждение", en: "Chapter 1: The Awakening", cn: "章节 1: 觉醒" },
+            // Переименованная Глава 1 теперь соответствует нашему файлу main_ch1.json
+            "ch1": { ru: "Глава 1: Выброс Хоукая", en: "Chapter 1: The Honkai Eruption", cn: "章节 1: 崩坏爆发" }, 
             "ch2": { ru: "Глава 2: Заражение", en: "Chapter 2: The Infection", cn: "章节 2: 感染" },
             "ch3": { ru: "Глава 3: Возвращение", en: "Chapter 3: The Return", cn: "章节 3: 归来" },
             "ex1": { ru: "Экстра 1: Летний пляж", en: "Extra 1: Summer Beach", cn: "额外 1: 夏日沙滩" },
@@ -623,298 +624,281 @@
             }
         }
 
-        /** Асинхронно загружает выбранную главу сюжета (имитация загрузки контента).
+        /** Асинхронно загружает выбранную главу сюжета.
          * @param {number} startIndex - Индекс диалога, с которого начать просмотр.
          */
         async function updateStoryContent(startIndex = 0) {
             const storyType = document.getElementById('storyTypeSelect').value;
             const storyId = document.getElementById('chapterSelect').value;
-            const currentLang = document.getElementById('languageSelect').value;
-            const vnViewer = document.getElementById('vnViewer');
-            const loadButton = document.getElementById('loadButton');
-            const loadText = document.getElementById('loadText');
             
-            if (!storyType || !storyId) return;
+            if (!storyType || !storyId) {
+                console.error("Story type or ID is not selected.");
+                return;
+            }
 
-            loadButton.disabled = true;
-            loadText.textContent = i18n[currentLang].loadText + '...';
-            
+            // ОПРЕДЕЛЕНИЕ ИМЕНИ ФАЙЛА в соответствии с конвенцией
+            let fileName;
+            if (storyType === 'main') {
+                // СТРОГАЯ КОНВЕНЦИЯ: Основной сюжет всегда ищет main_[ID_главы].json
+                fileName = `main_${storyId}.json`;
+            } else {
+                // Общая конвенция для других типов: [тип_сюжета]_[ID_главы].json
+                fileName = `${storyType}_${storyId}.json`;
+            }
+            const filePath = fileName;
+
+            document.getElementById('loadText').textContent = "Загрузка...";
+
             try {
-                // Имитация задержки загрузки основного контента (не названий)
-                await new Promise(resolve => setTimeout(resolve, 100));
-
-                // --- DATA MOCK (Заглушка для реального контента) ---
-                const chapterTitle = storyMetadata[storyId] ? storyMetadata[storyId][currentLang] : storyId;
-
-                const data = {
-                    audio: null,
-                    dialogue: [
-                        { 
-                            background: "https://placehold.co/1920x1080/003366/ffffff?text=Глава+загружена%3A+" + encodeURIComponent(chapterTitle), 
-                            speaker: "Система", 
-                            text: `Вы загрузили сюжет типа "${storyType}" - главу "${chapterTitle}". Нажмите здесь, чтобы продолжить.`, 
-                            sprite: null, 
-                            position: null 
-                        },
-                         { 
-                            background: "https://placehold.co/1920x1080/663300/ffffff?text=Сцена+2%3A+Лесной+Пейзаж", 
-                            speaker: "Kiana", 
-                            text: `Наконец-то мы здесь! Лес выглядит... мрачно.`, 
-                            sprite: "400x900/ca7cfe/ffffff?text=Sprite+Kiana", 
-                            position: "left",
-                            otherAction: "dim"
-                        },
-                        { 
-                            background: "https://placehold.co/1920x1080/663300/ffffff?text=Сцена+2%3A+Лесной+Пейзаж", 
-                            speaker: "Mei", 
-                            text: `Будь осторожна, Киана. Что-то чувствую... Нажми слева, чтобы вернуться к реплике Кианы.`, 
-                            sprite: "400x900/fecaca/ffffff?text=Sprite+Mei", 
-                            position: "right",
-                            otherAction: "dim"
-                        },
-                    ]
-                };
-                // --- END DATA MOCK ---
+                const maxRetries = 3;
+                let response;
                 
-                if (!data.dialogue || !Array.isArray(data.dialogue)) {
-                    throw new Error("JSON structure error: 'dialogue' array not found.");
+                // Exponential backoff for fetching the JSON file
+                for (let i = 0; i < maxRetries; i++) {
+                    try {
+                        response = await fetch(filePath);
+                        if (response.ok) {
+                            break; // Success
+                        }
+                    } catch (error) {
+                        console.warn(`Fetch attempt ${i + 1} failed for ${filePath}. Retrying...`);
+                    }
+                    if (i < maxRetries - 1) {
+                        // Wait for 2^i seconds
+                        await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+                    } else {
+                        throw new Error("Max retries reached.");
+                    }
                 }
 
-                currentDialogue = data.dialogue;
-                
-                currentDialogueIndex = Math.min(startIndex, currentDialogue.length - 1);
-                if (currentDialogueIndex < 0) currentDialogueIndex = 0;
+                if (!response || !response.ok) {
+                    throw new Error(`HTTP error! status: ${response ? response.status : 'unknown'}`);
+                }
 
+                const data = await response.json();
+                
+                // --- SUCCESS: Update Global State ---
+                currentDialogue = data.dialogue || [];
+                // Ensure index is valid, default to start if needed
+                currentDialogueIndex = Math.min(startIndex, currentDialogue.length - 1);
+                currentDialogueIndex = Math.max(0, currentDialogueIndex); // Ensure it's not negative
                 dialogueIsLoaded = true;
 
-                // NEW: Handle Chapter Audio
-                if (data.audio) {
-                    playChapterAudio(data.audio);
-                } else {
-                    if (chapterAudio) chapterAudio.pause();
-                }
-
-                renderDialogue();
-                saveProgress(); 
-
-            } catch (error) {
-                console.error("Error loading story:", error.message);
-                currentDialogue = []; // Reset to empty array on error
-                currentDialogueIndex = 0;
-                dialogueIsLoaded = false;
-                vnViewer.style.backgroundImage = `url('https://placehold.co/1920x1080/aa0000/ffffff?text=Ошибка+Загрузки')`;
+                // --- UI Updates ---
+                document.getElementById('dialogueWrapper').classList.remove('hidden');
+                document.getElementById('logToggleButton').classList.remove('hidden'); 
+                document.getElementById('loadText').textContent = "Загружено";
                 
-                // Hide dialogue box and log button
+                // Play audio if provided (data.audio_track should be the file name)
+                playChapterAudio(data.audio_track);
+
+                // Initialize the scene
+                renderDialogueStep();
+
+            } catch (e) {
+                console.error("Failed to load dialogue data:", e);
+                // Заменил alert на более мягкое уведомление в консоли для среды Canvas
+                document.getElementById('loadText').textContent = "Ошибка!";
+                setTimeout(() => {
+                    document.getElementById('loadText').textContent = i18n[document.getElementById('languageSelect').value].loadText;
+                }, 2000);
+                dialogueIsLoaded = false;
+                currentDialogue = [];
+            } finally {
+                // Re-enable button after a short delay
+                setTimeout(() => {
+                    document.getElementById('loadButton').disabled = false;
+                }, 500);
+            }
+        }
+
+        /** Renders the current dialogue step and updates the UI. */
+        function renderDialogueStep() {
+            if (!dialogueIsLoaded || currentDialogue.length === 0) {
                 document.getElementById('dialogueWrapper').classList.add('hidden');
                 document.getElementById('logToggleButton').classList.add('hidden');
-                if (chapterAudio) chapterAudio.pause();
+                return;
+            }
+
+            const step = currentDialogue[currentDialogueIndex];
+            const vnViewer = document.getElementById('vnViewer');
+            const currentSpeakerElement = document.getElementById('currentSpeaker');
+            const currentTextElement = document.getElementById('currentText');
+            const dialogueWrapper = document.getElementById('dialogueWrapper');
+
+            // 1. Background
+            if (step.background) {
+                vnViewer.style.backgroundImage = `url('${step.background}')`;
+            } else if (currentDialogueIndex === 0) {
+                 vnViewer.style.backgroundImage = `url('${DEFAULT_BG_URL}')`;
+            } // Otherwise keep the current background
+
+            // 2. Sprites & Dimming (Simplified logic for clarity)
+
+            const updateSpriteVisibilityAndDimming = (container, imageElement, currentStep) => {
+                const isLeft = container.classList.contains('left');
+                const positionKey = isLeft ? 'left' : 'right';
+
+                // Check if this sprite is active in the current step
+                const isActiveSpeakerSprite = currentStep.sprite && currentStep.position && currentStep.position.toLowerCase() === positionKey;
+
+                // If this is the active speaker's sprite
+                if (isActiveSpeakerSprite) {
+                    container.classList.remove('hidden');
+                    if (imageElement.src.indexOf(currentStep.sprite) === -1) {
+                        imageElement.src = currentStep.sprite;
+                    }
+                    imageElement.classList.remove('dimmed-sprite'); // Active sprite is bright
+                } 
+                // Check if an explicit sprite_dimmed instruction exists for a known sprite (e.g., Kiana 1.png)
+                else if (currentStep.sprite_dimmed && currentStep.sprite_dimmed === imageElement.src.substring(imageElement.src.lastIndexOf('/') + 1)) {
+                    // This is the dimmed sprite
+                    container.classList.remove('hidden');
+                    imageElement.classList.add('dimmed-sprite');
+                }
+                // If there is a speaker, and this is NOT the active sprite, dim it if visible, otherwise hide it.
+                else if (currentStep.speaker && currentStep.speaker !== '') {
+                    // If the sprite is visible but not the current speaker's, dim it.
+                    if (!container.classList.contains('hidden')) {
+                        imageElement.classList.add('dimmed-sprite');
+                    } else {
+                        container.classList.add('hidden');
+                    }
+                }
+                // Default: if no speaker/sprite instruction, hide it (or maintain hidden state)
+                else {
+                    container.classList.add('hidden');
+                }
+            };
+            
+            // Re-hide all before checking the logic for the current step
+            spriteLeftContainer.classList.add('hidden');
+            spriteRightContainer.classList.add('hidden');
+            
+            // Re-run the update logic based on the current step
+            if (step.sprite && step.position) {
+                const isLeft = step.position.toLowerCase() === 'left';
+                const container = isLeft ? spriteLeftContainer : spriteRightContainer;
+                const imageElement = isLeft ? spriteLeftElement : spriteRightElement;
                 
-            } finally {
-                loadButton.disabled = false;
-                loadText.textContent = i18n[currentLang].loadText;
-            }
-        }
-
-        // --- REMAINDERING FUNCTIONS ---
-        
-        /** Populates the dialogue log. */
-        function populateDialogueLog() {
-            const logContainer = document.getElementById('logContainer');
-            logContainer.innerHTML = '';
-
-            if (currentDialogue.length === 0) {
-                 logContainer.innerHTML = '<p class="text-gray-500 text-center mt-8">Сюжет не загружен.</p>';
-                 return;
+                container.classList.remove('hidden');
+                imageElement.src = step.sprite;
+                imageElement.classList.remove('dimmed-sprite');
             }
 
-            for (let index = 0; index <= currentDialogueIndex; index++) {
-                const line = currentDialogue[index];
-                const entry = document.createElement('div');
-                entry.className = 'log-entry';
-                entry.setAttribute('data-index', index);
-                entry.onclick = () => {
-                    jumpToDialogue(index);
-                    toggleLog(); 
-                };
-
-                if (line.speaker) {
-                    const speaker = document.createElement('span');
-                    speaker.className = 'log-speaker';
-                    speaker.textContent = line.speaker + ': ';
-                    entry.appendChild(speaker);
+            // Apply dimming based on the step.sprite_dimmed property
+            if (step.sprite_dimmed) {
+                const dimmedSpriteFilename = step.sprite_dimmed.split('/').pop();
+                
+                // Check left sprite
+                if (spriteLeftElement.src.endsWith(dimmedSpriteFilename)) {
+                    spriteLeftContainer.classList.remove('hidden');
+                    spriteLeftElement.classList.add('dimmed-sprite');
                 }
-
-                const text = document.createElement('span');
-                text.className = 'log-text';
-                text.textContent = line.text;
-                entry.appendChild(text);
-
-                if (index === currentDialogueIndex) {
-                    entry.classList.add('current-log-entry');
+                
+                // Check right sprite
+                if (spriteRightElement.src.endsWith(dimmedSpriteFilename)) {
+                    spriteRightContainer.classList.remove('hidden');
+                    spriteRightElement.classList.add('dimmed-sprite');
                 }
-
-                logContainer.appendChild(entry);
             }
-        }
 
-        /** Jumps to a specific line in the dialogue. */
-        function jumpToDialogue(index) {
-            currentDialogueIndex = index;
-            renderDialogue();
+
+            // 3. Dialogue Text and Speaker Name
+            if (step.speaker && step.speaker !== '') {
+                currentSpeakerElement.textContent = step.speaker;
+                currentSpeakerElement.parentElement.style.opacity = '1';
+                dialogueWrapper.classList.remove('opacity-50');
+            } else {
+                currentSpeakerElement.textContent = '';
+                currentSpeakerElement.parentElement.style.opacity = '0'; // Hide speaker name box
+                dialogueWrapper.classList.add('opacity-50'); // Dim dialogue box for narration
+            }
+            
+            currentTextElement.textContent = step.text || ' ';
+
+            // 4. Save Progress
             saveProgress();
         }
 
-        /** Renders the current dialogue line, sprite, and updates log. */
-        function renderDialogue() {
-            // If no dialogue is loaded, ensure everything is hidden except the background
-            if (currentDialogue.length === 0) {
-                 document.getElementById('dialogueWrapper').classList.add('hidden');
-                 document.getElementById('logToggleButton').classList.add('hidden');
-                 // Also ensure sprites are hidden
-                 spriteLeftContainer.classList.add('hidden');
-                 spriteRightContainer.classList.add('hidden');
-                 return;
-            }
-
-            const dialogue = currentDialogue[currentDialogueIndex];
-            const vnViewer = document.getElementById('vnViewer');
-            const currentSpeaker = document.getElementById('currentSpeaker');
-            const currentText = document.getElementById('currentText');
-            const speakerNameContainer = document.getElementById('speakerNameContainer');
-
-            // Determine action for other (inactive) sprites. Default is 'dim'.
-            const activePosition = dialogue.position; 
-            const activeSpriteSrc = dialogue.sprite ? SPRITE_BASE_PATH + dialogue.sprite : null;
-            const inactiveAction = dialogue.otherAction || 'dim'; 
-            
-            const sprites = [
-                { container: spriteLeftContainer, element: spriteLeftElement, position: 'left' },
-                { container: spriteRightContainer, element: spriteRightElement, position: 'right' }
-            ];
-            
-            // 1. Update Background
-            if (dialogue.background) {
-                vnViewer.style.backgroundImage = `url('${dialogue.background}')`;
-            }
-
-            // 2. Update Sprites
-            sprites.forEach(sprite => {
-                const isActiveSpeaker = sprite.position === activePosition;
-                
-                // Reset visual state
-                sprite.container.classList.remove('dimmed-sprite');
-
-                if (isActiveSpeaker) {
-                    // ACTIVE SPEAKER: Show and make bright
-                    if (activeSpriteSrc) {
-                        sprite.element.src = activeSpriteSrc; // Update image if provided
-                    }
-                    sprite.container.classList.remove('hidden');
-                } else {
-                    // INACTIVE SPRITE OR NARRATION
-                    const isSpriteVisible = !sprite.container.classList.contains('hidden') || sprite.element.src;
-
-                    if (isSpriteVisible) {
-                         if (!activePosition) {
-                            // Case A: Narration (No active speaker): dim all visible sprites
-                             sprite.container.classList.add('dimmed-sprite');
-                         } else {
-                            // Case B: Dialogue is happening, but this is the INACTIVE sprite
-                            if (inactiveAction === 'hide') {
-                                sprite.container.classList.add('hidden');
-                            } else if (inactiveAction === 'dim') {
-                                sprite.container.classList.add('dimmed-sprite');
-                            }
-                         }
-                    }
-                    // Note: If the sprite was never shown (no src), it remains hidden.
-                }
-            });
-
-            // 3. Update Text and Speaker
-            currentText.style.opacity = '0';
-            setTimeout(() => {
-                currentText.textContent = dialogue.text;
-                currentText.style.opacity = '1';
-            }, 50); 
-
-            if (dialogue.speaker) {
-                currentSpeaker.textContent = dialogue.speaker;
-                speakerNameContainer.classList.remove('hidden');
-            } else {
-                currentSpeaker.textContent = '';
-                speakerNameContainer.classList.add('hidden');
-            }
-            
-            // Show/Hide dialogue box based on whether there's content to display
-             if (dialogue.text && dialogue.text !== "") {
-                 document.getElementById('dialogueWrapper').classList.remove('hidden');
-                 document.getElementById('logToggleButton').classList.remove('hidden'); 
-             } else {
-                 document.getElementById('dialogueWrapper').classList.add('hidden');
-             }
-             
-            // 4. Update Log Highlighting
-            if (!document.getElementById('logModal').classList.contains('hidden')) {
-                populateDialogueLog();
-                const currentEntry = document.getElementById('logContainer').querySelector(`.current-log-entry`);
-                if (currentEntry) {
-                    currentEntry.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-            }
-        }
-
-        /** Handles navigation (next/previous) in the dialogue array. */
+        /** Navigates forward or backward in the dialogue array.
+         * @param {number} direction - 1 for next, -1 for previous.
+         */
         function navigateDialogue(direction) {
-            const newIndex = currentDialogueIndex + direction;
+            let newIndex = currentDialogueIndex + direction;
             
             if (newIndex >= 0 && newIndex < currentDialogue.length) {
                 currentDialogueIndex = newIndex;
-                renderDialogue();
-                saveProgress(); 
+                renderDialogueStep();
+            } else if (newIndex >= currentDialogue.length) {
+                console.log("End of chapter reached.");
+                // Optionally handle chapter transition here
+            } else if (newIndex < 0) {
+                 console.log("Beginning of chapter reached.");
+                 currentDialogueIndex = 0; // Stick to the first line
+                 renderDialogueStep();
             }
         }
-        
-        /** Toggles the help modal. */
-        function showHelpModal() {
-            document.getElementById('helpModal').classList.toggle('hidden');
+
+        /** Populates the dialogue log modal with all entries. */
+        function populateDialogueLog() {
+            const logContainer = document.getElementById('logContainer');
+            logContainer.innerHTML = ''; // Clear previous log
+
+            currentDialogue.forEach((step, index) => {
+                if (step.text) {
+                    const entry = document.createElement('div');
+                    entry.className = `log-entry ${index === currentDialogueIndex ? 'current-log-entry' : ''}`;
+                    entry.onclick = () => {
+                        currentDialogueIndex = index;
+                        renderDialogueStep();
+                        toggleLog(); // Close log after jumping
+                    };
+
+                    if (step.speaker) {
+                        const speaker = document.createElement('span');
+                        speaker.className = 'log-speaker';
+                        speaker.textContent = step.speaker;
+                        entry.appendChild(speaker);
+                    }
+
+                    const text = document.createElement('p');
+                    text.className = 'log-text';
+                    text.textContent = step.text;
+                    entry.appendChild(text);
+                    
+                    logContainer.appendChild(entry);
+                }
+            });
+            // If log is empty (shouldn't happen if dialogue is loaded)
+             if (logContainer.innerHTML === '') {
+                 logContainer.innerHTML = '<p class="text-gray-500 text-center mt-8">Лог пуст.</p>';
+             }
         }
 
-        /** Initializes persistent elements and listeners */
-        function initializeAppElements() {
-            // Sprites setup
+        // --- HELP MODAL ---
+        function showHelpModal() {
+            const modal = document.getElementById('helpModal');
+            modal.classList.toggle('hidden');
+        }
+
+        // --- INITIALIZATION ---
+        window.onload = function() {
+            // Get element references once
             spriteLeftContainer = document.getElementById('spriteLeftContainer');
             spriteRightContainer = document.getElementById('spriteRightContainer');
             spriteLeftElement = document.getElementById('spriteLeft');
             spriteRightElement = document.getElementById('spriteRight');
-
-            // Audio setup
             chapterAudio = document.getElementById('chapterAudio');
-            const volumeInput = document.getElementById('volumeInput');
-            if (volumeInput) {
-                // Set initial volume based on the slider value (will be overwritten by loadProgress)
-                setVolume(parseFloat(volumeInput.value) / 100); 
-                volumeInput.addEventListener('input', handleVolumeChange);
-            }
-        }
 
-        // --- INITIALIZATION ---
-        window.onload = () => {
-            initializeAppElements(); // Setup persistent elements
+            // Setup event listeners
+            document.getElementById('volumeInput').addEventListener('input', handleVolumeChange);
             
-            // 1. Populate Story Type dropdown initially
-            updateStoryTypeSelect(); 
-            
-            // 2. Attempt to load saved progress (language, type, chapter, index)
-            loadProgress(); 
-            
-            // 3. If no progress loaded, ensure the starting state is correct (empty dialogue, default BG)
-            if (!dialogueIsLoaded) {
-                 updateChapterSelect(); 
-                 document.getElementById('dialogueWrapper').classList.add('hidden'); // Ensure dialogue box is hidden on startup
-                 // Background is already set in HTML to DEFAULT_BG_URL
-            }
+            // Initial UI setup and progress check
+            initializeOrUpdateUI(); 
+            loadProgress();
         };
+
     </script>
 </body>
 </html>
