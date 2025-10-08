@@ -1,8 +1,9 @@
+<!-- Chosen Palette: Dark Neutrals (Black, Grey, White) with Honkai Red/Purple accents for UI elements. -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Houkai Gakuen 2 Архив Сюжета</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -24,16 +25,17 @@
         .speaker-name {
             background-color: #2a2a2a;
             color: #ca7cfe;
-            padding: 6px 12px;
-            border-radius: 8px;
+            padding: 4px 12px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
             display: inline-block;
             font-weight: bold;
-            margin-left: 8px;
+            left: 20px;
         }
         .sprite {
             position: absolute;
             bottom: 0;
-            max-height: 95%;         /* Ограничение высоты спрайта */
+            max-height: 95%; /* Ограничение высоты спрайта */
             transition: opacity 0.3s ease, transform 0.3s ease;
             z-index: 10;
         }
@@ -41,7 +43,7 @@
             left: 20px;
         }
         .sprite.right {
-            right: 20px;
+            right: 20;
         }
         /* Custom styles for Dialogue Log entries */
         .log-entry {
@@ -115,37 +117,39 @@
         <!-- 3. Visual Novel Viewer (Main View) -->
         <div id="vnViewer" class="relative w-full aspect-[16/9] bg-gray-900 rounded-xl shadow-2xl overflow-hidden flex flex-col justify-end transition-colors duration-500" 
              style="min-height: 400px; background-image: url('https://placehold.co/1920x1080/2a2a2a/fca5a5?text=Выбор+сюжета'); background-size: cover; background-position: center;"
-             onclick="handleVnClick(event)">
+             onclick="handleVnClick(event)"> <!-- Обработчик клика добавлен сюда -->
 
             <!-- Log Toggle Button (New feature) -->
             <button id="logToggleButton" onclick="toggleLog()" 
                 class="absolute top-4 right-4 z-30 bg-gray-800 hover:bg-red-700 text-white p-3 rounded-full shadow-lg transition duration-150 hidden">
+                <!-- SVG for Book Open icon: https://www.svgrepo.com/show/521518/book-open.svg -->
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.22 4.5 7.5 4.5A2.75 2.75 0 004.75 7.25v9.5A2.75 2.75 0 007.5 19.5c1.72 0 3.332-.977 4.5-2.753m0-13C13.168 5.477 14.78 4.5 16.5 4.5A2.75 2.75 0 0119.25 7.25v9.5A2.75 2.75 0 0116.5 19.5c-1.72 0-3.332-.977-4.5-2.753"></path>
                 </svg>
             </button>
             
             <!-- Sprite Container -->
-            <div id="spriteContainer" class="absolute inset-0 z-10 pointer-events-none flex justify-start items-end p-4">
+            <div id="spriteContainer" class="absolute inset-0 z-10 pointer-events-none flex justify-center items-end p-4">
                 <!-- Sprites are inserted here by JS -->
             </div>
 
             <!-- Dialogue Wrapper: Contains Speaker (above) and fixed-size Text Box (below) -->
-            <div id="dialogueWrapper" class="absolute bottom-4 left-4 z-20 transition-all duration-300 opacity-100 hidden">
+            <div id="dialogueWrapper" class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 transition-all duration-300 opacity-100 hidden">
                 
                 <!-- Speaker Name Container (Above the main box) -->
-                <div id="speakerNameContainer" class="text-left mb-2">
+                <div id="speakerNameContainer" class="text-center mb-0">
                     <div id="currentSpeaker" class="speaker-name text-lg rounded-t-lg rounded-b-none"></div>
                 </div>
                 
                 <!-- Dialogue Text Content Box -->
                 <div id="dialogueContentBox" 
-                    class="vn-overlay w-[900px] max-w-[calc(100vw-96px)] h-[200px] p-4 flex items-start justify-start 
-                            rounded-xl shadow-2xl text-left overflow-auto"
-                    onclick="event.stopPropagation()">
+                    class="vn-overlay w-[900px] h-[200px] p-2 flex items-center justify-center 
+                            rounded-xl shadow-2xl text-center overflow-hidden"
+                    onclick="event.stopPropagation()"> <!-- Предотвращаем срабатывание клика по VN Viewer -->
                     <p id="currentText" class="text-base leading-tight transition-opacity duration-300">Текст диалога...</p>
                 </div>
             </div>
+
 
             <!-- Navigation Buttons (hidden, navigation handled by click) -->
             <div id="navButtons" class="absolute bottom-6 right-6 flex space-x-3 z-30 opacity-0 transition-opacity duration-300 hidden">
@@ -611,18 +615,16 @@
                 const spriteSrc = SPRITE_BASE_PATH + dialogue.sprite;
                 img.src = spriteSrc; 
                 
-                img.alt = dialogue.speaker || 'sprite';
-                // Respect position from JSON: 'left' or 'right' (default left)
-                const posClass = (dialogue.position && dialogue.position.toLowerCase() === 'right') ? 'right' : 'left';
-                img.classList.add('sprite', posClass);
+                img.alt = dialogue.speaker;
+                img.classList.add('sprite', dialogue.position === 'left' ? 'left' : 'right');
                 img.onerror = () => {
                     // Используем заглушку, если спрайт не загрузился по указанному пути
-                    img.src = `https://placehold.co/200x400/808080/ffffff?text=${encodeURIComponent(dialogue.speaker || 'NoName')}`; 
+                    img.src = `https://placehold.co/200x400/808080/ffffff?text=${dialogue.speaker}`; 
                     console.error(`Sprite not found at: ${spriteSrc}. Check your file path.`);
                 }; 
                 spriteContainer.appendChild(img);
             }
-
+            
             // 3. Update Text and Speaker
             currentText.style.opacity = '0';
             setTimeout(() => {
