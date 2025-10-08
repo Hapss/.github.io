@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Архив Сюжета ВН</title>
+    <title>Архив Сюжета Houkai Gakuen 2</title>
     <!-- Подключение Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -181,12 +181,15 @@
         // ====================================================================
         // === КОНСТАНТЫ И ДАННЫЕ ===
         // ====================================================================
+        
+        // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Новые базовые пути для внешних ресурсов
+        const SPRITE_BASE_PATH = 'images/sprites/';
+        const BACKGROUND_BASE_PATH = 'images/background/';
 
         // Base64-кодированные SVG для надежных плейсхолдеров
         const KIANA_SPRITE_B64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjODAwMDgwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5LSUFOQTwvdGV4dD48L3N2Zz4='; // Пурпурный
         const MEI_SPRITE_B64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRkY1NzMzIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5NRUk8L3RleHQ+PC9zdmc+'; // Красный
         const DEFAULT_SPRITE_B64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjIyMjIyIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5TUFJJSVQ8L3RleHQ+PC9zdmc+';
-        // ИСПРАВЛЕНИЕ: Убрана латиница (ZDEM LOGI KONТЕНТA) из фонового плейсхолдера
         const DEFAULT_BG_B64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyMCIgaGVpZ2h0PSIxMDgwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMyYjJkM2EiLz48L3N2Zz4='; // Темный фон без текста
         
         const STORAGE_KEY = 'vn_story_progress_v4';
@@ -305,7 +308,7 @@
             if (lowerCaseName.includes('kiana')) return KIANA_SPRITE_B64;
             if (lowerCaseName.includes('mei')) return MEI_SPRITE_B64;
             
-            // Если это не плейсхолдер, возвращаем имя файла (предполагая, что это внешний URL)
+            // Если это не плейсхолдер, возвращаем имя файла (которое будет дополнено путем позже)
             return fileName; 
         };
         
@@ -375,12 +378,17 @@
             const currentTextElement = document.getElementById('currentText');
 
             // 1. Фон 
-            const bgUrl = step.background;
-            if (bgUrl && !bgUrl.startsWith('data:')) {
-                loadExternalImageWithPersistence(bgUrl, vnViewerElement, true);
+            const bgFileName = step.background; 
+            let finalBgUrl;
+
+            if (bgFileName && !bgFileName.startsWith('data:')) {
+                // ИСПРАВЛЕНИЕ: Добавляем базовый путь к фону
+                finalBgUrl = BACKGROUND_BASE_PATH + bgFileName; 
+                loadExternalImageWithPersistence(finalBgUrl, vnViewerElement, true);
             } else {
                 // Прямое присвоение Base64 или дефолта
-                vnViewerElement.style.backgroundImage = `url('${bgUrl || DEFAULT_BG_B64}')`;
+                finalBgUrl = bgFileName || DEFAULT_BG_B64;
+                vnViewerElement.style.backgroundImage = `url('${finalBgUrl}')`;
             }
 
 
@@ -399,22 +407,26 @@
                 const container = isLeft ? spriteLeftContainer : spriteRightContainer;
                 const imageElement = isLeft ? spriteLeftElement : spriteRightElement;
                 
-                const path = spritePath(step.sprite); 
+                const spriteFileNameOrB64 = spritePath(step.sprite); 
+                let finalSpriteUrl;
+                
+                container.classList.remove('hidden'); // Показываем контейнер спрайта
+
+                if (spriteFileNameOrB64.startsWith('data:')) {
+                    // Base64 (плейсхолдер)
+                    finalSpriteUrl = spriteFileNameOrB64;
+                    imageElement.src = finalSpriteUrl;
+                } else {
+                    // ИСПРАВЛЕНИЕ: Добавляем базовый путь к спрайту
+                    finalSpriteUrl = SPRITE_BASE_PATH + spriteFileNameOrB64; 
+                    // Использование механизма повтора для внешних URL
+                    loadExternalImageWithPersistence(finalSpriteUrl, imageElement, false);
+                }
                 
                 // --- ДЕБАГ ЛОГ ---
-                const logUrl = path.startsWith('data:') ? 'Base64 Placeholder' : path;
+                const logUrl = finalSpriteUrl.startsWith('data:') ? 'Base64 Placeholder' : finalSpriteUrl;
                 console.log(`[DEBUG RENDER] Спрайт: ${step.sprite}, Позиция: ${step.position}, Используется URL: ${logUrl}`);
                 // ---------------
-
-                container.classList.remove('hidden'); // Показываем контейнер спрайта
-                
-                if (path.startsWith('data:')) {
-                    // ПРЯМОЕ ПРИСВОЕНИЕ ДЛЯ BASE64
-                    imageElement.src = path;
-                } else {
-                    // Использование механизма повтора для внешних URL
-                    loadExternalImageWithPersistence(path, imageElement, false);
-                }
             } 
             
             // Применение Затемнения
