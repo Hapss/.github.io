@@ -18,9 +18,7 @@ body {
 .top-bar {
     background: #2a2a2a;
     padding: 15px 20px; /* Добавлены отступы по бокам */
-    position: relative; /* Меняем на relative для простоты */
     margin-bottom: 30px;
-    display: flex; /* Используем Flexbox для размещения элементов */
     justify-content: space-between; /* Заголовок по центру, язык справа */
     align-items: center;
 }
@@ -29,7 +27,6 @@ body {
 .site-title {
     color: #ff6ec7;
     font-size: 2rem;
-    text-shadow: 0 0 10px rgba(255, 110, 199, 0.3);
     position: absolute; /* Абсолютное позиционирование */
     left: 50%; /* Сдвигаем вправо на 50% */
     transform: translateX(-50%); /* Сдвигаем обратно на 50% своей ширины */
@@ -38,7 +35,7 @@ body {
 
 /* Контейнер для языка - теперь в правом углу */
 .language-container {
-    margin-left: auto; /* Автоматический отступ слева выталкивает блок вправо */
+    margin-righ: auto; /* Автоматический отступ слева выталкивает блок вправо */
 }
 
 .language-dropdown {
@@ -47,25 +44,11 @@ body {
 
 .language-select {
     padding: 8px 35px 8px 15px;
-    background: rgba(255, 255, 255, 0.1);
-    color: #e0e0e0; /* Светлый текст */
+    color: #3D3D3D;
     border: 1px solid #ff6ec7;
     border-radius: 6px;
-    cursor: pointer;
-    appearance: none;
     font-size: 0.9rem;
-    min-width: 140px;
-}
-
-.language-dropdown::after {
-    content: "▼";
-    position: absolute;
-    top: 50%;
-    right: 12px;
-    transform: translateY(-50%);
-    color: #ff6ec7;
-    pointer-events: none;
-    font-size: 0.8rem;
+    max-width: 140px;
 }
 
 /* ===== КОМПАКТНЫЕ ФИЛЬТРЫ ===== */
