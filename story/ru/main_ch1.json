@@ -1,4 +1,5 @@
 {
+    "chapter_title": "Глава 1: Выброс Хоукая",
     "dialogue": [
         { 
             "speaker": "", 
@@ -21,7 +22,9 @@
             "background": "images/background/bg_stage1.png"
         },
         { "speaker": "Киана", "sprite": "Kiana 1.png", "position": "left", "text": "Теперь нужно найти цель быстрее, чем Шиксал прибудет. В этот раз я не дам тебе сбежать!"},
-        { "speaker": "Зомби", "sprite": "", "position": "", "text": "Гррааа!!"},
+        
+        { "speaker": "Зомби", "sprite": "", "position": "", "text": "Гррааа!!", "sprite_dimmed": "Kiana 1.png"},
+        
         { "speaker": "Киана", "sprite": "Kiana 1.png", "position": "left", "text": "Заражённые Хонкаем зомби объявились... К счастью, я заранее подготовила оружие."},
         
         { 
@@ -29,13 +32,17 @@
             "sprite": "", 
             "position": "", 
             "text": "Щелчок!",
-            "background": "images/background/bg_stage1.png"
+            "background": "images/background/bg_stage1.png",
+            "sprite_dimmed": "Kiana 1.png"
         },
         { "speaker": "Киана", "sprite": "Kiana 1.png", "position": "left", "text": "Проверка оружия завершена, боеприпасы на месте... Правда я не знаю, как долго продержится это старьё."},
         { "speaker": "Киана", "sprite": "Kiana 1.png", "position": "left", "text": "Ну~ Следуя плану, сначала нужно выбраться из этой библиотеки. И конечно же путь преграждают зомби..."},
         { "speaker": "Киана", "sprite": "Kiana 1.png", "position": "left", "text": "Люди, заражённые Хонкаем и мутировавшие из-за него... Они утратили свои чувства и сознание. Прямо как ходячие мертвецы, какие жалкие создания."},
-        { "speaker": "Зомби", "sprite": "Kiana 1.png", "position": "left", "text": "Гррааа!!"},
+        
+        { "speaker": "Зомби", "sprite": "", "position": "left", "text": "Гррааа!!", "sprite_dimmed": "Kiana 1.png"},
+        
         { "speaker": "Киана", "sprite": "Kiana 1.png", "position": "left", "text": "Прости, даже так эта леди не проявит пощады. По крайней мере в качестве компенсации поспите спокойно."},
-        { "speaker": "", "sprite": "", "position": "", "text": "Бах! Бах! Бах!"}
+        
+        { "speaker": "", "sprite": "", "position": "", "text": "Бах! Бах! Бах!", "sprite_dimmed": "Kiana 1.png"}
     ]
 }
