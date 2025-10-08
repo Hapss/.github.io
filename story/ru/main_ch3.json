@@ -1,12 +1,12 @@
 {
     "title": "Глава 3: Зловещая молния",
-    "background": "bg_stage3.png",
     "dialogue": [
         {
             "speaker": "Киана",
             "text": "Ху~Ху~ Им нет конца! Я не ожидала, что все зомби в округе будут привлечены источником Хоукая! Продолжать в таком духе не получится.",
             "sprite": "Kiana 4.png",
             "position": "left"
+            "background": "bg_stage3.png",
         },
         {
             "speaker": "Киана",
