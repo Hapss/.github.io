@@ -1,0 +1,644 @@
+:root {
+  --story-width: min(calc((100vmin - var(--topNav-height)) * 16 / 9), 95vw);
+  --dialog-size: 6em;
+}
+@media (orientation: landscape) and (max-width: 1200px) {
+  :root {
+    --story-width: 100vw;
+  }
+}
+
+@font-face {
+  font-family: "vn";
+  src: url("../../webfonts/vn.woff2") format("woff2");
+}
+.dialog {
+  /*font-family: "vn";*/
+}
+.scene {
+  width: 100%;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  background-image: var(--background-image-url);
+  background-size: var(--story-width) auto;
+  background-attachment: fixed;
+  background-position: center calc(50% + var(--topNav-height) / 2);
+  background-repeat: no-repeat;
+}
+/* set minHeight according to aspect ratio, default to 16:9 */
+.scene {
+  --bgwidth: 16;
+  --bgheight: 9;
+  min-height: calc(var(--story-width) / var(--bgwidth) * var(--bgheight));
+}
+.scene.video {
+  /* wider ratio for videos */
+  min-height: calc(var(--story-width) / 13 * 6);
+}
+.scene.multipart {
+  min-height: calc(1.5 * var(--story-width) / var(--bgwidth) * var(--bgheight));
+}
+.scene:before {
+  content: "";
+  background-color: var(--main-background-color);
+  background-image: var(--background-image-url);
+  background-size: cover;
+  background-attachment: fixed;
+  background-position: center calc(50% + var(--topNav-height) / 2);
+  background-repeat: no-repeat;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  filter: blur(5px);
+  z-index: -1;
+}
+.scene.blockerPadded:after {
+  content: "";
+  flex: 1;
+  background-color: var(--fill-blocker);
+}
+.scene:after {
+  transition: opacity 0.5s;
+}
+.scene.multipart {
+  background-attachment: fixed, fixed;
+  background-size:
+    calc(0.75 * var(--story-width)) auto,
+    calc(0.75 * var(--story-width)) auto;
+  background-position:
+    calc(50% - 0.375 * var(--story-width)) calc(50% + var(--topNav-height) / 2),
+    calc(50% + 0.375 * var(--story-width)) calc(50% + var(--topNav-height) / 2);
+  background-repeat: no-repeat, no-repeat;
+}
+.scene.multipart:before {
+  /* this doesn't work as expected, only one bg will actually show due to cover + fixed (they overlap)*/
+  background-attachment: fixed, fixed;
+  background-size: cover, cover;
+  background-position:
+    center calc(50% + var(--topNav-height) / 2),
+    center calc(50% + var(--topNav-height) / 2);
+  background-repeat: no-repeat, no-repeat;
+}
+.scenebreak {
+  width: 100%;
+  height: 2em;
+  background: black;
+}
+.blocker {
+  width: 100%;
+}
+.blocker.fadein {
+  background: radial-gradient(
+    200% 200% at 50% 0%,
+    var(--start-color) 25%,
+    var(--end-color) 50%
+  );
+}
+.blocker.fadeout {
+  background: radial-gradient(
+    200% 200% at 50% 100%,
+    var(--end-color) 25%,
+    var(--start-color) 50%
+  );
+}
+#storyDisp {
+  display: flex;
+  flex-direction: column;
+  max-width: var(--story-width);
+  margin: 0 auto;
+}
+.dialog {
+  display: flex;
+  margin: 0;
+  padding: 0.4em 0.4em;
+  justify-content: center;
+  transition: opacity 0.5s;
+  opacity: 1;
+}
+.blocker {
+  transition: opacity 0.5s;
+}
+.dialog.blocker {
+  padding: 0;
+}
+.dialog.narration .text {
+}
+.dialog.hidden {
+  visibility: hidden;
+  position: absolute;
+  opacity: 0;
+}
+.dialog:after,
+.dialog:before {
+  content: "";
+  flex: 0 99;
+}
+.dialog-right,
+.dialog-left {
+  flex: 1;
+  display: flex;
+  min-width: -webkit-min-content;
+  min-width: calc(var(--dialog-size) + 1em);
+}
+.dialog-left {
+  justify-content: flex-end;
+}
+.avatar {
+  width: var(--dialog-size);
+  height: var(--dialog-size);
+  opacity: 0.75;
+  margin: 0 0.5em;
+  overflow: hidden;
+  position: relative;
+  border-radius: 0.3em;
+  flex-shrink: 0;
+  align-self: center;
+}
+.avatar.active {
+  opacity: 1;
+}
+.avatar.initial img {
+  left: 0 !important;
+  top: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  transform: scale(1) !important;
+}
+.avatar.unknown img {
+  left: -265px !important;
+  top: -41px !important;
+  transform: scale(1.2) !important;
+  filter: brightness(0);
+}
+.avatar.mystery img {
+  filter: brightness(0);
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+}
+.avatar.npc img {
+  position: absolute;
+  /* width: initial; */
+  /* height: initial; */
+  /* margin: auto; */
+  /* width: 200px; */
+  /* height: 200px; */
+  /* transform: translate(-25%,25%) scale(1.5); */
+  /* width: 300px; */
+  /* height: 300px; */
+  /* transform: translate(-33%, 0); */
+  width: 1024px;
+  height: 1024px;
+  /* transform: scale(.5) translate(-50%,-50%) translate(-40%,0); */
+  transform-origin: top left;
+  transform: scale(0.5);
+  left: -205px;
+  top: 0px;
+}
+.text {
+  box-sizing: border-box;
+  background: #000b;
+  flex: 0;
+  flex-basis: 35em;
+  padding: 0.2em 0.5em;
+  display: flex;
+  font-size: 1.3em;
+  flex-direction: column;
+  justify-content: flex-start;
+  border-radius: 0.3em;
+  min-height: calc(var(--dialog-size) / 2 / 1.3);
+}
+.text:not([data-name=""]) {
+  min-height: calc(var(--dialog-size) / 1.3);
+}
+.text:not([data-name=""]) .dialog-name {
+  /*.text:before {
+  content: attr(data-name);*/
+  color: var(--name-color);
+  font-size: 0.8em;
+  margin-bottom: 0.2em;
+  margin-left: -0.3em;
+}
+.text.doctor:before,
+.text[data-name=""]:before {
+  content: none;
+}
+.text[data-name=""] {
+  justify-content: center;
+  text-align: center;
+}
+.decision {
+  border: 1px solid #aaa;
+  cursor: pointer;
+  margin: 0.2em 0;
+  padding: 0.2em;
+  border-radius: 0.25em;
+}
+.decision.selected {
+  color: #000;
+  background: #888;
+}
+
+#topBtn {
+  display: none;
+  position: fixed;
+  font-size: 4em;
+  bottom: 0.25em;
+  right: 0.25em;
+  opacity: 0.75;
+  z-index: 999;
+  cursor: pointer;
+}
+@media (hover: hover) {
+  .story_nav:hover {
+    color: #777;
+    cursor: pointer;
+  }
+  #topBtn:hover {
+    opacity: 1;
+  }
+}
+.storyNav {
+  display: flex;
+  justify-content: center;
+  font-size: 4em;
+  margin: 0.2em 0;
+}
+.storyNav.top {
+  font-size: 2em;
+}
+.storyNav .spacer {
+  flex-basis: 1em;
+}
+#storyTitle,
+.storyName {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#storyTitle.hidden {
+  display: none;
+}
+.storyName {
+  font-size: 2em;
+  background: var(--main-background-color);
+  padding: 0.25em;
+}
+img.storyAvatar {
+  height: 1em;
+  width: 1em;
+  border: 1px solid var(--main-text-color);
+  border-radius: 0.1em;
+}
+#storyTitle > *,
+.storyName > * {
+  margin-left: 0.15em;
+  margin-right: 0.15em;
+}
+.storyName {
+  position: relative;
+}
+.readtime {
+  position: absolute;
+  right: 0;
+  margin-right: 0.4em;
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  font-size: 0.6em;
+  color: var(--light-text-color);
+  overflow: hidden;
+}
+.storySelect {
+  font-size: 1.2em;
+  padding-right: 0.3em;
+}
+audio {
+  /* margin: .4em auto; */
+}
+.music {
+  visibility: hidden;
+  height: 0px;
+  margin: 0;
+}
+.sound {
+  display: none;
+}
+#volControl {
+  display: flex;
+  align-items: center;
+  margin: 0 1em 0 0;
+}
+.vol-spacer {
+  /* flex: 1; */
+}
+.dlBtn {
+  --btn-size: 2rem;
+  font-size: var(--btn-size);
+  width: var(--btn-size);
+  height: var(--btn-size);
+  line-height: var(--btn-size);
+  text-align: center;
+  align-self: center;
+  padding: 0.2em;
+  border-radius: 0.25em;
+  color: #777;
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin-right: 0.25em;
+  margin-top: 0.25em;
+  opacity: 0.75;
+}
+/* Hide .dlBtn by default */
+.scene .dlBtn {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.15s ease-in-out,
+    visibility 0s 0.15s;
+}
+
+/* Show .dlBtn when .scene is hovered */
+.scene:hover .dlBtn {
+  transition-delay: 0.35s;
+  opacity: 0.85;
+  visibility: visible;
+}
+
+/* Hide .dlBtn when any interactable part of .dialog is hovered */
+.scene:hover:has(.dialog i:hover) .dlBtn,
+.scene:hover:has(.dialog .avatar:hover) .dlBtn,
+.scene:hover:has(.dialog .text:hover) .dlBtn {
+  transition-delay: 0s;
+  opacity: 0;
+  visibility: hidden;
+}
+
+#avatarModal .dlBtn {
+  margin: 0.25em;
+}
+.scene[bgpos="fixed"] .dlBtn {
+  top: calc(
+    50% - (var(--story-width) / var(--bgwidth)) * var(--bgheight) / 2 +
+      var(--topNav-height) / 2
+  );
+  right: calc(50% - var(--story-width) / 2);
+  position: fixed;
+}
+.scene[bgpos="bottom"] .dlBtn {
+  top: calc(100% - var(--story-width) / var(--bgwidth) * var(--bgheight));
+}
+
+.itemBtn,
+.soundBtn {
+  --btn-size: 2rem;
+  font-size: var(--btn-size);
+  width: var(--btn-size);
+  height: var(--btn-size);
+  line-height: var(--btn-size);
+  text-align: center;
+  border: 2px solid #aaa;
+  border-radius: 0.25em;
+  align-self: center;
+  padding: 0.2em;
+  color: #777;
+  background: #222e;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .itemBtn:hover,
+  .soundBtn:hover {
+    background: #888;
+    color: #222;
+  }
+  .dlBtn:hover {
+    background: #888;
+    color: #222;
+  }
+}
+.itemBtn:active,
+.soundBtn.playing,
+.soundBtn:active {
+  color: #222;
+  background: #444;
+}
+.soundBtn.stalled {
+  background: #944;
+}
+.soundBtn.stalled:before {
+  content: "\f6a9";
+}
+#volControl i {
+  font-size: 1.5em;
+}
+#volControl #playPauseBtn {
+  margin: 0 0.4em;
+}
+#volControl #playPauseBtn i {
+  font-size: 1em;
+}
+#volSlider {
+  margin: 0 0.4em;
+  -webkit-appearance: none; /* Override default CSS styles */
+  appearance: none;
+  /* height: 25px; /* Specified height */
+  height: 0.8em;
+  background: #808080; /* Grey background */
+  outline: none; /* Remove outline */
+  opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+  -webkit-transition: 0.2s; /* 0.2 seconds transition on hover */
+  transition: opacity 0.2s;
+  border-radius: 0.5em;
+}
+#volSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1.3em;
+  height: 1.3em;
+  background: #dddddd;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+#volSlider::-moz-range-thumb {
+  width: 1.3em;
+  height: 1.3em;
+  background: #dddddd;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+/* The Modal (background) */
+.modal {
+  display: block;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    visibility 0.2s,
+    opacity 0.2s;
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: var(--topNav-height);
+  width: 100%; /* Full width */
+  height: calc(100% - var(--topNav-height)); /* Full height */
+  overflow: hidden; /* Enable scroll if needed */
+  background-color: rgb(0, 0, 0); /* Fallback color */
+  background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+}
+.modal.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Modal Content/Box */
+.modal-content {
+  background-color: #222e;
+  border: 1px solid #777;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: min(1024px, 80vh, 80vw);
+  width: min(1024px, 80vw, 80vh);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  --bstart: 0;
+  --bend: 0;
+}
+.modal-content,
+.modal-content img {
+  border-radius: 0.5em;
+  user-select: none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -o-user-select: none;
+  -ms-user-select: none;
+}
+.modal-content img {
+  max-width: 100%;
+}
+.modal-content img.item {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.modal-content.unknown img {
+  filter: brightness(0);
+}
+
+.modal-content .black {
+  position: absolute;
+  inset: 0;
+  filter: brightness(0);
+  pointer-events: none;
+
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #fff calc(var(--bstart, 0) * 100%),
+    transparent calc(var(--bend, 0) * 100%)
+  );
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+
+  mask-image: linear-gradient(
+    to bottom,
+    #fff calc(var(--bstart, 0) * 100%),
+    transparent calc(var(--bend, 0) * 100%)
+  );
+  mask-repeat: no-repeat;
+  mask-size: 100% 100%;
+}
+
+.avatar:not(.unknown) {
+  cursor: pointer;
+}
+
+.avatar:not(.unknown):hover {
+  transition: transform 0.1s;
+  transform: scale(1.05);
+}
+
+.avatar:not(.unknown):hover:after {
+  content: "\f00e";
+  font-weight: 900;
+  position: absolute;
+  font-family: "Font Awesome 5 Free";
+  font-size: 1.5em;
+}
+#serverSelect {
+  margin-right: 0.25em;
+}
+#storyDisp:not([display-mode="0"]) .soundPlayer {
+  height: 0;
+  padding: 0;
+  margin: 0;
+}
+#storyDisp:not([display-mode="0"]) .soundPlayer i {
+  display: none;
+}
+#storyDisp.bg_only .scene:after,
+#storyDisp[display-mode="2"] .scene:after,
+#storyDisp.bg_only .scene > *,
+#storyDisp[display-mode="2"] .scene > * {
+  opacity: 0;
+  pointer-events: none;
+}
+#storyDisp.bg_only .scene > .dlBtn,
+#storyDisp[display-mode="2"] .scene > .dlBtn {
+  opacity: 0.85;
+  pointer-events: auto;
+}
+#ccselector {
+  justify-content: center;
+}
+em,
+i {
+  font-style: italic;
+}
+b,
+strong {
+  font-weight: bold;
+}
+#storyDisp.module .text {
+  text-align: left;
+  flex-basis: 31.45em;
+}
+
+.storySelect option,
+.storySelect {
+  background-color: var(--main-background-color);
+  color: var(--main-text-color);
+}
+.storySelect {
+  outline: none;
+  padding: 0.15em;
+  border: 1px solid #555;
+  border-radius: 0.2em;
+}
+
+.scene > video {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+html {
+  overscroll-behavior: none;
+}
+
+.nav-left {
+  min-width: 0;
+}
+.nav-center {
+  overflow: hidden;
+}
