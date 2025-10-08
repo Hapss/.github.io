@@ -34,7 +34,6 @@
         .sprite-position {
             position: absolute;
             bottom: 0;
-            /* Усиление: контейнер спрайта занимает почти всю высоту и 45% ширины */
             height: 95%; 
             width: 45%;
             transition: opacity 0.3s ease, transform 0.3s ease;
@@ -46,16 +45,22 @@
         .sprite-position.left { left: 0; }
         .sprite-position.right { right: 0; }
         .sprite-image {
-            /* КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Гарантируем, что изображение заполняет контейнер */
             height: 100%; 
             width: auto;
             max-height: 100%; 
             object-fit: contain;
             opacity: 1; 
-            display: block; /* Убеждаемся, что это блочный элемент */
+            display: block; 
         }
         .dimmed-sprite {
             opacity: 0.4;
+        }
+
+        /* Улучшение: Гарантируем, что плейсхолдер фона виден и центрирован */
+        #vnViewer {
+            background-repeat: no-repeat;
+            background-color: #1a1a1a; 
+            background-position: center;
         }
     </style>
 </head>
@@ -72,17 +77,17 @@
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        let app;
         let db;
         let auth;
         let userId = 'anon';
 
         if (firebaseConfig) {
             try {
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
+                const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
+                db = getFirestore(app);
 
+                // Выделение логики аутентификации
                 async function authenticate() {
                     try {
                         if (initialAuthToken) {
@@ -124,7 +129,6 @@
         <div class="bg-gray-700 p-4 rounded-xl shadow-lg mb-6 flex flex-wrap gap-4 items-end">
             <div class="flex-1 min-w-[180px]">
                 <label for="storyTypeSelect" id="labelStoryType" class="block text-sm font-medium mb-1 text-gray-300">Тип сюжета</label>
-                <!-- Тип сюжета ВСЕГДА активен -->
                 <select id="storyTypeSelect" onchange="initializeOrUpdateUI(true)" class="w-full bg-gray-800 text-white rounded-lg p-2.5 cursor-pointer focus:ring-red-400 focus:border-red-400 transition">
                     <!-- Options populated by JS -->
                 </select>
@@ -132,7 +136,6 @@
 
             <div class="flex-1 min-w-[250px]">
                 <label for="chapterSelect" id="labelChapter" class="block text-sm font-medium mb-1 text-gray-300">Сюжет (Глава)</label>
-                <!-- Список глав отключается, если метаданные не загружены -->
                 <select id="chapterSelect" onchange="enableLoadButton(); saveProgress()" class="w-full bg-gray-800 text-white rounded-lg p-2.5 cursor-pointer focus:ring-red-400 focus:border-red-400 transition" disabled>
                     <!-- Options populated by JS -->
                 </select>
@@ -179,30 +182,36 @@
 
     <script>
         // ====================================================================
-        // === КОНСТАНТЫ И ДАННЫЕ ===
+        // === КОНФИГУРАЦИЯ И ДАННЫЕ ===
         // ====================================================================
         
-        // Базовые пути, указанные пользователем
-        const SPRITE_BASE_PATH = 'images/sprites/';
-        const BACKGROUND_BASE_PATH = 'images/background/';
-
-        // Base64-кодированные SVG для надежных плейсхолдеров
-        const KIANA_SPRITE_B64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjODAwMDgwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5LSUFOQTwvdGV4dD48L3RleHQ+PC9zdmc+'; // Пурпурный
-        const MEI_SPRITE_B64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRkY1NzMzIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5NRUk8L3RleHQ+PC9zdmc+'; // Красный
-        const DEFAULT_SPRITE_B64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjIyMjIyIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5TUFJJSVQ8L3RleHQ+PC9zdmc+';
-        const DEFAULT_BG_B64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyMCIgaGVpZ2h0PSIxMDgwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMyYjJkM2EiLz48L3N2Zz4='; // Темный фон без текста
-        
-        const STORAGE_KEY = 'vn_story_progress_v4';
-        const METADATA_FILE = 'story/story_metadata.json'; 
-        const STORY_BASE_PATH = 'story/'; 
-        
-        // Настройки повторной загрузки контента (Exponential Backoff)
-        const INITIAL_DELAY_MS = 2000;
-        const MAX_DELAY_MS = 30000;
-        
-        // Настройки постоянной загрузки изображений (спрайтов/фонов)
-        const MAX_PERSISTENT_IMAGE_RETRIES = 50; 
-        const PERSISTENT_IMAGE_RETRY_DELAY_MS = 2000; 
+        // Объект CONFIG для централизованного управления всеми настройками
+        const CONFIG = {
+            PATHS: {
+                SPRITE_BASE: 'images/sprites/',
+                BACKGROUND_BASE: 'images/background/',
+                METADATA_FILE: 'story/story_metadata.json', 
+                STORY_BASE: 'story/', 
+            },
+            STORAGE: {
+                KEY: 'vn_story_progress_v4',
+            },
+            BACKOFF: {
+                INITIAL_DELAY_MS: 2000,
+                MAX_DELAY_MS: 30000,
+                MAX_ATTEMPTS: 5,
+            },
+            IMAGE_LOAD: {
+                MAX_RETRIES: 50, 
+                RETRY_DELAY_MS: 2000, 
+            },
+            // Base64-кодированные SVG для надежных плейсхолдеров
+            PLACEHOLDERS: {
+                KIANA_SPRITE: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjODAwMDgwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5LSUFOQTwvdGV4dD48L3N2Zz4=',
+                MEI_SPRITE: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRkY1NzMzIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5NRUk8L3RleHQ+PC9zdmc+',
+                DEFAULT_BG: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyMCIgaGVpZ2h0PSIxMDgwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMyYjJkM2EiLz48L3N2Zz4=',
+            }
+        };
 
         // Группировка сюжетов (без изменений)
         const STORY_GROUPS = {
@@ -216,7 +225,7 @@
         let currentDialogue = []; 
         let currentDialogueIndex = 0;
         let dialogueIsLoaded = false;
-        let currentBackgroundUrl = null; // Глобальная переменная для отслеживания текущего фона
+        let currentBackgroundUrl = null; 
         
         // Переводы UI (без изменений)
         const i18n = {
@@ -244,39 +253,49 @@
             }
         };
 
-        let spriteLeftContainer, spriteRightContainer;
-        let spriteLeftElement, spriteRightElement;
-        let vnViewerElement;
-        window.storyMetadata = null; 
+        // Кэширование DOM-элементов
+        const DOM = {};
+
+        /** * Получает кэшированный DOM-элемент или ищет его. */
+        const getEl = (id) => {
+            if (!DOM[id]) {
+                DOM[id] = document.getElementById(id);
+            }
+            return DOM[id];
+        };
+
+        // ====================================================================
+        // === ИНИЦИАЛИЗАЦИЯ ===
+        // ====================================================================
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            DOM.spriteLeftContainer = getEl('spriteLeftContainer');
+            DOM.spriteRightContainer = getEl('spriteRightContainer');
+            DOM.spriteLeftElement = getEl('spriteLeft');
+            DOM.spriteRightElement = getEl('spriteRight');
+            DOM.vnViewerElement = getEl('vnViewer');
+            
+            // Устанавливаем дефолтный фон сразу после загрузки DOM
+            DOM.vnViewerElement.style.backgroundImage = `url('${CONFIG.PLACEHOLDERS.DEFAULT_BG}')`;
+            currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG; 
+            
+            loadProgress(); 
+        });
 
         // ====================================================================
         // === CORE FUNCTIONS ===
         // ====================================================================
         
-        document.addEventListener('DOMContentLoaded', () => {
-            spriteLeftContainer = document.getElementById('spriteLeftContainer');
-            spriteRightContainer = document.getElementById('spriteRightContainer');
-            spriteLeftElement = document.getElementById('spriteLeft');
-            spriteRightElement = document.getElementById('spriteRight');
-            vnViewerElement = document.getElementById('vnViewer');
-            
-            // Устанавливаем дефолтный фон сразу после загрузки DOM
-            vnViewerElement.style.backgroundImage = `url('${DEFAULT_BG_B64}')`;
-            currentBackgroundUrl = DEFAULT_BG_B64; // Инициализируем текущий фон
-            
-            loadProgress(); 
-        });
-
         /** * Асинхронно загружает метаданные глав. */
         async function fetchChapterMetadata() {
             try {
-                const response = await fetch(METADATA_FILE); 
+                const response = await fetch(CONFIG.PATHS.METADATA_FILE); 
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 window.storyMetadata = await response.json();
                 console.log("[Metadata] Загрузка глав завершена.");
             } catch (error) {
-                console.error(`[Metadata] Критическая ошибка загрузки внешнего файла (${METADATA_FILE}).`, error);
-                alertMessage(i18n[document.getElementById('languageSelect').value].errorFetchMetadataStrict); 
+                console.error(`[Metadata] Критическая ошибка загрузки внешнего файла (${CONFIG.PATHS.METADATA_FILE}).`, error);
+                alertMessage(i18n[getEl('languageSelect').value].errorFetchMetadataStrict); 
                 window.storyMetadata = null; 
             }
         }
@@ -292,23 +311,23 @@
                 renderDialogueStep();
                 saveProgress();
             } else if (newIndex >= currentDialogue.length) {
-                alertMessage(i18n[document.getElementById('languageSelect').value].endOfStory);
+                alertMessage(i18n[getEl('languageSelect').value].endOfStory);
                 currentDialogueIndex = currentDialogue.length - 1;
                 saveProgress();
             } else {
-                alertMessage(i18n[document.getElementById('languageSelect').value].startOfStory);
+                alertMessage(i18n[getEl('languageSelect').value].startOfStory);
             }
         }
         
         /** * Определяет путь/URL к спрайту. */
         const spritePath = (fileName) => {
-            if (!fileName) return DEFAULT_SPRITE_B64;
+            if (!fileName) return null; // Возвращаем null, чтобы спрайт был скрыт
             
             const lowerCaseName = fileName.toLowerCase();
 
             // Если это Base64-плейсхолдер
-            if (lowerCaseName.includes('kiana')) return KIANA_SPRITE_B64;
-            if (lowerCaseName.includes('mei')) return MEI_SPRITE_B64;
+            if (lowerCaseName.includes('kiana')) return CONFIG.PLACEHOLDERS.KIANA_SPRITE;
+            if (lowerCaseName.includes('mei')) return CONFIG.PLACEHOLDERS.MEI_SPRITE;
             
             // Если это не плейсхолдер, возвращаем имя файла
             return fileName; 
@@ -316,41 +335,34 @@
         
         /** * Загружает ВНЕШНЕЕ изображение (или фон) с механизмом постоянного повтора. */
         function loadExternalImageWithPersistence(url, element, isBackground = false, attempt = 1) {
+            const { MAX_RETRIES, RETRY_DELAY_MS } = CONFIG.IMAGE_LOAD;
+
             // Если достигнут лимит попыток, останавливаемся
-            if (attempt > MAX_PERSISTENT_IMAGE_RETRIES) {
-                 console.error(`[Image Load] Достигнут лимит попыток (${MAX_PERSISTENT_IMAGE_RETRIES}) для ${url}. Загрузка прекращена.`);
+            if (attempt > MAX_RETRIES) {
+                 console.error(`[Image Load] Достигнут лимит попыток (${MAX_RETRIES}) для ${url}. Загрузка прекращена.`);
                  if (!isBackground) element.parentElement.classList.add('hidden');
                  return;
             }
             
-            // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Всегда добавляем уникальный параметр для надежности, чтобы обойти кэш
+            // Агрессивный обход кэша
             const cacheBuster = `?t=${Date.now()}_${attempt}`;
             const finalUrl = url + cacheBuster;
 
-            console.log(`[Image Load] Попытка загрузки ВНЕШНЕГО URL: ${finalUrl} (Попытка ${attempt})`);
+            const retryLoad = (err) => {
+                console.warn(`[Image Load] ОШИБКА: ${finalUrl}. ${err}. Повтор через ${RETRY_DELAY_MS} мс.`);
+                setTimeout(() => loadExternalImageWithPersistence(url, element, isBackground, attempt + 1), RETRY_DELAY_MS);
+            };
 
-
-            // --- Логика для спрайтов (<img>) с внешним URL ---
+            // --- Логика для спрайтов (<img>) ---
             if (!isBackground) {
-                // Очищаем обработчики перед новой попыткой
-                element.onload = null;
-                element.onerror = null;
-
-                element.onload = () => {
-                    console.log(`[Sprite Load] Успешно загружен: ${finalUrl} (Попытка ${attempt})`);
-                };
-
-                element.onerror = () => {
-                    console.warn(`[Sprite Load] ОШИБКА: ${finalUrl}. Повтор через ${PERSISTENT_IMAGE_RETRY_DELAY_MS} мс.`);
-                    // Повторяем попытку с оригинальным URL, но persistence добавит новый cacheBuster
-                    setTimeout(() => loadExternalImageWithPersistence(url, element, isBackground, attempt + 1), PERSISTENT_IMAGE_RETRY_DELAY_MS);
-                };
+                element.onload = () => console.log(`[Sprite Load] Успешно загружен: ${finalUrl} (Попытка ${attempt})`);
+                element.onerror = () => retryLoad("Ошибка HTTP/сетевого уровня");
                 
                 // Присваиваем src в конце, используя уникальный URL
                 element.src = finalUrl; 
 
             } else {
-                // --- Логика для фона (CSS background-image) с внешним URL ---
+                // --- Логика для фона (CSS background-image) ---
                 const tempImg = new Image();
                 tempImg.onload = () => {
                     console.log(`[Background Load] Успешно загружен: ${finalUrl} (Попытка ${attempt})`);
@@ -358,55 +370,47 @@
                     currentBackgroundUrl = finalUrl; // Обновляем глобальную переменную при успешной загрузке
                 };
                 
-                tempImg.onerror = () => {
-                    console.warn(`[Background Load] ОШИБКА: ${finalUrl}. Повтор через ${PERSISTENT_IMAGE_RETRY_DELAY_MS} мс.`);
-                    // Повторяем попытку с оригинальным URL, но persistence добавит новый cacheBuster
-                    setTimeout(() => loadExternalImageWithPersistence(url, element, isBackground, attempt + 1), PERSISTENT_IMAGE_RETRY_DELAY_MS);
-                };
-                
+                tempImg.onerror = () => retryLoad("Ошибка HTTP/сетевого уровня");
                 tempImg.src = finalUrl;
             }
         }
 
         /** Рендерит текущий шаг диалога и обновляет UI. */
         function renderDialogueStep() {
-            // Если контент не загружен, скрываем диалог и спрайты
+            const { vnViewerElement, spriteLeftContainer, spriteRightContainer, spriteLeftElement, spriteRightElement } = DOM;
+
+            // Если контент не загружен, скрываем все
             if (!dialogueIsLoaded || currentDialogue.length === 0) {
-                document.getElementById('dialogueWrapper').classList.add('hidden');
+                getEl('dialogueWrapper').classList.add('hidden');
                 spriteLeftContainer.classList.add('hidden');
                 spriteRightContainer.classList.add('hidden');
-                vnViewerElement.style.backgroundImage = `url('${DEFAULT_BG_B64}')`;
-                currentBackgroundUrl = DEFAULT_BG_B64;
+                vnViewerElement.style.backgroundImage = `url('${CONFIG.PLACEHOLDERS.DEFAULT_BG}')`;
+                currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG;
                 return;
             }
 
             const step = currentDialogue[currentDialogueIndex];
-            const currentSpeakerElement = document.getElementById('currentSpeaker');
-            const currentTextElement = document.getElementById('currentText');
-
-            // 1. Фон (Реализация персистентности)
+            
+            // 1. Фон (Персистентность)
             const bgFileName = step.background; 
             let finalBgUrl = null;
 
             if (bgFileName) { 
-                // Если фон указан в шаге, загружаем и обновляем персистентный URL
                 if (!bgFileName.startsWith('data:')) {
-                    finalBgUrl = BACKGROUND_BASE_PATH + bgFileName; 
-                    // loadExternalImageWithPersistence обновит currentBackgroundUrl при успехе
+                    finalBgUrl = CONFIG.PATHS.BACKGROUND_BASE + bgFileName; 
                     loadExternalImageWithPersistence(finalBgUrl, vnViewerElement, true);
                 } else {
-                    // Base64 или специфический плейсхолдер
                     finalBgUrl = bgFileName;
                     vnViewerElement.style.backgroundImage = `url('${finalBgUrl}')`;
                     currentBackgroundUrl = finalBgUrl; 
                 }
             } else if (currentBackgroundUrl) { 
-                // Если фон НЕ указан в шаге, используем сохраненный персистентный URL
+                // Если фон не указан, используем персистентный
                 vnViewerElement.style.backgroundImage = `url('${currentBackgroundUrl}')`;
             } else {
-                // Если это первый шаг и нет фона, используем дефолт
-                 vnViewerElement.style.backgroundImage = `url('${DEFAULT_BG_B64}')`;
-                 currentBackgroundUrl = DEFAULT_BG_B64;
+                // Иначе, дефолтный плейсхолдер
+                 vnViewerElement.style.backgroundImage = `url('${CONFIG.PLACEHOLDERS.DEFAULT_BG}')`;
+                 currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG;
             }
 
 
@@ -420,35 +424,24 @@
             spriteRightElement.classList.remove('dimmed-sprite');
             
             // Обновление и показ нужного спрайта
-            if (step.sprite && step.position) {
+            const spriteFileNameOrB64 = spritePath(step.sprite); 
+            
+            if (spriteFileNameOrB64 && step.position) {
                 const isLeft = step.position.toLowerCase() === 'left';
                 const container = isLeft ? spriteLeftContainer : spriteRightContainer;
                 const imageElement = isLeft ? spriteLeftElement : spriteRightElement;
                 
-                const spriteFileNameOrB64 = spritePath(step.sprite); 
-                let finalSpriteUrl;
-                
-                container.classList.remove('hidden'); // Показываем контейнер спрайта
+                container.classList.remove('hidden'); 
 
                 if (spriteFileNameOrB64.startsWith('data:')) {
                     // Base64 (плейсхолдер)
-                    finalSpriteUrl = spriteFileNameOrB64;
-                    imageElement.src = finalSpriteUrl;
+                    imageElement.src = spriteFileNameOrB64;
                 } else {
                     // Внешний URL
-                    finalSpriteUrl = SPRITE_BASE_PATH + spriteFileNameOrB64; 
-                    
-                    // Обязательный сброс src для принудительной перерисовки
-                    imageElement.src = ""; 
-                    
-                    // Использование механизма повтора для внешних URL (теперь с агрессивным cacheBuster)
+                    const finalSpriteUrl = CONFIG.PATHS.SPRITE_BASE + spriteFileNameOrB64; 
+                    imageElement.src = ""; // Обязательный сброс src для принудительной перерисовки
                     loadExternalImageWithPersistence(finalSpriteUrl, imageElement, false);
                 }
-                
-                // --- ДЕБАГ ЛОГ ---
-                const logUrl = finalSpriteUrl.startsWith('data:') ? 'Base64 Placeholder' : finalSpriteUrl;
-                console.log(`[DEBUG RENDER] Спрайт: ${step.sprite}, Позиция: ${step.position}, Используется URL: ${logUrl}`);
-                // ---------------
             } 
             
             // Применение Затемнения
@@ -459,7 +452,9 @@
             }
 
             // 3. Текст и Имя Спикера
-            document.getElementById('dialogueWrapper').classList.remove('hidden');
+            getEl('dialogueWrapper').classList.remove('hidden');
+            const currentSpeakerElement = getEl('currentSpeaker');
+            const currentTextElement = getEl('currentText');
             
             if (step.speaker) {
                 currentSpeakerElement.textContent = step.speaker;
@@ -474,28 +469,26 @@
         
         /** * Асинхронно пытается загрузить выбранную главу, используя Exponential Backoff. */
         async function updateStoryContent(startIndex = 0) {
-            const lang = document.getElementById('languageSelect').value; 
-            const fullStoryKey = document.getElementById('chapterSelect').value; 
-            const loadButton = document.getElementById('loadButton');
-            const loadTextElement = document.getElementById('loadText');
+            const lang = getEl('languageSelect').value; 
+            const fullStoryKey = getEl('chapterSelect').value; 
+            const loadButton = getEl('loadButton');
+            const loadTextElement = getEl('loadText');
             
             if (!fullStoryKey) return;
 
-            const expectedFilePath = `${STORY_BASE_PATH}${lang}/${fullStoryKey}.json`;
+            const expectedFilePath = `${CONFIG.PATHS.STORY_BASE}${lang}/${fullStoryKey}.json`;
+            const { INITIAL_DELAY_MS, MAX_DELAY_MS, MAX_ATTEMPTS } = CONFIG.BACKOFF;
 
             loadButton.disabled = true;
             loadTextElement.textContent = "Загрузка...";
             
             const attemptLoad = async (attempt = 1) => {
-                
                 let success = false;
                 let data = null;
 
                 try {
                     const response = await fetch(expectedFilePath);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     data = await response.json();
                     success = true;
                 } catch (e) {
@@ -503,16 +496,13 @@
                 }
 
                 if (success && data) {
-                    // --- УСПЕХ: Обновление глобального состояния ---
+                    // --- УСПЕХ ---
                     currentDialogue = data.dialogue || [];
                     currentDialogueIndex = Math.min(startIndex, currentDialogue.length - 1);
                     currentDialogueIndex = Math.max(0, currentDialogueIndex); 
                     dialogueIsLoaded = true;
-                    
-                    // Сбрасываем текущий фон, чтобы первый шаг его установил
                     currentBackgroundUrl = null; 
                     
-                    // --- Обновление UI ---
                     loadTextElement.textContent = "Загружено";
                     renderDialogueStep();
 
@@ -522,22 +512,18 @@
                     }, 1500);
 
                 } else {
-                    // --- ПОВТОРНАЯ ПОПЫТКА: Вычисление задержки (Exponential Backoff) ---
-                    const delay = Math.min(MAX_DELAY_MS, INITIAL_DELAY_MS * Math.pow(2, attempt - 1));
+                    // --- ПОВТОРНАЯ ПОПЫТКА ---
+                    if (attempt >= MAX_ATTEMPTS) {
+                        loadTextElement.textContent = "Ошибка загрузки";
+                        console.error(`[Content] Окончательный сбой загрузки контента главы после ${MAX_ATTEMPTS} попыток.`);
+                        loadButton.disabled = false;
+                        return;
+                    }
                     
+                    const delay = Math.min(MAX_DELAY_MS, INITIAL_DELAY_MS * Math.pow(2, attempt - 1));
                     loadTextElement.textContent = `Повтор (${attempt})...`;
 
-                    // Рекурсивный вызов через setTimeout для повтора
-                    setTimeout(() => {
-                        // Максимальное количество попыток для загрузки контента
-                        if (attempt >= 5) {
-                            loadTextElement.textContent = "Ошибка загрузки";
-                            console.error(`[Content] Окончательный сбой загрузки контента главы после 5 попыток.`);
-                            loadButton.disabled = false;
-                            return;
-                        }
-                        attemptLoad(attempt + 1);
-                    }, delay);
+                    setTimeout(() => attemptLoad(attempt + 1), delay);
                 }
             };
             
@@ -553,7 +539,7 @@
          * Показывает временное сообщение вверху экрана.
          */
         function alertMessage(message) {
-            const header = document.getElementById('header');
+            const header = getEl('header');
             const msgBox = document.createElement('div');
             msgBox.textContent = message;
             msgBox.className = 'fixed top-1 right-1/2 translate-x-1/2 p-2 bg-red-600 text-white rounded-lg shadow-xl z-50 text-sm transition-opacity duration-300';
@@ -566,16 +552,16 @@
         }
 
         function updateI18nStrings() {
-            const lang = document.getElementById('languageSelect').value;
+            const lang = getEl('languageSelect').value;
             const text = i18n[lang];
 
-            document.getElementById('headerTitle').textContent = text.headerTitle;
-            document.getElementById('labelStoryType').textContent = text.labelStoryType;
-            document.getElementById('labelChapter').textContent = text.labelChapter;
-            document.getElementById('loadText').textContent = text.loadText;
-            document.getElementById('resetButton').textContent = text.resetProgress;
+            getEl('headerTitle').textContent = text.headerTitle;
+            getEl('labelStoryType').textContent = text.labelStoryType;
+            getEl('labelChapter').textContent = text.labelChapter;
+            getEl('loadText').textContent = text.loadText;
+            getEl('resetButton').textContent = text.resetProgress;
             
-            const typeSelect = document.getElementById('storyTypeSelect');
+            const typeSelect = getEl('storyTypeSelect');
             const currentType = typeSelect.value;
             typeSelect.innerHTML = '';
             
@@ -587,7 +573,7 @@
             for (const key in STORY_GROUPS) {
                 const option = document.createElement('option');
                 option.value = key;
-                option.textContent = STORY_GROUPS[key][lang] || STORY_GROUPS[key].ru; // Используем RU как резерв
+                option.textContent = STORY_GROUPS[key][lang] || STORY_GROUPS[key].ru; 
                 if (key === currentType) {
                     option.selected = true;
                 }
@@ -597,9 +583,9 @@
 
         /** * Обновляет выпадающий список глав. */
         function updateChapterSelect(skipSideEffects = false) {
-            const typeKey = document.getElementById('storyTypeSelect').value;
-            const select = document.getElementById('chapterSelect');
-            const lang = document.getElementById('languageSelect').value;
+            const typeKey = getEl('storyTypeSelect').value;
+            const select = getEl('chapterSelect');
+            const lang = getEl('languageSelect').value;
             const currentChapterKey = select.value; 
 
             select.innerHTML = '';
@@ -651,8 +637,8 @@
         }
 
         function enableLoadButton() {
-            const storyId = document.getElementById('chapterSelect').value;
-            document.getElementById('loadButton').disabled = !storyId;
+            const storyId = getEl('chapterSelect').value;
+            getEl('loadButton').disabled = !storyId;
         }
 
         function initializeOrUpdateUI(calledByUIEvent) {
@@ -669,18 +655,18 @@
         
         function saveProgress() {
             const progress = {
-                lang: document.getElementById('languageSelect').value,
-                type: document.getElementById('storyTypeSelect').value,
-                chapter: document.getElementById('chapterSelect').value, 
+                lang: getEl('languageSelect').value,
+                type: getEl('storyTypeSelect').value,
+                chapter: getEl('chapterSelect').value, 
                 index: currentDialogueIndex,
             };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+            localStorage.setItem(CONFIG.STORAGE.KEY, JSON.stringify(progress));
         }
 
         async function loadProgress() {
             await fetchChapterMetadata(); 
             
-            const savedProgress = localStorage.getItem(STORAGE_KEY);
+            const savedProgress = localStorage.getItem(CONFIG.STORAGE.KEY);
             
             initializeOrUpdateUI(false); 
 
@@ -690,9 +676,9 @@
             }
 
             const progress = JSON.parse(savedProgress);
-            const langSelect = document.getElementById('languageSelect');
-            const typeSelect = document.getElementById('storyTypeSelect');
-            const chapterSelect = document.getElementById('chapterSelect');
+            const langSelect = getEl('languageSelect');
+            const typeSelect = getEl('storyTypeSelect');
+            const chapterSelect = getEl('chapterSelect');
             
             if (i18n[progress.lang]) {
                 langSelect.value = progress.lang;
@@ -714,7 +700,7 @@
             }
             enableLoadButton();
             
-            // ИСПРАВЛЕНИЕ: Автоматически загружаем контент, если глава была успешно восстановлена.
+            // АВТОЗАГРУЗКА: Автоматически загружаем контент, если глава была успешно восстановлена.
             if (chapterRestored) {
                  // Загружаем контент и переходим к сохраненному индексу
                  updateStoryContent(progress.index); 
@@ -722,21 +708,21 @@
         }
 
         function resetProgress() {
-            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(CONFIG.STORAGE.KEY);
             dialogueIsLoaded = false;
             currentDialogueIndex = 0;
             currentDialogue = []; 
-            currentBackgroundUrl = DEFAULT_BG_B64; // Сброс персистентного фона
+            currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG; 
 
-            document.getElementById('dialogueWrapper').classList.add('hidden');
-            document.getElementById('languageSelect').value = 'ru';
+            getEl('dialogueWrapper').classList.add('hidden');
+            getEl('languageSelect').value = 'ru';
             
             loadProgress(); 
             
-            vnViewerElement.style.backgroundImage = `url('${DEFAULT_BG_B64}')`;
+            getEl('vnViewer').style.backgroundImage = `url('${CONFIG.PLACEHOLDERS.DEFAULT_BG}')`;
             
-            document.getElementById('spriteLeftContainer').classList.add('hidden');
-            document.getElementById('spriteRightContainer').classList.add('hidden');
+            getEl('spriteLeftContainer').classList.add('hidden');
+            getEl('spriteRightContainer').classList.add('hidden');
             
             alertMessage("Прогресс сброшен!");
         }
