@@ -267,7 +267,7 @@
         // --- GLOBAL CONSTANTS ---
         const STORAGE_KEY = 'hg2_story_progress';
         const STORY_BASE_PATH = 'story/'; // Базовый путь для JSON: story/ru/main_ch1.json
-        const SPRITE_BASE_PATH = 'sprites/'; // Базовый путь для спрайтов
+        const SPRITE_BASE_PATH = 'images/sprites/'; // Базовый путь для спрайтов
         const AUDIO_BASE_PATH = 'audio/'; 
         const DEFAULT_BG_URL = 'https://placehold.co/1920x1080/2a2a2a/fca5a5?text=Выберите+сюжет+и+нажмите+Загрузить';
         
@@ -709,36 +709,39 @@
             spriteLeftElement.classList.remove('dimmed-sprite');
             spriteRightElement.classList.remove('dimmed-sprite');
             
-            // Важно: Сброс src, чтобы не отображался старый спрайт или сломанная иконка,
-            // если текущий шаг не содержит спрайта.
             spriteLeftElement.src = '';
             spriteRightElement.src = ''; 
             
-            // 2b. Логика установки активного спрайта
+            // 2b. Логика установки активного спрайта (Усиленная проверка пути)
             if (step.sprite && step.position) {
                 const isLeft = step.position.toLowerCase() === 'left';
                 const container = isLeft ? spriteLeftContainer : spriteRightContainer;
                 const imageElement = isLeft ? spriteLeftElement : spriteRightElement;
                 
                 let spritePath;
-                let spriteFileName = step.sprite;
-                
-                // *** ИСПРАВЛЕННАЯ ЛОГИКА ЗАГРУЗКИ СПРАЙТОВ ***
-                // Проверяем, не содержит ли имя файла уже префикс 'sprites/' или 'http'
-                if (spriteFileName.startsWith('http') || spriteFileName.startsWith(SPRITE_BASE_PATH)) {
-                    // Если путь абсолютный или уже содержит префикс 'sprites/', используем его как есть.
+                let spriteFileName = step.sprite.trim(); // Удаляем пробелы
+
+                // 1. Проверка на внешний URL (http/https)
+                if (spriteFileName.startsWith('http')) {
                     spritePath = spriteFileName;
                 } else {
-                    // Если указано только имя файла (например, "Kiana 1.png"), добавляем префикс.
-                    spritePath = SPRITE_BASE_PATH + spriteFileName;
+                    // 2. Локальный файл: гарантируем, что префикс 'sprites/' будет добавлен только один раз.
+                    let bareFileName = spriteFileName;
+                    const basePrefix = SPRITE_BASE_PATH.toLowerCase();
+
+                    // Если имя файла уже содержит префикс 'sprites/', удаляем его, чтобы избежать дублирования.
+                    if (bareFileName.toLowerCase().startsWith(basePrefix)) {
+                        bareFileName = bareFileName.substring(basePrefix.length);
+                    }
+                    
+                    // Добавляем префикс. Теперь 'Kiana 1.png' -> 'sprites/Kiana 1.png'
+                    spritePath = SPRITE_BASE_PATH + bareFileName;
                 }
                 
-                console.log(`[Sprite] Попытка загрузить: ${spritePath}`);
+                console.log(`[Sprite] Финальный путь для загрузки: ${spritePath}`);
 
-                // Устанавливаем src. Если загрузка не удастся, сработает onerror.
+                // Устанавливаем src.
                 imageElement.src = spritePath;
-                
-                // Делаем контейнер видимым ТОЛЬКО после установки src
                 container.classList.remove('hidden');
             }
 
@@ -746,12 +749,11 @@
             if (step.sprite_dimmed) {
                 const dimmedSpriteFilename = step.sprite_dimmed; 
                 
-                // Если левый спрайт видим и его путь содержит имя для диммирования, диммируем
+                // Проверка, что загруженный путь спрайта содержит имя диммируемого файла
                 if (!spriteLeftContainer.classList.contains('hidden') && spriteLeftElement.src.includes(dimmedSpriteFilename)) {
                     spriteLeftElement.classList.add('dimmed-sprite');
                 } 
                 
-                // Если правый спрайт видим и его путь содержит имя для диммирования, диммируем
                 if (!spriteRightContainer.classList.contains('hidden') && spriteRightElement.src.includes(dimmedSpriteFilename)) {
                     spriteRightElement.classList.add('dimmed-sprite');
                 } 
