@@ -540,6 +540,146 @@
                 loadText.textContent = i18n[currentLang].loadText;
             }
         }
+        /** Renders the current dialogue line, sprite, and updates navigation buttons and log. */
+        function renderDialogue() {
+            if (!dialogueIsLoaded || currentDialogue.length === 0) return;
+
+            const dialogue = currentDialogue[currentDialogueIndex];
+            const vnViewer = document.getElementById('vnViewer');
+            const spriteContainer = document.getElementById('spriteContainer');
+            const currentSpeaker = document.getElementById('currentSpeaker');
+            const currentText = document.getElementById('currentText');
+            const currentSpeakerContainer = document.getElementById('currentSpeakerContainer');
+            
+            // 1. Update Background
+            if (dialogue.background) {
+                vnViewer.style.backgroundImage = `url('${dialogue.background}')`;
+            }
+
+            // 2. Sprite Management: Handle previous sprite action and render new one
+            
+            const actionPrev = dialogue.action_prev_sprite; // 'dim', 'hide', or undefined/null
+            
+            // 2.1. Handle Previous Sprite Action (Dim/Hide)
+            if (currentSpriteElement) {
+                if (actionPrev === 'dim') {
+                    // Затемнить текущий спрайт, оставляя его в DOM
+                    currentSpriteElement.classList.add('dimmed');
+                    currentSpriteElement.style.zIndex = 9; // Отправляем на задний план
+                } else if (actionPrev === 'hide') {
+                    // Скрыть текущий спрайт, убрать его из DOM после анимации
+                    currentSpriteElement.style.opacity = '0';
+                    setTimeout(() => {
+                        currentSpriteElement.remove();
+                        currentSpriteElement = null;
+                    }, 300); // Соответствует длительности CSS-transition
+                } else {
+                    // Если нет явного действия, спрайт остается как есть (часть мульти-спрайтовой сцены)
+                    // В данной одно-спрайтовой архитектуре мы просто гарантируем, что он яркий, если его не собираются заменить
+                    currentSpriteElement.classList.remove('dimmed');
+                    currentSpriteElement.style.zIndex = 10;
+                }
+            }
+
+            // 2.2. Render NEW Sprite
+            if (dialogue.sprite) {
+                // Если новый спрайт определен, мы либо создаем новый элемент, либо обновляем старый,
+                // если предыдущий спрайт был скрыт/заменен. 
+                
+                // Для простоты, если есть новый спрайт, удаляем все старые, кроме тех, что затемнены.
+                // В этой одно-спрайтовой реализации, мы будем поддерживать только один яркий спрайт + затемненные.
+                
+                const newCharId = dialogue.sprite_id || dialogue.speaker;
+                let spriteEl = spriteContainer.querySelector(`img[data-char-id="${newCharId}"]`);
+
+                if (!spriteEl) {
+                    // Если спрайт для этого персонажа не существует (или был скрыт)
+                    const img = document.createElement('img');
+                    img.classList.add('sprite');
+                    img.setAttribute('data-char-id', newCharId || 'unknown');
+                    spriteEl = img;
+                    spriteContainer.appendChild(spriteEl);
+
+                    const spriteSrc = dialogue.sprite.startsWith('http') ? dialogue.sprite : SPRITE_BASE_PATH + dialogue.sprite;
+                    spriteEl.src = spriteSrc; 
+                    spriteEl.alt = dialogue.speaker || 'Персонаж';
+                    spriteEl.style.opacity = '0'; // Для плавного появления
+                    spriteEl.onerror = () => {
+                         spriteEl.src = `https://placehold.co/200x400/808080/ffffff?text=${dialogue.speaker || 'Char'}`; 
+                         console.error(`Sprite not found: ${spriteSrc}.`);
+                    }; 
+                } else {
+                    // Если спрайт существует (например, был затемнен или меняет позу)
+                    const spriteSrc = dialogue.sprite.startsWith('http') ? dialogue.sprite : SPRITE_BASE_PATH + dialogue.sprite;
+                    spriteEl.src = spriteSrc;
+                }
+
+                // Установка позиции (X-координата в процентах)
+                const xPercent = dialogue.sprite_x !== undefined ? dialogue.sprite_x : 50;
+                spriteEl.style.left = `${xPercent}%`;
+                spriteEl.style.transform = `translateX(-50%)`; 
+
+                // Сделать новый/активированный спрайт ярким и вывести вперед
+                spriteEl.classList.remove('dimmed');
+                spriteEl.style.opacity = '1';
+                spriteEl.style.zIndex = 10;
+                
+                currentSpriteElement = spriteEl; // Обновляем ссылку на активный спрайт
+
+            } else if (actionPrev === 'dim' || actionPrev === 'hide') {
+                 // Если нет нового спрайта, но есть команда на действие (и она выполнена выше)
+                 // currentSpriteElement уже обновлен/затемнен.
+            } else if (currentSpriteElement) {
+                // Если нет спрайта и нет действия, но есть предыдущий спрайт, убеждаемся, что он яркий (если это не Голос за кадром)
+                currentSpriteElement.classList.remove('dimmed');
+                currentSpriteElement.style.zIndex = 10;
+            }
+
+
+            // 3. Update Text and Speaker
+            currentText.style.opacity = '0';
+            setTimeout(() => {
+                currentText.textContent = dialogue.text;
+                currentText.style.opacity = '1';
+            }, 50); 
+
+            if (dialogue.speaker) {
+                currentSpeaker.textContent = dialogue.speaker;
+                currentSpeakerContainer.classList.remove('hidden');
+            } else {
+                currentSpeaker.textContent = '';
+                currentSpeakerContainer.classList.add('hidden');
+            }
+
+            // 4. Update Log Highlighting and content if the log is open
+            const logContainer = document.getElementById('logContainer');
+            if (!document.getElementById('logModal').classList.contains('hidden')) {
+                populateDialogueLog();
+                const currentEntry = logContainer.querySelector(`.current-log-entry`);
+                if (currentEntry) {
+                    currentEntry.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+
+        /** Handles navigation (next/previous) in the dialogue array. */
+        function navigateDialogue(direction) {
+            const newIndex = currentDialogueIndex + direction;
+            
+            if (newIndex >= 0 && newIndex < currentDialogue.length) {
+                currentDialogueIndex = newIndex;
+                renderDialogue();
+                saveProgress(); 
+            } else if (newIndex >= currentDialogue.length) {
+                // Если дошли до конца, перезагружаем на начальный экран
+                document.getElementById('dialogueWrapper').classList.add('hidden');
+                document.getElementById('logToggleButton').classList.add('hidden');
+                document.getElementById('spriteContainer').innerHTML = '';
+                currentSpriteElement = null;
+                const currentLang = document.getElementById('languageSelect').value;
+                 document.getElementById('vnViewer').style.backgroundImage = `url('https://placehold.co/1920x1080/2a2a2a/fca5a5?text=${i18n[currentLang].loadText.replace('Загрузить', 'Конец+Сюжета')}')`;
+            }
+        }
 
         /** Populates the dialogue log with only the lines that have been read up to the current index. */
         function populateDialogueLog() {
