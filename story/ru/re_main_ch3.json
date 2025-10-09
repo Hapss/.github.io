@@ -353,7 +353,7 @@
             "speaker": "",
             "text": "БУМ!!!",
             "sprite": "Kiana 1.png",
-            "dim": true
+            "dim": true,
             "sprite": "Herrscher Mei.png",
             "dim": true
         },
@@ -393,7 +393,7 @@
             "speaker": "",
             "text": "Бац! Бах!",
             "sprite": "Kiana 1.png",
-            "dim": true
+            "dim": true,
             "sprite": "Herrscher Mei.png",
             "dim": true
         },
@@ -482,7 +482,7 @@
             "speaker": "",
             "text": "Прошу, помоги мне... Отец! Прошу, помоги мне... Пожалуйста, не оставляй Мэй одну.",
             "sprite": "Kiana 4.png",
-            "dim": true
+            "dim": true,
             "sprite": "Herrscher Mei.png",
             "dim": true
         },
@@ -498,7 +498,7 @@
             "speaker": "",
             "text": "Отец! Почему ты покинул меня.. Почему все меня ненавидят!? Почему! Почему! Почему!!! Такой мир должен быть разрушен!!!",
             "sprite": "Kiana 3.png",
-            "dim": true
+            "dim": true,
             "sprite": "Herrscher Mei.png",
             "dim": true
         },
