@@ -431,10 +431,10 @@
         let currentDialogueIndex = 0;
         let dialogueIsLoaded = false;
         let currentBackgroundUrl = null; 
-        let activeBgLayer = 1; 
         window.storyMetadata = null; 
         let isHistoryVisible = false; 
-        
+        let activeBgLayer = 1; // 1 или 2
+
         // Глобальные переменные для отслеживания текущего спрайтов
         let currentLeftSpriteFile = null;
         let currentRightSpriteFile = null;
@@ -448,7 +448,9 @@
                 errorFetchMetadataStrict: "Критическая ошибка: не удалось загрузить метаданные глав. Файл story/story_metadata.json отсутствует или недоступен.",
                 errorChapterNotFound: "Файл главы не найден.",
                 themeDark: "Тёмная", themeLight: "Светлая",
-                historyTitle: "История Диалогов", historyButton: "История", historyEmpty: "История пуста."
+                historyTitle: "История Диалогов", historyButton: "История", historyEmpty: "История пуста.",
+                selectArcPlaceholder: "--- Выберите арку ---",
+                selectChapterPlaceholder: "--- Выберите главу ---",
             },
             en: {
                 headerTitle: "VN Story Archive", labelStoryType: "Story Type", labelArc: "Arc", labelChapter: "Chapter",
@@ -457,7 +459,9 @@
                 errorFetchMetadataStrict: "Critical Error: Failed to load chapter metadata. The file story/story_metadata.json is missing or inaccessible.",
                 errorChapterNotFound: "Chapter file not found.",
                 themeDark: "Dark", themeLight: "Light",
-                historyTitle: "Dialogue History", historyButton: "History", historyEmpty: "History is empty."
+                historyTitle: "Dialogue History", historyButton: "History", historyEmpty: "History is empty.",
+                selectArcPlaceholder: "--- Select Arc ---",
+                selectChapterPlaceholder: "--- Select Chapter ---",
             },
             zh: {
                 headerTitle: "视觉小说故事档案", labelStoryType: "故事类型", labelArc: "篇章", labelChapter: "章节",
@@ -466,7 +470,9 @@
                 errorFetchMetadataStrict: "致命错误：无法加载章节元数据。文件 story/story_metadata.json 缺失或无法访问。",
                 errorChapterNotFound: "未找到章节文件。",
                 themeDark: "深色", themeLight: "浅色",
-                historyTitle: "对话历史", historyButton: "历史", historyEmpty: "历史为空。"
+                historyTitle: "对话历史", historyButton: "历史", historyEmpty: "历史为空。",
+                selectArcPlaceholder: "--- 选择篇章 ---",
+                selectChapterPlaceholder: "--- 选择章节 ---",
             }
         };
 
@@ -904,7 +910,7 @@
             
             document.getElementById('headerTitle').textContent = text.headerTitle;
             document.getElementById('labelStoryType').textContent = text.labelStoryType;
-            document.getElementById('labelArc').textContent = text.labelArc; // NEW
+            document.getElementById('labelArc').textContent = text.labelArc; 
             document.getElementById('labelChapter').textContent = text.labelChapter;
             elements.loadText.textContent = text.loadText;
             document.getElementById('resetButton').textContent = text.resetProgress;
@@ -918,6 +924,7 @@
 
             const typeSelect = elements.storyTypeSelect;
             const currentType = typeSelect.value;
+            const savedType = typeSelect.value; // Сохраняем текущее значение, чтобы установить его обратно
             typeSelect.innerHTML = '';
             
             const defaultOption = document.createElement('option');
@@ -927,54 +934,58 @@
 
             for (const key in STORY_GROUPS) {
                 const option = document.createElement('option');
+                const groupData = STORY_GROUPS[key];
                 option.value = key;
                 // Использование текущего языка, если доступно, иначе fallback на RU
-                option.textContent = STORY_GROUPS[key][lang] || STORY_GROUPS[key].ru; 
-                if (key === currentType) {
-                    option.selected = true;
-                }
+                option.textContent = groupData[lang] || groupData.ru; 
                 typeSelect.appendChild(option);
             }
+            // Установка сохраненного или дефолтного значения
+            typeSelect.value = savedType || '';
         }
         
-        /** Обновляет выпадающий список арок, если выбран "Основной сюжет". */
+        /** * Обновляет выпадающий список арок и управляет его видимостью. */
         function updateArcSelect() {
             const typeKey = elements.storyTypeSelect.value;
-            const { arcSelect, arcSelectContainer, chapterSelect } = elements;
+            const { arcSelect, arcSelectContainer } = elements;
             const lang = elements.languageSelect.value;
             const currentArcKey = arcSelect.value; 
-            
+
             arcSelect.innerHTML = '';
             arcSelect.disabled = true;
             
-            // 1. Показать/скрыть контейнер арки
-            const isMainStory = (typeKey === 'main' && window.storyMetadata);
-            arcSelectContainer.classList.toggle('hidden', !isMainStory);
+            const isMainStory = (typeKey === 'main');
+            // Управление видимостью контейнера арки (Только если выбран "main")
+            elements.arcSelectContainer.classList.toggle('hidden', !isMainStory);
             
-            // 2. Если это не основной сюжет, просто вызываем обновление глав
+            // Если это НЕ основной сюжет, просто выходим
             if (!isMainStory) {
-                // Если мы переключились с основного сюжета, нужно очистить выбранную арку в памяти
-                if (typeKey !== 'main') arcSelect.value = ''; 
-                updateChapterSelect(true); 
+                // Если мы переключились с основного сюжета, убедимся, что arcSelect сброшен
+                arcSelect.value = '';
+                updateChapterSelect(); 
                 return;
             }
 
-            // 3. Заполнение селекта арки
+            // --- Логика для Основного сюжета (isMainStory === true) ---
+
             const arcs = STORY_GROUPS.main.arcs;
             
             const defaultOption = document.createElement('option');
             defaultOption.value = "";
-            defaultOption.textContent = "--- Выберите арку ---";
+            defaultOption.textContent = i18n[lang].selectArcPlaceholder;
+            defaultOption.disabled = true;
+            defaultOption.selected = true; // Устанавливаем по умолчанию
             arcSelect.appendChild(defaultOption);
 
             let arcFound = false;
+
             for (const key in arcs) {
                 const arcData = arcs[key];
                 const option = document.createElement('option');
                 option.value = key;
-                // Использование текущего языка, если доступно
                 option.textContent = arcData[lang] || arcData.ru; 
                 
+                // Если значение в select.value совпадает с ключом арки, выбираем его
                 if (key === currentArcKey) {
                     option.selected = true;
                     arcFound = true;
@@ -982,12 +993,14 @@
                 arcSelect.appendChild(option);
             }
             
-            // Если арки найдены, включаем селект
-            if (arcFound) {
+            // Включение селекта арки
+            if (Object.keys(arcs).length > 0) {
                  arcSelect.disabled = false;
+                 // Если текущее значение не найдено (или не было установлено), убеждаемся, что выбрана заглушка
+                 if (!arcFound) arcSelect.value = ''; 
             }
-
-            // 4. Обновление глав после обновления арок
+            
+            // Обновление глав (будет использовать текущее или сброшенное значение arcSelect.value)
             updateChapterSelect();
         }
 
@@ -1009,46 +1022,63 @@
             if (!window.storyMetadata) {
                 defaultOption.textContent = i18n[lang].placeholderMetadata;
                 select.appendChild(defaultOption);
+                if (!skipSideEffects) enableLoadButton();
                 return;
             }
             
-            defaultOption.textContent = "--- Выберите главу ---";
+            defaultOption.textContent = i18n[lang].selectChapterPlaceholder;
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
             select.appendChild(defaultOption);
             
             let prefix = null;
+            let chapterFound = false;
 
+            // Определяем префикс на основе типа и арки
             if (typeKey === 'main' && arcKey) {
-                // Если выбран основной сюжет И арка, используем префикс арки
+                // Основной сюжет + Арка
                 prefix = STORY_GROUPS.main.arcs[arcKey]?.prefix;
             } else if (typeKey !== 'main' && STORY_GROUPS[typeKey]) {
-                // Если другой тип сюжета, используем его общий префикс
+                // Другой тип сюжета
                 prefix = STORY_GROUPS[typeKey].prefix;
             }
             
+            // Если выбран "main", но арка НЕ выбрана, то главы не показываем
+            if (typeKey === 'main' && !arcKey) {
+                select.disabled = true;
+                select.value = '';
+                if (!skipSideEffects) enableLoadButton();
+                return;
+            }
+
             if (prefix) {
-                let chapterFound = false;
+                
                 for (const fullChapterKey in window.storyMetadata) {
                     if (fullChapterKey.startsWith(prefix)) {
                         const chapterData = window.storyMetadata[fullChapterKey];
-                        // Проверяем наличие перевода для текущего языка, иначе fallback на RU
+                        // Проверяем наличие перевода для текущего языка
                         const chapterName = chapterData[lang] || chapterData.ru; 
                         if (chapterName) {
                             const option = document.createElement('option');
                             option.value = fullChapterKey; 
                             option.textContent = chapterName; 
                             
+                            // Выбираем главу, если ее значение совпадает с currentChapterKey
                             if (fullChapterKey === currentChapterKey) {
                                  option.selected = true;
+                                 chapterFound = true; // Глава успешно найдена в новом списке
                             }
                             select.appendChild(option);
-                            chapterFound = true;
                         }
                     }
                 }
                 
-                if (chapterFound) {
+                if (select.options.length > 1) { // > 1, потому что есть заглушка
                      select.disabled = false;
                 }
+                
+                // Если сохраненная глава не найдена в новом списке, сбрасываем значение
+                if (!chapterFound) select.value = '';
             } 
             
             if (!skipSideEffects) {
@@ -1061,10 +1091,11 @@
             const storyId = elements.chapterSelect.value;
             elements.loadButton.disabled = !storyId;
         }
-
+        
+        // ВАЖНО: Вызывается при смене языка или типа сюжета
         function initializeOrUpdateUI(calledByUIEvent) {
-            updateI18nStrings();
-            updateArcSelect(); // Сначала обновляем Арки
+            updateI18nStrings(); // Обновляет названия UI и опции storyTypeSelect
+            updateArcSelect(); // Обновляет опции arcSelect и управляет видимостью arcSelectContainer
             // updateChapterSelect() вызывается внутри updateArcSelect()
             
             if (calledByUIEvent) {
@@ -1073,17 +1104,14 @@
         }
 
         // ====================================================================
-        // === УПРАВЛЕНИЕ ИСТОРИЕЙ (ОБНОВЛЕННЫЙ TOGGLE) ===
+        // === УПРАВЛЕНИЕ ИСТОРИЕЙ ===
         // ====================================================================
 
         function toggleHistory() {
             isHistoryVisible = !isHistoryVisible;
-            // Теперь полагаемся только на класс 'open' для управления transform, 
-            // так как transform: translateX(100%) установлен по умолчанию в CSS
             elements.historyPanel.classList.toggle('open', isHistoryVisible);
             
             if (isHistoryVisible) {
-                // Добавляем небольшой таймаут, чтобы прокрутка сработала после завершения анимации открытия
                 setTimeout(renderHistory, 300); 
             }
         }
@@ -1111,7 +1139,6 @@
 
                 const historyItem = document.createElement('div');
                 
-                // Используем класс 'select-field' для наследования цвета текста, но переопределяем фон
                 historyItem.className = `p-3 rounded-lg cursor-pointer transition duration-150 shadow-md border border-transparent`;
                 
                 // Стиль для активного (текущего) элемента
@@ -1159,7 +1186,6 @@
             // Прокрутка к текущему диалоговому шагу
             const currentItem = historyContent.querySelector(`[data-index="${currentDialogueIndex}"]`);
             if (currentItem) {
-                // Используем простой scrollIntoView, чтобы избежать проблем с iframe
                 currentItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
@@ -1172,7 +1198,7 @@
             const progress = {
                 lang: elements.languageSelect.value,
                 type: elements.storyTypeSelect.value,
-                arc: elements.arcSelect.value, // NEW: Сохранение арки
+                arc: elements.arcSelect.value, 
                 chapter: elements.chapterSelect.value, 
                 index: currentDialogueIndex,
             };
@@ -1183,64 +1209,38 @@
             await fetchChapterMetadata(); 
             
             const savedProgress = localStorage.getItem(CONFIG.STORAGE.KEY);
-            
-            // Тема уже загружена в loadTheme()
-            
-            // Если нет сохраненного прогресса, просто инициализируем UI
-            if (!savedProgress) {
-                initializeOrUpdateUI(false); 
-                enableLoadButton();
-                return; 
-            }
+            let progress = {};
 
-            const progress = JSON.parse(savedProgress);
+            if (savedProgress) {
+                try {
+                    progress = JSON.parse(savedProgress);
+                } catch(e) {
+                    console.error("Ошибка парсинга сохраненного прогресса. Используется дефолтный прогресс.", e);
+                    localStorage.removeItem(CONFIG.STORAGE.KEY);
+                }
+            }
+            
             const { languageSelect, storyTypeSelect, arcSelect, chapterSelect } = elements;
             
-            // 1. Восстановление языка
-            if (i18n[progress.lang]) {
-                languageSelect.value = progress.lang;
-            }
+            // 1. Восстановление языка и обновление строк
+            languageSelect.value = progress.lang && i18n[progress.lang] ? progress.lang : 'ru';
             updateI18nStrings(); 
             
-            // 2. Восстановление типа сюжета
-            if (progress.type && STORY_GROUPS[progress.type]) {
-                storyTypeSelect.value = progress.type;
-                updateArcSelect(); // Вызываем, чтобы отобразить или скрыть селект арки
-            }
-            
-            // 3. Восстановление арки (только если это Main Story)
-            let arcRestored = false;
-            if (storyTypeSelect.value === 'main' && progress.arc) {
-                if (Array.from(arcSelect.options).some(opt => opt.value === progress.arc)) {
-                    arcSelect.value = progress.arc;
-                    arcRestored = true;
-                    // Если арка восстановлена, снова обновляем, чтобы заполнить главы
-                    updateChapterSelect(true); 
-                }
-            } else if (storyTypeSelect.value !== 'main') {
-                // Если тип не "main", мы уже вызвали updateChapterSelect() в updateArcSelect()
-                arcRestored = true; 
-            }
+            // 2. Установка сохраненных значений в селекты (без немедленного вызова onchange)
+            storyTypeSelect.value = progress.type && STORY_GROUPS[progress.type] ? progress.type : '';
+            arcSelect.value = progress.arc || '';
+            chapterSelect.value = progress.chapter || '';
 
 
-            // 4. Восстановление главы
-            let chapterRestored = false;
-            // Проверяем, что тип и арка (если нужно) выбраны корректно
-            if (window.storyMetadata && storyTypeSelect.value && progress.chapter && (arcRestored || storyTypeSelect.value !== 'main')) {
-                if (Array.from(chapterSelect.options).some(opt => opt.value === progress.chapter)) {
-                    chapterSelect.value = progress.chapter;
-                    chapterRestored = true;
-                }
-            }
-            enableLoadButton();
+            // 3. Заполнение UI опциями на основе установленных значений
+            updateArcSelect(); // Заполняет опции Арки и вызывает updateChapterSelect()
             
-            if (chapterRestored) {
+            // 4. Загрузка контента, если глава была успешно восстановлена и найдена в метаданных
+            const chapterExists = window.storyMetadata && window.storyMetadata[chapterSelect.value];
+            if (chapterSelect.value && chapterExists) {
                  updateStoryContent(progress.index); 
-            }
-            
-            // Если ни глава, ни тип не были восстановлены, делаем полную инициализацию
-            if (!chapterRestored && !storyTypeSelect.value) {
-                initializeOrUpdateUI(false);
+            } else {
+                 enableLoadButton();
             }
         }
 
@@ -1252,10 +1252,10 @@
             currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR; 
             activeBgLayer = 1;
             isHistoryVisible = false;
-            elements.historyPanel.classList.remove('open'); // Скрыть историю
+            elements.historyPanel.classList.remove('open'); 
 
             
-            // ИСПРАВЛЕНИЕ: ЯВНЫЙ СБРОС СОСТОЯНИЯ СПРАЙТОВ при сбросе
+            // Явный сброс состояния
             currentLeftSpriteFile = null;
             currentRightSpriteFile = null;
 
@@ -1276,7 +1276,7 @@
             elements.bgLayer1.style.opacity = '1';
             elements.bgLayer2.style.opacity = '0';
             
-            loadProgress(); 
+            loadProgress(); // Перезапуск инициализации
             
             alertMessage("Прогресс сброшен!");
         }
