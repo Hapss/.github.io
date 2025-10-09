@@ -1,8 +1,9 @@
 {
-    "re_main_ch1": { "ru": "Глава 1: Выброс Хоукая", "en": "Chapter 1: The Honkai Eruption", "cn": "章节 1: 崩坏爆发" },
+    "re_main_ch1": { "ru": "Глава 1: Выброс Хоукая", "en": "Chapter 1: Houkai Eruption", "cn": "章节 1: 崩坏爆发" },
     "re_main_ch2": { "ru": "Глава 2: Киана наносит ответный удар!", "en": "Chapter 2: Kiana Strikes Back!", "cn": "章节 2: 琪亚娜反击" },
-    "re_main_ch3": { "ru": "Глава 3: Зловещая молния", "en": "Chapter 3: Sinister Lightning", "cn": "章节 3: 恶毒的闪电" },
-    "extra_ex1": { "ru": "Экстра 1", "en": "Extra 1", "cn": "额外 1" },
+    "re_main_ch3": { "ru": "Глава 3: Зловещая молния", "en": "Chapter 3:", "cn": "章节 3: 恶毒的闪电" },
+    "extra_ex1": { "ru": "Экстра 1: Берегись", "en": "Extra 1", "cn": "额外 1" },
+    "extra_ex2": { "ru": "Экстра 2: Неутолимое желание", "en": "Extra 2", "cn": "额外 2" },
     "boss_b1": { "ru": "Босс", "en": "Boss", "cn": "BOSS" },
     "vn_vn1": { "ru": "VN", "en": "VN", "cn": "VN 1" },
     "ln_r1": { "ru": "Роман ", "en": "Novel", "cn": "小说" }
