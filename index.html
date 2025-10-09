@@ -467,7 +467,9 @@
         };
 
         const STORY_GROUPS = {
+            // 'main_' prefix is used by the logic to distinguish Main Story content
             main: { ru: "Основной сюжет", en: "Main Story", zh: "主线故事", prefix: "main_" },
+            // 'extra_' prefix used to select all extra content
             extra: { ru: "Дополнительный сюжет", en: "Extra Story", zh: "额外故事", prefix: "extra_" },
             bosses: { ru: "Боссы", en: "Boss Fights", zh: "Boss 战", prefix: "boss_" },
             vn: { ru: "Визуальная новелла", en: "Visual Novel", zh: "视觉小说", prefix: "vn_" },
@@ -501,7 +503,8 @@
                 errorFetchMetadataStrict: "Критическая ошибка: не удалось загрузить метаданные глав. Файл story/story_metadata.json отсутствует или недоступен.",
                 errorChapterNotFound: "Файл главы не найден.",
                 themeDark: "Тёмная", themeLight: "Светлая",
-                historyTitle: "История Диалогов", historyButton: "История", historyEmpty: "История пуста."
+                historyTitle: "История Диалогов", historyButton: "История", historyEmpty: "История пуста.",
+                noExtraChapters: "Главы дополнительного сюжета не найдены.",
             },
             en: {
                 headerTitle: "VN Story Archive", labelStoryType: "Story Type", labelArc: "Arc", labelChapter: "Chapter",
@@ -510,7 +513,8 @@
                 errorFetchMetadataStrict: "Critical Error: Failed to load chapter metadata. The file story/story_metadata.json is missing or inaccessible.",
                 errorChapterNotFound: "Chapter file not found.",
                 themeDark: "Dark", themeLight: "Light",
-                historyTitle: "Dialogue History", historyButton: "History", historyEmpty: "History is empty."
+                historyTitle: "Dialogue History", historyButton: "History", historyEmpty: "History is empty.",
+                noExtraChapters: "No extra story chapters found.",
             },
             zh: {
                 headerTitle: "视觉小说故事档案", labelStoryType: "故事类型", labelArc: "篇章", labelChapter: "章节",
@@ -519,7 +523,8 @@
                 errorFetchMetadataStrict: "致命错误：无法加载章节元数据。文件 story/story_metadata.json 缺失或无法访问。",
                 errorChapterNotFound: "未找到章节文件。",
                 themeDark: "深色", themeLight: "浅色",
-                historyTitle: "对话历史", historyButton: "History", historyEmpty: "历史为空。"
+                historyTitle: "对话历史", historyButton: "History", historyEmpty: "历史为空。",
+                noExtraChapters: "未找到额外故事章节。",
             }
         };
 
@@ -1036,7 +1041,7 @@
             }
         }
         
-        function updateArcSelect(skipSideEffects = false) {
+        function updateArcSelect(skipChapterUpdate = false) {
             const typeKey = elements.storyTypeSelect.value;
             const select = elements.arcSelect;
             const container = elements.arcSelectContainer;
@@ -1071,16 +1076,35 @@
                 }
 
             } else {
+                // Если тип не 'main', скрываем арки и очищаем значение
                 container.classList.add('hidden');
                 select.value = ""; 
             }
 
-            if (!skipSideEffects) {
-                updateChapterSelect(true);
+            if (!skipChapterUpdate) {
+                updateChapterSelect(false); // Не пропускаем обновление глав
             }
         }
 
-        function updateChapterSelect(skipSideEffects = false) {
+        // **КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ:** Явно сбрасываем arc и chapter при смене типа
+        function updateArcAndChapterUI(calledByUIEvent) {
+            updateI18nStrings();
+            
+            // Если пользователь вручную меняет тип сюжета, необходимо сбросить arc и chapter
+            // для предотвращения сохранения несовместимых старых значений.
+            if (calledByUIEvent) {
+                elements.arcSelect.value = "";
+                elements.chapterSelect.value = "";
+                // Важно: не вызываем saveProgress здесь, saveProgress будет вызвана в updateChapterSelect
+            }
+
+            updateArcSelect(!calledByUIEvent); 
+            // Если вызвано пользователем, updateArcSelect вызовет updateChapterSelect, 
+            // иначе, если вызвано loadProgress, мы позволяем updateArcSelect делать свое дело
+        }
+
+
+        function updateChapterSelect(skipSave = false) {
             const typeKey = elements.storyTypeSelect.value;
             const arcKey = elements.arcSelect.value; 
             const select = elements.chapterSelect;
@@ -1098,33 +1122,37 @@
             select.innerHTML = `<option value="">--- Выберите главу ---</option>`;
             
             if (!typeKey || !STORY_GROUPS[typeKey]) {
-                if (!skipSideEffects) { enableLoadButton(); saveProgress(); }
+                enableLoadButton();
+                if (!skipSave) saveProgress();
                 return;
             }
             
-            // --- Улучшенная логика фильтрации для устранения утечек и отображения Extra ---
-            
-            let requiredStartPrefix = null;
+            let requiredStartPrefix = STORY_GROUPS[typeKey].prefix;
             let requiredInclusion = null;
             let requiredExclusion = null;
             
             const mainStoryPrefix = STORY_GROUPS.main.prefix;
 
             if (typeKey === 'main') {
-                // Для Основного сюжета требуется выбранная арка
+                // Для Основного сюжета
                 if (!arcKey) {
-                    if (!skipSideEffects) { enableLoadButton(); saveProgress(); }
+                    enableLoadButton();
+                    if (!skipSave) saveProgress();
                     return;
                 }
-                // Глава должна начинаться с префикса арки и содержать 'main_'
-                requiredStartPrefix = `${arcKey}_`;
+                // Глава должна начинаться с префикса арки (re_, in_ и т.д.)
+                requiredStartPrefix = `${arcKey}_`; 
+                // И должна содержать 'main_'
                 requiredInclusion = mainStoryPrefix;
+                requiredExclusion = null; // Не исключаем ничего
+                
             } else {
                 // Для всех остальных типов (Extra, Bosses и т.д.)
-                // Глава должна начинаться с префикса типа (e.g., 'extra_')
-                // И НЕ должна содержать 'main_' (предотвращение утечки)
+                // Глава должна начинаться с префикса типа (extra_, boss_ и т.д.)
+                // И ГАРАНТИРОВАННО НЕ должна содержать 'main_' (для предотвращения утечки)
                 requiredStartPrefix = STORY_GROUPS[typeKey].prefix; 
                 requiredExclusion = mainStoryPrefix;
+                requiredInclusion = null;
             }
 
             let chapterFound = false;
@@ -1162,25 +1190,21 @@
                     chapterFound = true;
                 }
             }
-            // --- КОНЕЦ УЛУЧШЕННОЙ ЛОГИКИ ФИЛЬТРАЦИИ ---
             
             if (chapterFound) {
                  select.disabled = false;
             } else if (typeKey === 'extra') {
-                 select.innerHTML = `<option value="">--- Главы дополнительного сюжета не найдены ---</option>`;
+                 // Специальное сообщение, если Extra-главы не найдены
+                 select.innerHTML = `<option value="">--- ${i18n[lang].noExtraChapters} ---</option>`;
             }
             
-            if (!skipSideEffects) {
-                enableLoadButton();
+            enableLoadButton();
+            if (!skipSave) {
+                // Сохраняем прогресс только после полного обновления
                 saveProgress(); 
             }
         }
         
-        function updateArcAndChapterUI(calledByUIEvent) {
-            updateI18nStrings();
-            updateArcSelect(calledByUIEvent); 
-        }
-
         function enableLoadButton() {
             const storyId = elements.chapterSelect.value;
             elements.loadButton.disabled = !storyId;
@@ -1296,38 +1320,38 @@
             const progress = JSON.parse(savedProgress);
             const { languageSelect, storyTypeSelect, arcSelect, chapterSelect } = elements;
             
+            // 1. Восстановление языка
             if (i18n[progress.lang]) {
                 languageSelect.value = progress.lang;
             }
             updateI18nStrings(); 
             
             let typeRestored = false;
-            // Сначала устанавливаем StoryType, чтобы ArcSelect и ChapterSelect могли корректно отфильтровать
+            // 2. Восстановление типа сюжета
             if (progress.type && STORY_GROUPS[progress.type]) {
                 storyTypeSelect.value = progress.type;
                 typeRestored = true;
             }
             
-            let arcRestored = false;
-            // Обновляем список арок (не вызывает updateChapterSelect)
-            updateArcSelect(true); 
+            // 3. Обновление списка арок (только UI)
+            updateArcSelect(true); // skipChapterUpdate = true, чтобы не вызывать updateChapterSelect дважды
             
+            let arcRestored = false;
             if (progress.type === 'main') {
-                // Если тип 'main', пытаемся восстановить арку
                 if (progress.arc && MAIN_STORY_ARCS[progress.arc]) {
                     arcSelect.value = progress.arc;
                     arcRestored = true;
                 }
             } else {
-                 // Для не-main типов arcSelect пуст
-                 arcSelect.value = "";
+                 arcSelect.value = ""; // Для не-main типов arc всегда пуст
             }
             
             let chapterRestored = false;
             if (window.storyMetadata && typeRestored && progress.chapter) {
-                // Обновляем список глав с учетом восстановленных type/arc
-                updateChapterSelect(true); 
+                // 4. Обновляем список глав с учетом восстановленных type/arc
+                updateChapterSelect(true); // skipSave = true
                 
+                // Проверяем, существует ли сохраненная глава в текущем отфильтрованном списке
                 if (Array.from(chapterSelect.options).some(opt => opt.value === progress.chapter)) {
                     chapterSelect.value = progress.chapter;
                     chapterRestored = true;
