@@ -1,12 +1,12 @@
 {
   "chapter": "Экстра 2: Неутолимое желание",
-  "background": "bg_stageS2b.png",
   "dialogue": [
     {
       "speaker": "Киана",
       "text": "Фуф! Наконец-то нормальное место! Останься я там, просто бы задохнулась...",
       "sprite": "Kiana 1.png",
       "position": "left"
+     "background": "bg_stageS2b.png",
     },
     {
       "speaker": "Киана",
