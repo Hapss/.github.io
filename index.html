@@ -274,7 +274,7 @@
     </script>
     
     <!-- 1. Header Bar: Использует var(--color-bg-darkest) -->
-    <header id="header" class="fixed top-0 left-0 right-0 z-50 p-4 shadow-xl text-white transition-colors duration-300" style="background-color: var(--color-bg-darkest);">
+    <header id="header" class="fixed top-0 left-0 right-0 z-50 p-4 shadow-xl transition-colors duration-300" style="background-color: var(--color-bg-darkest);">
         <div class="flex justify-between items-center max-w-7xl mx-auto">
             <h1 id="headerTitle" class="text-xl font-bold tracking-wider" style="color: var(--color-text-primary);">Архив сюжета Houkai Gakuen 2</h1>
             
@@ -292,7 +292,7 @@
                 <!-- Кнопка сброса -->
                 <button id="resetButton" onclick="resetProgress()" class="px-3 py-1 reset-button rounded-full transition duration-150 text-sm">Сброс</button>
                 
-                <!-- Выбор языка (Удален класс text-white) -->
+                <!-- Выбор языка -->
                 <select id="languageSelect" onchange="initializeOrUpdateUI(true)" class="select-field rounded-lg p-2 cursor-pointer transition hover:ring-2" style="background-color: var(--color-bg-medium);">
                     <option value="ru">Русский</option>
                     <option value="en">English</option>
@@ -302,11 +302,10 @@
         </div>
     </header>
     
-    <!-- Панель Истории Диалогов (ПЕРЕМЕЩЕНА ВПРАВО) -->
+    <!-- Панель Истории Диалогов -->
     <div id="historyPanel" class="fixed top-0 h-full z-50 p-4 pt-20 shadow-2xl transition-transform duration-300" 
          style="background-color: var(--color-bg-darkest); opacity: 0.95;">
         <h2 id="historyTitle" class="text-xl font-bold mb-4" style="color: var(--color-text-primary);">История Диалогов</h2>
-        <!-- historyContent теперь flex-grow: 1 и отвечает за прокрутку -->
         <div id="historyContent" class="space-y-3" style="height: calc(100% - 3.5rem);">
             <!-- History items here -->
         </div>
@@ -321,17 +320,25 @@
         
         <!-- Controls Panel: Использует var(--color-bg-medium) -->
         <div class="control-panel p-4 rounded-xl shadow-lg mb-6 flex flex-wrap gap-4 items-end transition-colors duration-300">
+            <!-- Выбор Типа Сюжета -->
             <div class="flex-1 min-w-[180px]">
                 <label for="storyTypeSelect" id="labelStoryType" class="block text-sm font-medium mb-1" style="color: var(--color-text-secondary);">Тип сюжета</label>
-                <!-- Select: Использует var(--color-bg-main) -->
-                <select id="storyTypeSelect" onchange="initializeOrUpdateUI(true)" class="select-field w-full rounded-lg p-2.5 cursor-pointer focus:ring-4 transition" style="background-color: var(--color-bg-main);">
+                <select id="storyTypeSelect" onchange="updateArcAndChapterUI(true)" class="select-field w-full rounded-lg p-2.5 cursor-pointer focus:ring-4 transition" style="background-color: var(--color-bg-main);">
                     <!-- Options populated by JS -->
                 </select>
             </div>
 
+            <!-- Выбор Арки (НОВЫЙ БЛОК) -->
+            <div id="arcSelectContainer" class="flex-1 min-w-[180px] hidden">
+                <label for="arcSelect" id="labelArc" class="block text-sm font-medium mb-1" style="color: var(--color-text-secondary);">Арка</label>
+                <select id="arcSelect" onchange="updateChapterSelect(true)" class="select-field w-full rounded-lg p-2.5 cursor-pointer focus:ring-4 transition" style="background-color: var(--color-bg-main);">
+                    <!-- Options populated by JS -->
+                </select>
+            </div>
+
+            <!-- Выбор Главы -->
             <div class="flex-1 min-w-[250px]">
                 <label for="chapterSelect" id="labelChapter" class="block text-sm font-medium mb-1" style="color: var(--color-text-secondary);">Сюжет (Глава)</label>
-                <!-- Select: Использует var(--color-bg-main) -->
                 <select id="chapterSelect" onchange="enableLoadButton(); saveProgress()" class="select-field w-full rounded-lg p-2.5 cursor-pointer focus:ring-4 transition" disabled style="background-color: var(--color-bg-main);">
                     <!-- Options populated by JS -->
                 </select>
@@ -384,7 +391,7 @@
         </div>
     </main>
     
-    <!-- 4. Полноэкранное предупреждение (Modal Overlay) - Возвращено с адаптацией к темам -->
+    <!-- 4. Полноэкранное предупреждение (Modal Overlay) -->
     <div id="warning-overlay" class="fixed inset-0 z-[100] bg-gray-900/95 flex items-center justify-center p-4 
                                        transition-opacity duration-500 opacity-100">
         
@@ -420,7 +427,7 @@
                     class="warning-button font-bold py-3 px-8 text-lg rounded-full 
                            transition duration-200 ease-in-out shadow-xl hover:shadow-2xl 
                            focus:outline-none focus:ring-4" 
-                           style="background-color: var(--color-warning-accent); color: white; focus:ring: var(--color-warning-accent);">
+                           style="background-color: var(--color-warning-accent);">
                 Закрыть
             </button>
         </div>
@@ -440,9 +447,9 @@
                 STORY_BASE: 'story/', 
             },
             STORAGE: {
-                KEY: 'vn_story_progress_v5',
+                KEY: 'vn_story_progress_v6', // Обновлен ключ для сохранения новой структуры
                 THEME_KEY: 'vn_theme',
-                WARNING_KEY: 'vn_warning_dismissed', // Ключ для отслеживания закрытия предупреждения
+                WARNING_KEY: 'vn_warning_dismissed',
             },
             BACKOFF: {
                 INITIAL_DELAY_MS: 750,  
@@ -450,7 +457,6 @@
                 MAX_ATTEMPTS: 3,        
             },
             PLACEHOLDERS: {
-                // Это заполнитель, который используется, если CSS не загрузился
                 DEFAULT_BG_COLOR: '#1f2937', 
             }
         };
@@ -463,22 +469,31 @@
             romance: { ru: "Роман", en: "Romance", zh: "浪漫", prefix: "ln_" }
         };
         
+        // НОВЫЙ СПИСОК АРОК
+        const MAIN_STORY_ARCS = {
+            re: { ru: "Ретроспектр", en: "Retrospect", zh: "回溯" },
+            in: { ru: "Наследие", en: "Inheritance", zh: "继承" },
+            fm: { ru: "Огненный Мотылёк", en: "Firemoth", zh: "炎煌" },
+            nl: { ru: "Новая жизнь", en: "New Life", zh: "新生活" },
+            ah: { ru: "Академия Хоукая", en: "Honkai Academy", zh: "崩坏学园" }
+        };
+
         let currentDialogue = []; 
         let currentDialogueIndex = 0;
         let dialogueIsLoaded = false;
         let currentBackgroundUrl = null; 
         let activeBgLayer = 1; 
         window.storyMetadata = null; 
-        let isHistoryVisible = false; // Состояние видимости панели истории
+        let isHistoryVisible = false; 
         
-        // Глобальные переменные для отслеживания текущего спрайтов (для исправления затемнения)
+        // Глобальные переменные для отслеживания текущего спрайтов
         let currentLeftSpriteFile = null;
         let currentRightSpriteFile = null;
         
         // Переводы UI
         const i18n = {
             ru: {
-                headerTitle: "Архив сюжета Houkai Gakuen 2", labelStoryType: "Тип сюжета", labelChapter: "Сюжет (Глава)",
+                headerTitle: "Архив сюжета Houkai Gakuen 2", labelStoryType: "Тип сюжета", labelArc: "Арка", labelChapter: "Сюжет (Глава)",
                 loadText: "Загрузить", resetProgress: "Сброс", endOfStory: "История закончилась!",
                 startOfStory: "Это начало истории.", placeholderMetadata: "--- Метаданные не загружены ---",
                 errorFetchMetadataStrict: "Критическая ошибка: не удалось загрузить метаданные глав. Файл story/story_metadata.json отсутствует или недоступен.",
@@ -487,7 +502,7 @@
                 historyTitle: "История Диалогов", historyButton: "История", historyEmpty: "История пуста."
             },
             en: {
-                headerTitle: "VN Story Archive", labelStoryType: "Story Type", labelChapter: "Chapter",
+                headerTitle: "VN Story Archive", labelStoryType: "Story Type", labelArc: "Arc", labelChapter: "Chapter",
                 loadText: "Load", resetProgress: "Reset", endOfStory: "Story finished!",
                 startOfStory: "This is the start of the story.", placeholderMetadata: "--- Metadata not loaded ---",
                 errorFetchMetadataStrict: "Critical Error: Failed to load chapter metadata. The file story/story_metadata.json is missing or inaccessible.",
@@ -496,7 +511,7 @@
                 historyTitle: "Dialogue History", historyButton: "History", historyEmpty: "History is empty."
             },
             zh: {
-                headerTitle: "视觉小说故事档案", labelStoryType: "故事类型", labelChapter: "章节",
+                headerTitle: "视觉小说故事档案", labelStoryType: "故事类型", labelArc: "篇章", labelChapter: "章节",
                 loadText: "加载", resetProgress: "重置", endOfStory: "故事结束了!",
                 startOfStory: "这是故事的开始。", placeholderMetadata: "--- 未加载元数据 ---",
                 errorFetchMetadataStrict: "致命错误：无法加载章节元数据。文件 story/story_metadata.json 缺失或无法访问。",
@@ -510,7 +525,7 @@
         let elements = {};
 
         // ====================================================================
-        // === УПРАВЛЕНИЕ ТЕМАМИ ===
+        // === УПРАВЛЕНИЕ ТЕМАМИ и ПРЕДУПРЕЖДЕНИЕМ ===
         // ====================================================================
 
         function saveTheme(theme) {
@@ -533,24 +548,33 @@
             // Обновление цвета карточки предупреждения при смене темы
             const card = document.getElementById('warning-card');
             if (card) {
-                const accentColor = getComputedStyle(document.body).getPropertyValue('--color-warning-accent').trim();
-                const bgColor = getComputedStyle(document.body).getPropertyValue('--color-warning-bg').trim();
-                const textColor = getComputedStyle(document.body).getPropertyValue('--color-text-primary').trim();
-                const secondaryTextColor = getComputedStyle(document.body).getPropertyValue('--color-text-secondary').trim();
+                const style = getComputedStyle(document.body);
+                const accentColor = style.getPropertyValue('--color-warning-accent').trim();
+                const bgColor = style.getPropertyValue('--color-warning-bg').trim();
+                const textColor = style.getPropertyValue('--color-text-primary').trim();
+                const secondaryTextColor = style.getPropertyValue('--color-text-secondary').trim();
                 
                 card.style.backgroundColor = bgColor;
                 card.style.borderColor = accentColor;
-                card.style.color = textColor;
+                
                 card.querySelector('h1').style.color = accentColor;
+                
+                // Находим все <p> элементы внутри карточки для вторичного цвета текста
                 card.querySelectorAll('p').forEach(p => p.style.color = secondaryTextColor);
-                card.querySelector('#close-warning-button').style.backgroundColor = accentColor;
-                card.querySelector('#close-warning-button').style.color = isDark ? 'white' : 'black'; // Улучшение контраста кнопки
+
+                const closeButton = card.querySelector('#close-warning-button');
+                closeButton.style.backgroundColor = accentColor;
+                // Кнопка должна быть контрастной, делаем текст белым, если фон темный, и черным, если фон светлый.
+                closeButton.style.color = isDark ? 'white' : 'white'; // Оставляем white, т.к. акцентный цвет и так темный в обеих темах
+                
+                // Убедимся, что цвет фона оверлея тоже соответствует теме
+                const overlay = document.getElementById('warning-overlay');
+                overlay.style.backgroundColor = isDark ? 'rgba(15, 23, 42, 0.95)' : 'rgba(241, 245, 249, 0.95)';
             }
 
-            // Если фон сейчас цветной (не картинка), нужно обновить цвет, используя переменную
+            // Обновление цвета дефолтного фона VN
             if (currentBackgroundUrl === CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR) {
-                 // Получаем цвет фона из CSS-переменной
-                 const themeBgColor = getComputedStyle(document.body).getPropertyValue('--color-bg-main').trim();
+                 const themeBgColor = style.getPropertyValue('--color-bg-main').trim();
                  
                  const activeLayer = activeBgLayer === 1 ? elements.bgLayer1 : elements.bgLayer2;
                  const inactiveLayer = activeBgLayer === 1 ? elements.bgLayer2 : elements.bgLayer1;
@@ -571,10 +595,6 @@
             applyTheme(savedTheme);
         }
 
-        // ====================================================================
-        // === ПРЕДУПРЕЖДЕНИЕ (МОДАЛЬНОЕ ОКНО) ===
-        // ====================================================================
-
         function setupWarningModal() {
             const overlay = document.getElementById('warning-overlay');
             const closeButton = document.getElementById('close-warning-button');
@@ -586,18 +606,14 @@
                 return;
             }
 
-            // Убедимся, что при загрузке темы цвета модального окна обновлены
             applyTheme(document.body.classList.contains('dark-theme') ? 'dark' : 'light');
 
             closeButton.addEventListener('click', function() {
-                // Отмечаем, что предупреждение было закрыто
                 localStorage.setItem(CONFIG.STORAGE.WARNING_KEY, 'true');
                 
-                // Запускаем анимацию исчезновения (opacity-0)
                 overlay.classList.remove('opacity-100');
                 overlay.classList.add('opacity-0');
                 
-                // Ждем завершения анимации (500 мс) и скрываем элемент
                 setTimeout(() => {
                     overlay.style.display = 'none';
                 }, 500); 
@@ -612,8 +628,13 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Кэширование всех необходимых элементов DOM
             elements.languageSelect = document.getElementById('languageSelect');
-            elements.chapterSelect = document.getElementById('chapterSelect');
             elements.storyTypeSelect = document.getElementById('storyTypeSelect');
+            
+            // НОВЫЕ ЭЛЕМЕНТЫ ДЛЯ АРКИ
+            elements.arcSelectContainer = document.getElementById('arcSelectContainer');
+            elements.arcSelect = document.getElementById('arcSelect');
+            
+            elements.chapterSelect = document.getElementById('chapterSelect');
             elements.loadButton = document.getElementById('loadButton');
             elements.loadText = document.getElementById('loadText');
             elements.vnViewerElement = document.getElementById('vnViewer');
@@ -649,7 +670,7 @@
         });
 
         // ====================================================================
-        // === CORE FUNCTIONS ===
+        // === CORE FUNCTIONS (Загрузка данных) ===
         // ====================================================================
         
         /** Асинхронно загружает метаданные глав. */
@@ -692,13 +713,9 @@
             return CONFIG.PATHS.SPRITE_BASE + encodedFileName; 
         };
         
-        /**
-         * Загружает изображение спрайта и плавно его отображает, сохраняя его в сцене.
-         */
+        /** Загружает изображение спрайта. */
         function loadSprite(url, element, container) {
-            
             if (!url) {
-                // Если URL пуст, скрываем спрайт и удаляем его из сцены
                 container.classList.add('hidden');
                 element.src = '';
                 return;
@@ -721,7 +738,7 @@
             tempImg.src = finalUrl;
         }
 
-        /** * Переключает фон, используя технику кросс-фейда. */
+        /** Переключает фон, используя технику кросс-фейда. */
         function crossFadeBackground(newBgFileName) {
             const encodedBgFileName = encodeURIComponent(newBgFileName);
             const finalBgUrl = CONFIG.PATHS.BACKGROUND_BASE + encodedBgFileName;
@@ -752,7 +769,6 @@
                 
                  setTimeout(() => {
                     nextLayer.style.backgroundImage = 'none';
-                    // Используем CSS переменную для цвета фона
                     const themeBgColor = getComputedStyle(document.body).getPropertyValue('--color-bg-main').trim();
 
                     nextLayer.style.backgroundColor = themeBgColor;
@@ -825,17 +841,15 @@
                 }
 
                 // --- Затемнение не говорящего персонажа ---
-                // Затемняем противоположный спрайт, только если он отображается (не hidden)
                 if (!dimmedContainer.classList.contains('hidden')) {
                     dimmedElement.classList.add('dimmed-sprite');
                 }
                 
-                // Убеждаемся, что говорящий не затемнен (на случай, если он был затемнен на предыдущем шаге)
+                // Убеждаемся, что говорящий не затемнен
                 speakerElement.classList.remove('dimmed-sprite');
 
             } else {
-                // Если нет спрайта в этом шаге, это чистый текст или сцена
-                // Все видимые спрайты должны быть UNDIMMED
+                // Если нет спрайта в этом шаге, все видимые спрайты должны быть UNDIMMED
                 if (!spriteLeftContainer.classList.contains('hidden')) {
                     spriteLeftElement.classList.remove('dimmed-sprite');
                 }
@@ -843,7 +857,6 @@
                     spriteRightElement.classList.remove('dimmed-sprite');
                 }
                 
-                // Если нет текста и спрайта, скрываем диалог
                 if (!step.text) {
                      dialogueWrapper.classList.add('hidden');
                      return;
@@ -866,12 +879,11 @@
             
             // 4. Обновление Истории
             if (isHistoryVisible) {
-                // Если история открыта, обновляем ее, чтобы выделить текущий шаг
                 renderHistory();
             }
         }
         
-        /** Асинхронно пытается загрузить выбранную главу, используя Exponential Backoff. */
+        /** Асинхронно пытается загрузить выбранную главу. */
         async function updateStoryContent(startIndex = 0) {
             const lang = elements.languageSelect.value; 
             const fullStoryKey = elements.chapterSelect.value.trim(); 
@@ -879,7 +891,8 @@
             
             if (!fullStoryKey) return;
 
-            // ПУТЬ К ФАЙЛУ: fullStoryKey уже содержит префикс типа сюжета (например, "main_chapter1").
+            // Файл и путь к нему:
+            // fullStoryKey: re_main_ch1
             const expectedFilePath = `${CONFIG.PATHS.STORY_BASE}${lang}/${fullStoryKey}.json`;
 
             console.log(`[Content Load] Попытка загрузить главу: ${expectedFilePath}`);
@@ -923,7 +936,6 @@
                     dialogueIsLoaded = true;
                     currentBackgroundUrl = null; 
                     
-                    // ИСПРАВЛЕНИЕ: ЯВНЫЙ СБРОС СОСТОЯНИЯ СПРАЙТОВ при загрузке новой главы
                     currentLeftSpriteFile = null;
                     currentRightSpriteFile = null;
                     elements.spriteLeftContainer.classList.add('hidden');
@@ -966,7 +978,7 @@
         }
 
         // ====================================================================
-        // === UI & I18N FUNCTIONS ===
+        // === UI & I18N FUNCTIONS (Обновлено для Арок) ===
         // ====================================================================
 
         /** Показывает временное сообщение вверху экрана. */
@@ -985,18 +997,17 @@
 
         function updateI18nStrings() {
             const lang = elements.languageSelect.value;
-            const text = i18n[lang] || i18n.ru; // Fallback to Russian
+            const text = i18n[lang] || i18n.ru;
             
             document.getElementById('headerTitle').textContent = text.headerTitle;
             document.getElementById('labelStoryType').textContent = text.labelStoryType;
+            document.getElementById('labelArc').textContent = text.labelArc; // Новый
             document.getElementById('labelChapter').textContent = text.labelChapter;
             elements.loadText.textContent = text.loadText;
             document.getElementById('resetButton').textContent = text.resetProgress;
             elements.historyText.textContent = text.historyButton;
             elements.historyTitle.textContent = text.historyTitle;
 
-            
-            // Обновление текста на кнопке темы
             const currentTheme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
             elements.themeText.textContent = currentTheme === 'dark' ? text.themeDark : text.themeLight;
 
@@ -1012,7 +1023,6 @@
             for (const key in STORY_GROUPS) {
                 const option = document.createElement('option');
                 option.value = key;
-                // Использование текущего языка, если доступно, иначе fallback на RU
                 option.textContent = STORY_GROUPS[key][lang] || STORY_GROUPS[key].ru; 
                 if (key === currentType) {
                     option.selected = true;
@@ -1020,10 +1030,59 @@
                 typeSelect.appendChild(option);
             }
         }
+        
+        /** Обновляет выпадающий список Арок. */
+        function updateArcSelect(skipSideEffects = false) {
+            const typeKey = elements.storyTypeSelect.value;
+            const select = elements.arcSelect;
+            const container = elements.arcSelectContainer;
+            const lang = elements.languageSelect.value;
+            const currentArcKey = select.value;
+
+            select.innerHTML = '';
+            select.disabled = true;
+            
+            if (typeKey === 'main') {
+                container.classList.remove('hidden');
+                
+                const defaultOption = document.createElement('option');
+                defaultOption.value = "";
+                defaultOption.textContent = "--- Выберите арку ---";
+                select.appendChild(defaultOption);
+                
+                let arcFound = false;
+                for (const key in MAIN_STORY_ARCS) {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = MAIN_STORY_ARCS[key][lang] || MAIN_STORY_ARCS[key].ru;
+                    if (key === currentArcKey) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                    arcFound = true;
+                }
+                
+                if (arcFound) {
+                    select.disabled = false;
+                }
+
+            } else {
+                // Скрываем Арки, если выбран не Основной сюжет
+                container.classList.add('hidden');
+                select.value = ""; // Сброс выбранного значения Арки
+            }
+
+            // Обновляем главы после обновления арок (или их скрытия)
+            if (!skipSideEffects) {
+                updateChapterSelect(true);
+            }
+        }
+
 
         /** Обновляет выпадающий список глав. */
         function updateChapterSelect(skipSideEffects = false) {
             const typeKey = elements.storyTypeSelect.value;
+            const arcKey = elements.arcSelect.value; // Может быть пустым, если не 'main'
             const select = elements.chapterSelect;
             const lang = elements.languageSelect.value;
             const currentChapterKey = select.value; 
@@ -1031,27 +1090,32 @@
             select.innerHTML = '';
             select.disabled = true; 
             
-            const defaultOption = document.createElement('option');
-            defaultOption.value = "";
-
             if (!window.storyMetadata) {
-                defaultOption.textContent = i18n[lang].placeholderMetadata;
-                select.appendChild(defaultOption);
+                select.innerHTML = `<option value="">${i18n[lang].placeholderMetadata}</option>`;
                 return;
             }
             
-            defaultOption.textContent = "--- Выберите главу ---";
-            select.appendChild(defaultOption);
+            select.innerHTML = `<option value="">--- Выберите главу ---</option>`;
 
             if (typeKey && STORY_GROUPS[typeKey]) {
-                const prefix = STORY_GROUPS[typeKey].prefix;
+                const prefix = STORY_GROUPS[typeKey].prefix; // main_ | extra_ | boss_ | etc.
                 let chapterFound = false;
+                
+                // Если тип 'main' и не выбрана арка, не показываем ничего.
+                if (typeKey === 'main' && !arcKey) {
+                    select.disabled = true;
+                    if (!skipSideEffects) { enableLoadButton(); saveProgress(); }
+                    return;
+                }
+                
+                let targetPrefix = typeKey === 'main' ? `${arcKey}_${prefix}` : prefix;
 
                 for (const fullChapterKey in window.storyMetadata) {
-                    if (fullChapterKey.startsWith(prefix)) {
+                    // Используем startsWith для фильтрации по полному префиксу (например, re_main_)
+                    if (fullChapterKey.startsWith(targetPrefix)) {
                         const chapterData = window.storyMetadata[fullChapterKey];
-                        // Проверяем наличие перевода для текущего языка, иначе fallback на RU
                         const chapterName = chapterData[lang] || chapterData.ru; 
+                        
                         if (chapterName) {
                             const option = document.createElement('option');
                             option.value = fullChapterKey; 
@@ -1076,32 +1140,29 @@
                 saveProgress(); 
             }
         }
+        
+        /** Основная функция, вызываемая при изменении языка или типа сюжета. */
+        function updateArcAndChapterUI(calledByUIEvent) {
+            updateI18nStrings();
+            updateArcSelect(calledByUIEvent); // Обновляет Арки
+            // updateChapterSelect вызывается из updateArcSelect
+        }
+
 
         function enableLoadButton() {
             const storyId = elements.chapterSelect.value;
             elements.loadButton.disabled = !storyId;
         }
 
-        function initializeOrUpdateUI(calledByUIEvent) {
-            updateI18nStrings();
-            updateChapterSelect(calledByUIEvent); 
-            if (calledByUIEvent) {
-                 saveProgress(); 
-            }
-        }
-
         // ====================================================================
-        // === УПРАВЛЕНИЕ ИСТОРИЕЙ (ОБНОВЛЕННЫЙ TOGGLE) ===
+        // === УПРАВЛЕНИЕ ИСТОРИЕЙ ===
         // ====================================================================
 
         function toggleHistory() {
             isHistoryVisible = !isHistoryVisible;
-            // Теперь полагаемся только на класс 'open' для управления transform, 
-            // так как transform: translateX(100%) установлен по умолчанию в CSS
             elements.historyPanel.classList.toggle('open', isHistoryVisible);
             
             if (isHistoryVisible) {
-                // Добавляем небольшой таймаут, чтобы прокрутка сработала после завершения анимации открытия
                 setTimeout(renderHistory, 300); 
             }
         }
@@ -1118,21 +1179,16 @@
             
             const fragment = document.createDocumentFragment();
 
-            // Отображаем все просмотренные шаги до текущего индекса
             for (let i = 0; i <= currentDialogueIndex; i++) {
                 const step = currentDialogue[i];
-                
-                // Пропускаем шаги без текста, если это не чистая смена фона в самом начале
                 if (!step.text && i !== 0) continue; 
                 
                 const isCurrent = (i === currentDialogueIndex);
 
                 const historyItem = document.createElement('div');
                 
-                // Используем класс 'select-field' для наследования цвета текста, но переопределяем фон
                 historyItem.className = `p-3 rounded-lg cursor-pointer transition duration-150 shadow-md border border-transparent`;
                 
-                // Стиль для активного (текущего) элемента
                 if (isCurrent) {
                     historyItem.classList.add('ring-2', 'ring-offset-2');
                     historyItem.style.backgroundColor = 'var(--color-accent-primary)'; 
@@ -1141,24 +1197,21 @@
                     historyItem.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
                     historyItem.style.fontWeight = 'bold';
                 } else {
-                    // Стиль для просмотренных элементов
                     historyItem.style.backgroundColor = 'var(--color-bg-medium)'; 
                     historyItem.style.color = 'var(--color-text-primary)';
                 }
                 
-                // Клик для возврата к шагу
                 historyItem.dataset.index = i; 
                 historyItem.onclick = () => {
                     currentDialogueIndex = i;
                     renderDialogueStep();
                     saveProgress();
-                    toggleHistory(); // Закрываем панель после перехода
+                    toggleHistory(); 
                 };
 
                 if (step.speaker) {
                     const speakerName = document.createElement('p');
                     speakerName.className = 'font-bold mb-1';
-                    // Используем цвет спикера, если это не текущий шаг
                     speakerName.style.color = isCurrent ? 'white' : 'var(--color-speaker-name)'; 
                     speakerName.textContent = step.speaker;
                     historyItem.appendChild(speakerName);
@@ -1174,10 +1227,8 @@
             
             historyContent.appendChild(fragment);
             
-            // Прокрутка к текущему диалоговому шагу
             const currentItem = historyContent.querySelector(`[data-index="${currentDialogueIndex}"]`);
             if (currentItem) {
-                // Используем простой scrollIntoView, чтобы избежать проблем с iframe
                 currentItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
@@ -1190,6 +1241,7 @@
             const progress = {
                 lang: elements.languageSelect.value,
                 type: elements.storyTypeSelect.value,
+                arc: elements.arcSelect.value, // Сохраняем выбранную арку
                 chapter: elements.chapterSelect.value, 
                 index: currentDialogueIndex,
             };
@@ -1201,32 +1253,48 @@
             
             const savedProgress = localStorage.getItem(CONFIG.STORAGE.KEY);
             
-            // Тема уже загружена в loadTheme()
-            initializeOrUpdateUI(false); 
+            updateI18nStrings(); // Шаг 1: Обновляем строки
 
             if (!savedProgress) {
+                updateArcAndChapterUI(false); // Шаг 2: Инициализация UI по умолчанию
                 enableLoadButton();
                 return; 
             }
 
             const progress = JSON.parse(savedProgress);
-            const { languageSelect, storyTypeSelect, chapterSelect } = elements;
+            const { languageSelect, storyTypeSelect, arcSelect, chapterSelect } = elements;
             
-            // Восстановление языка
+            // 1. Восстановление языка
             if (i18n[progress.lang]) {
                 languageSelect.value = progress.lang;
             }
             updateI18nStrings(); 
             
-            // Восстановление типа сюжета
+            // 2. Восстановление типа сюжета
+            let typeRestored = false;
             if (progress.type && STORY_GROUPS[progress.type]) {
                 storyTypeSelect.value = progress.type;
-                updateChapterSelect(true); 
+                typeRestored = true;
             }
             
-            // Восстановление главы
+            // 3. Восстановление Арки (если тип - main)
+            let arcRestored = false;
+            if (progress.type === 'main') {
+                updateArcSelect(true); // Показываем и заполняем список арок
+                if (progress.arc && MAIN_STORY_ARCS[progress.arc]) {
+                    arcSelect.value = progress.arc;
+                    arcRestored = true;
+                }
+            } else {
+                 updateArcSelect(true); // Скрываем список арок
+            }
+            
+            // 4. Восстановление главы
             let chapterRestored = false;
-            if (window.storyMetadata && storyTypeSelect.value && progress.chapter) {
+            if (window.storyMetadata && typeRestored && progress.chapter) {
+                // Обновляем список глав, используя сохраненные arc/type, но не вызывая saveProgress
+                updateChapterSelect(true); 
+                
                 if (Array.from(chapterSelect.options).some(opt => opt.value === progress.chapter)) {
                     chapterSelect.value = progress.chapter;
                     chapterRestored = true;
@@ -1247,23 +1315,19 @@
             currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR; 
             activeBgLayer = 1;
             isHistoryVisible = false;
-            elements.historyPanel.classList.remove('open'); // Скрыть историю
+            elements.historyPanel.classList.remove('open'); 
 
-            
-            // ИСПРАВЛЕНИЕ: ЯВНЫЙ СБРОС СОСТОЯНИЯ СПРАЙТОВ при сбросе
             currentLeftSpriteFile = null;
             currentRightSpriteFile = null;
 
             elements.dialogueWrapper.classList.add('hidden');
             elements.languageSelect.value = 'ru';
             
-            // Очистка и скрытие спрайтов
             elements.spriteLeftContainer.classList.add('hidden');
             elements.spriteRightContainer.classList.add('hidden');
             elements.spriteLeftElement.src = ''; 
             elements.spriteRightElement.src = '';
 
-            // Сброс фона на цвет, соответствующий текущей теме
             const themeBgColor = getComputedStyle(document.body).getPropertyValue('--color-bg-main').trim();
 
             elements.bgLayer1.style.backgroundImage = 'none';
