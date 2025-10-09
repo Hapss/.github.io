@@ -1,4 +1,4 @@
-<!-- Визуальный Просмотрщик Новелл с улучшенной, плавной загрузкой изображений и поддержкой пробелов в именах файлов. -->
+<!-- Визуальный Просмотрщик Новелл с исправлением логики затемнения спрайтов и возможностью смены темы. -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -10,18 +10,54 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
         
-        /* Цветовые переменные для акцентов */
-        :root {
+        /* ==================================================================== */
+        /* === Цветовые переменные (Dark Theme - по умолчанию) === */
+        /* ==================================================================== */
+        :root, .dark-theme {
+            /* Фоновые цвета */
             --color-bg-darkest: #171c26; /* Для заголовка */
-            --color-bg-main: #1f2937;    /* Основной фон/элементы */
+            --color-bg-main: #1f2937;    /* Основной фон/элементы (VN Viewer default) */
             --color-bg-medium: #374151;  /* Панель управления */
+            
+            /* Акценты */
             --color-accent-primary: #0891b2; /* Бирюзовый (Load button) */
             --color-accent-secondary: #0e7490; /* Темный Бирюзовый (Reset button) */
             --color-accent-ring: #22d3ee; /* Светлый Бирюзовый (Focus/Hover ring) */
-            --color-speaker-name: #ca7cfe; /* Фиолетовый (Не тронут) */
+            
+            /* Текст */
+            --color-text-primary: #e5e7eb; /* Светлый текст */
+            --color-text-secondary: #d1d5db; /* Вспомогательный текст */
+            
+            /* Фиолетовый (Не тронут) */
+            --color-speaker-name: #ca7cfe; 
         }
+
+        /* ==================================================================== */
+        /* === Цветовые переменные (Light Theme) - Оптимизировано === */
+        /* ==================================================================== */
+        .light-theme {
+            /* Фоновые цвета */
+            --color-bg-darkest: #ffffff;  /* Самый светлый Header */
+            --color-bg-main: #f3f4f6;    /* Очень светлый основной фон (VN Viewer default) */
+            --color-bg-medium: #ffffff;  /* Control Panel */
+            
+            /* Акценты */
+            --color-accent-primary: #0f766e; /* Темный Бирюзовый */
+            --color-accent-secondary: #115e59; /* Более темный (Reset button) */
+            --color-accent-ring: #0d9488; /* Акцент для фокуса */
+            
+            /* Текст - УЛУЧШЕННЫЙ КОНТРАСТ */
+            --color-text-primary: #111827; /* Очень темный текст */
+            --color-text-secondary: #4b5563; /* Средне-темный текст */
+            
+            /* Фиолетовый (Сделан темнее для контраста на светлом фоне) */
+            --color-speaker-name: #9333ea; 
+        }
+
+        /* ==================================================================== */
+        /* === Общие стили и привязка к переменным === */
+        /* ==================================================================== */
         
-        /* Глобальные правила */
         body, #vnViewer, .sprite-image {
             user-select: none;
             -webkit-user-select: none; 
@@ -34,12 +70,18 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--color-bg-main); 
-            color: #e5e7eb;
+            color: var(--color-text-primary);
+            transition: background-color 0.3s ease;
         }
+        
+        /* Стили для UI-элементов */
         .vn-overlay {
             /* Используем основной цвет фона с легкой прозрачностью */
-            background-color: rgba(31, 41, 55, 0.9); 
+            background-color: var(--color-bg-main); 
+            opacity: 0.9;
             backdrop-filter: blur(4px);
+            color: var(--color-text-primary);
+            border: 1px solid var(--color-bg-medium); /* Добавляем тонкую границу для светлой темы */
         }
         .speaker-name {
             background-color: var(--color-bg-main);
@@ -52,10 +94,30 @@
             font-size: 1.25rem;
         }
         
-        /* Спрайты */
+        /* Кнопки и селекты */
+        .control-panel { background-color: var(--color-bg-medium); }
+        .select-field { background-color: var(--color-bg-main); color: var(--color-text-primary); }
+        .select-field:hover, .select-field:focus { 
+            box-shadow: 0 0 0 2px var(--color-accent-ring);
+            border-color: var(--color-accent-ring);
+        }
+        
+        /* Акцентные кнопки */
+        .reset-button { background-color: var(--color-accent-secondary); }
+        .reset-button:hover { background-color: var(--color-accent-primary); }
+        .load-button { background-color: var(--color-accent-primary); }
+        .load-button:hover { background-color: var(--color-accent-secondary); }
+        .alert-message { background-color: var(--color-accent-primary); }
+
+
+        /* ==================================================================== */
+        /* === Спрайты и Фон === */
+        /* ==================================================================== */
+        
+        /* Sprite Container покрывает весь #vnViewer */
         .sprite-position {
             position: absolute;
-            bottom: 0;
+            bottom: 0; /* Привязан к самому низу #vnViewer */
             height: 95%; 
             width: 45%;
             transition: opacity 0.5s ease; 
@@ -66,19 +128,22 @@
         }
         .sprite-position.left { left: 0; }
         .sprite-position.right { right: 0; }
+        
         .sprite-image {
             height: 100%; 
             width: auto;
             max-height: 100%; 
             object-fit: contain;
             display: block; 
-            transition: opacity 0.3s ease; 
+            /* Стиль затемнения: теперь только opacity */
+            transition: opacity 0.3s ease, filter 0.3s ease; 
+            opacity: 1; /* По умолчанию полная видимость */
         }
         .dimmed-sprite {
-            opacity: 0.4 !important; 
+            opacity: 0.5 !important; /* Применяем затемнение */
+            filter: grayscale(30%); /* Опционально, для большего эффекта */
         }
         
-        /* Фоновые слои для кросс-фейда */
         .bg-layer {
             transition: opacity 1.0s ease; 
             background-repeat: no-repeat;
@@ -88,31 +153,9 @@
         #vnViewer {
             background-color: var(--color-bg-main); 
         }
-
-        /* Обновление стилей кнопок и фокусов с использованием переменных */
-        .reset-button {
-            background-color: var(--color-accent-secondary);
-        }
-        .reset-button:hover {
-            background-color: var(--color-accent-primary);
-        }
-        .load-button {
-            background-color: var(--color-accent-primary);
-        }
-        .load-button:hover {
-            background-color: var(--color-accent-secondary);
-        }
-        .select-field:hover, .select-field:focus {
-            --tw-ring-color: var(--color-accent-ring);
-            border-color: var(--color-accent-ring);
-        }
-        .alert-message {
-            background-color: var(--color-accent-primary);
-        }
-
     </style>
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen dark-theme">
     
     <!-- Инициализация Firebase (сохранена для совместимости) -->
     <script type="module">
@@ -147,16 +190,23 @@
         }
     </script>
     
-    <!-- 1. Header Bar: Теперь самый темный фон: #171c26 -->
-    <header id="header" class="fixed top-0 left-0 right-0 z-50 p-4 shadow-xl text-white" style="background-color: var(--color-bg-darkest);">
+    <!-- 1. Header Bar: Использует var(--color-bg-darkest) -->
+    <header id="header" class="fixed top-0 left-0 right-0 z-50 p-4 shadow-xl text-white transition-colors duration-300" style="background-color: var(--color-bg-darkest);">
         <div class="flex justify-between items-center max-w-7xl mx-auto">
-            <h1 id="headerTitle" class="text-xl font-bold tracking-wider">Архив Сюжета ВН</h1>
+            <h1 id="headerTitle" class="text-xl font-bold tracking-wider" style="color: var(--color-text-primary);">Архив Сюжета ВН</h1>
             
             <div class="flex items-center space-x-4">
-                <!-- Кнопка сброса: bg-teal-700, hover:bg-teal-600 -->
-                <button id="resetButton" onclick="resetProgress()" class="px-3 py-1 reset-button hover:bg-red-700 rounded-full transition duration-150 text-sm">Сброс</button>
-                <!-- Выбор языка: bg-medium, ring-teal-400 -->
-                <select id="languageSelect" onchange="initializeOrUpdateUI(true)" class="select-field text-white rounded-lg p-2 cursor-pointer transition hover:ring-2 ring-[#22d3ee]" style="background-color: var(--color-bg-medium);">
+                
+                <!-- Кнопка смены темы -->
+                <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm rounded-full transition duration-150" style="background-color: var(--color-bg-medium); color: var(--color-text-primary);">
+                    <span id="themeIcon">🌙</span> <span id="themeText">Тёмная</span>
+                </button>
+
+                <!-- Кнопка сброса -->
+                <button id="resetButton" onclick="resetProgress()" class="px-3 py-1 reset-button rounded-full transition duration-150 text-sm">Сброс</button>
+                
+                <!-- Выбор языка -->
+                <select id="languageSelect" onchange="initializeOrUpdateUI(true)" class="select-field text-white rounded-lg p-2 cursor-pointer transition hover:ring-2" style="background-color: var(--color-bg-medium);">
                     <option value="ru">Русский</option>
                     <option value="en">English</option>
                 </select>
@@ -167,34 +217,34 @@
     <!-- 2. Main Content Area -->
     <main class="pt-20 pb-4 px-4 max-w-7xl mx-auto min-h-screen">
         
-        <!-- Controls Panel: Фон - #374151 -->
-        <div class="p-4 rounded-xl shadow-lg mb-6 flex flex-wrap gap-4 items-end" style="background-color: var(--color-bg-medium);">
+        <!-- Controls Panel: Использует var(--color-bg-medium) -->
+        <div class="control-panel p-4 rounded-xl shadow-lg mb-6 flex flex-wrap gap-4 items-end transition-colors duration-300">
             <div class="flex-1 min-w-[180px]">
-                <label for="storyTypeSelect" id="labelStoryType" class="block text-sm font-medium mb-1 text-gray-300">Тип сюжета</label>
-                <!-- Select: bg-main, focus:ring-teal-400 -->
-                <select id="storyTypeSelect" onchange="initializeOrUpdateUI(true)" class="select-field w-full text-white rounded-lg p-2.5 cursor-pointer focus:ring-[#22d3ee] focus:border-[#22d3ee] transition" style="background-color: var(--color-bg-main);">
+                <label for="storyTypeSelect" id="labelStoryType" class="block text-sm font-medium mb-1" style="color: var(--color-text-secondary);">Тип сюжета</label>
+                <!-- Select: Использует var(--color-bg-main) -->
+                <select id="storyTypeSelect" onchange="initializeOrUpdateUI(true)" class="select-field w-full rounded-lg p-2.5 cursor-pointer focus:ring-4 transition" style="background-color: var(--color-bg-main);">
                     <!-- Options populated by JS -->
                 </select>
             </div>
 
             <div class="flex-1 min-w-[250px]">
-                <label for="chapterSelect" id="labelChapter" class="block text-sm font-medium mb-1 text-gray-300">Сюжет (Глава)</label>
-                <!-- Select: bg-main, focus:ring-teal-400 -->
-                <select id="chapterSelect" onchange="enableLoadButton(); saveProgress()" class="select-field w-full text-white rounded-lg p-2.5 cursor-pointer focus:ring-[#22d3ee] focus:border-[#22d3ee] transition" disabled style="background-color: var(--color-bg-main);">
+                <label for="chapterSelect" id="labelChapter" class="block text-sm font-medium mb-1" style="color: var(--color-text-secondary);">Сюжет (Глава)</label>
+                <!-- Select: Использует var(--color-bg-main) -->
+                <select id="chapterSelect" onchange="enableLoadButton(); saveProgress()" class="select-field w-full rounded-lg p-2.5 cursor-pointer focus:ring-4 transition" disabled style="background-color: var(--color-bg-main);">
                     <!-- Options populated by JS -->
                 </select>
             </div>
             
-            <!-- Кнопка загрузки: bg-teal-600, hover:bg-teal-700 -->
+            <!-- Кнопка загрузки -->
             <button id="loadButton" onclick="updateStoryContent(0)" class="min-w-[120px] load-button text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition duration-150 disabled:opacity-50" disabled>
                 <span id="loadText">Загрузить</span>
             </button>
         </div>
 
         <!-- 3. Visual Novel Viewer (Main View) -->
-        <!-- Фон вьювера: #1f2937 -->
-        <div id="vnViewer" class="relative w-full aspect-[16/9] bg-gray-900 rounded-xl shadow-2xl overflow-hidden flex flex-col justify-end transition-colors duration-500 cursor-pointer" 
-             style="min-height: 400px;"
+        <!-- Фон вьювера: Использует var(--color-bg-main) -->
+        <div id="vnViewer" class="relative w-full aspect-[16/9] rounded-xl shadow-2xl overflow-hidden flex flex-col justify-end transition-colors duration-500 cursor-pointer" 
+             style="min-height: 400px; background-color: var(--color-bg-main);"
              onclick="navigateDialogue(1)"> 
             
             <!-- Background Layers Container (для кросс-фейда) -->
@@ -203,7 +253,7 @@
                 <div id="bgLayer2" class="absolute inset-0 bg-layer opacity-0"></div>
             </div>
 
-            <!-- Sprite Container -->
+            <!-- Sprite Container: Привязка bottom: 0 работает корректно -->
             <div id="spriteContainer" class="absolute inset-0 z-10 pointer-events-none flex justify-center items-end p-4">
                 
                 <div id="spriteLeftContainer" class="sprite-position left hidden">
@@ -246,6 +296,7 @@
             },
             STORAGE: {
                 KEY: 'vn_story_progress_v5',
+                THEME_KEY: 'vn_theme',
             },
             BACKOFF: {
                 INITIAL_DELAY_MS: 750,  
@@ -253,7 +304,7 @@
                 MAX_ATTEMPTS: 3,        
             },
             PLACEHOLDERS: {
-                // Используем основной цвет фона (#1f2937) как запасной
+                // Это заполнитель, который используется, если CSS не загрузился, лучше оставить темный для совместимости
                 DEFAULT_BG_COLOR: '#1f2937', 
             }
         };
@@ -273,6 +324,10 @@
         let activeBgLayer = 1; 
         window.storyMetadata = null; 
         
+        // Глобальные переменные для отслеживания текущего спрайта (для исправления затемнения)
+        let currentLeftSpriteFile = null;
+        let currentRightSpriteFile = null;
+        
         // Переводы UI
         const i18n = {
             ru: {
@@ -280,19 +335,65 @@
                 loadText: "Загрузить", resetProgress: "Сброс", endOfStory: "История закончилась!",
                 startOfStory: "Это начало истории.", placeholderMetadata: "--- Метаданные не загружены ---",
                 errorFetchMetadataStrict: "Критическая ошибка: не удалось загрузить метаданные глав. Файл story/story_metadata.json отсутствует или недоступен.",
-                errorChapterNotFound: "Файл главы не найден."
+                errorChapterNotFound: "Файл главы не найден.",
+                themeDark: "Тёмная", themeLight: "Светлая"
             },
             en: {
                 headerTitle: "VN Story Archive", labelStoryType: "Story Type", labelChapter: "Chapter",
                 loadText: "Load", resetProgress: "Reset", endOfStory: "Story finished!",
                 startOfStory: "This is the start of the story.", placeholderMetadata: "--- Metadata not loaded ---",
                 errorFetchMetadataStrict: "Critical Error: Failed to load chapter metadata. The file story/story_metadata.json is missing or inaccessible.",
-                errorChapterNotFound: "Chapter file not found."
+                errorChapterNotFound: "Chapter file not found.",
+                themeDark: "Dark", themeLight: "Light"
             }
         };
 
         // Кэшированные ссылки на элементы DOM
         let elements = {};
+
+        // ====================================================================
+        // === УПРАВЛЕНИЕ ТЕМАМИ ===
+        // ====================================================================
+
+        function saveTheme(theme) {
+            localStorage.setItem(CONFIG.STORAGE.THEME_KEY, theme);
+            applyTheme(theme);
+        }
+
+        function applyTheme(theme) {
+            const lang = elements.languageSelect.value;
+            const isDark = theme === 'dark';
+            
+            document.body.classList.toggle('light-theme', !isDark);
+            document.body.classList.toggle('dark-theme', isDark);
+
+            if (elements.themeIcon && elements.themeText) {
+                elements.themeIcon.textContent = isDark ? '🌙' : '☀️';
+                elements.themeText.textContent = isDark ? i18n[lang].themeDark : i18n[lang].themeLight;
+            }
+            
+            // Если фон сейчас цветной (не картинка), нужно обновить цвет, используя переменную
+            if (currentBackgroundUrl === CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR) {
+                 const themeBgColor = isDark ? '#1f2937' : '#f3f4f6'; // Используем явные цвета, соответствующие CSS переменным
+                 
+                 const activeLayer = activeBgLayer === 1 ? elements.bgLayer1 : elements.bgLayer2;
+                 const inactiveLayer = activeBgLayer === 1 ? elements.bgLayer2 : elements.bgLayer1;
+
+                 activeLayer.style.backgroundColor = themeBgColor;
+                 inactiveLayer.style.backgroundColor = themeBgColor;
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            saveTheme(newTheme);
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem(CONFIG.STORAGE.THEME_KEY) || 'dark';
+            applyTheme(savedTheme);
+        }
 
         // ====================================================================
         // === ИНИЦИАЛИЗАЦИЯ ===
@@ -314,16 +415,17 @@
             elements.currentSpeaker = document.getElementById('currentSpeaker');
             elements.currentText = document.getElementById('currentText');
             elements.speakerNameContainer = document.getElementById('speakerNameContainer');
-            
-            // НОВЫЕ СЛОИ ДЛЯ ФОНА
             elements.bgLayer1 = document.getElementById('bgLayer1');
             elements.bgLayer2 = document.getElementById('bgLayer2');
-            
+            elements.themeIcon = document.getElementById('themeIcon');
+            elements.themeText = document.getElementById('themeText');
+
             // Установка дефолтного фона на активный слой (цвет)
             elements.bgLayer1.style.backgroundColor = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR;
             elements.bgLayer1.style.backgroundImage = 'none';
             currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR; 
             
+            loadTheme(); // Загрузка и применение темы перед загрузкой прогресса
             loadProgress(); 
         });
 
@@ -364,45 +466,30 @@
             }
         }
         
-        /** * Определяет путь/URL к спрайту.
-         * Использует encodeURIComponent для обработки пробелов в именах файлов.
-         */
+        /** Определяет путь/URL к спрайту. */
         const spritePath = (fileName) => {
             if (!fileName) return null;
-            
-            // Используем encodeURIComponent для обработки пробелов/спецсимволов
             const encodedFileName = encodeURIComponent(fileName);
             return CONFIG.PATHS.SPRITE_BASE + encodedFileName; 
         };
         
         /**
-         * Загружает изображение спрайта и плавно его отображает.
+         * Загружает изображение спрайта и плавно его отображает, сохраняя его в сцене.
          */
-        function loadSprite(url, element) {
-            const container = element.parentElement;
-
+        function loadSprite(url, element, container) {
+            
             if (!url) {
+                // Если URL пуст, скрываем спрайт и удаляем его из сцены
                 container.classList.add('hidden');
+                element.src = '';
                 return;
             }
             
-            // Если это новый локальный файл:
-            // 1. Скрываем контейнер и устанавливаем прозрачность 0 (чтобы не было старого изображения)
-            container.classList.add('hidden');
-            element.style.opacity = '0';
-            element.src = ''; // Очистка старого SRC
-
             const tempImg = new Image();
             
             tempImg.onload = () => {
-                // 2. После загрузки устанавливаем источник, показываем контейнер
                 element.src = tempImg.src; 
                 container.classList.remove('hidden'); 
-                
-                // 3. Плавно отображаем
-                setTimeout(() => {
-                    element.style.opacity = '1'; 
-                }, 50); 
             };
             
             tempImg.onerror = () => {
@@ -411,40 +498,31 @@
                 element.src = '';
             };
 
-            // Используем агрессивный обход кэша для надежности
             const finalUrl = `${url}?t=${Date.now()}`;
             tempImg.src = finalUrl;
         }
 
-        /** * Переключает фон, используя технику кросс-фейда.
-         * Использует encodeURIComponent для обработки пробелов в именах файлов.
-         */
+        /** * Переключает фон, используя технику кросс-фейда. */
         function crossFadeBackground(newBgFileName) {
-            // Используем encodeURIComponent для обработки пробелов/спецсимволов
             const encodedBgFileName = encodeURIComponent(newBgFileName);
             const finalBgUrl = CONFIG.PATHS.BACKGROUND_BASE + encodedBgFileName;
             
-            // Сравнение с текущим URL
             if (finalBgUrl === currentBackgroundUrl) return; 
 
             const { bgLayer1, bgLayer2 } = elements;
             const nextLayer = activeBgLayer === 1 ? bgLayer2 : bgLayer1;
             const currentLayer = activeBgLayer === 1 ? bgLayer1 : bgLayer2;
             
-            // 1. Preload image
             const tempImg = new Image();
             
             tempImg.onload = () => {
-                // 2. Once loaded, apply the image to the next layer
                 nextLayer.style.backgroundImage = `url('${tempImg.src}')`;
-                nextLayer.style.backgroundColor = 'transparent'; // Изображение загружено, убираем цвет фона
+                nextLayer.style.backgroundColor = 'transparent'; 
                 
-                // 3. Perform the fade: make next layer visible, current layer invisible
                 setTimeout(() => {
                     currentLayer.style.opacity = '0';
                     nextLayer.style.opacity = '1';
                     
-                    // 4. Update state
                     activeBgLayer = activeBgLayer === 1 ? 2 : 1;
                     currentBackgroundUrl = tempImg.src;
                 }, 10);
@@ -452,10 +530,13 @@
             
             tempImg.onerror = () => {
                 console.warn(`[BG Fade] Не удалось загрузить фон: ${finalBgUrl}. Применение цвета фона.`);
-                // Если изображение не загрузилось, устанавливаем цвет и выполняем фейд
+                
                  setTimeout(() => {
                     nextLayer.style.backgroundImage = 'none';
-                    nextLayer.style.backgroundColor = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR;
+                    // Используем CSS переменную для цвета фона
+                    const themeBgColor = getComputedStyle(document.body).getPropertyValue('--color-bg-main').trim();
+
+                    nextLayer.style.backgroundColor = themeBgColor;
 
                     currentLayer.style.opacity = '0';
                     nextLayer.style.opacity = '1';
@@ -465,7 +546,6 @@
                 }, 10);
             };
 
-            // Агрессивный обход кэша
             const finalUrl = `${finalBgUrl}?t=${Date.now()}`;
             tempImg.src = finalUrl;
         }
@@ -483,40 +563,72 @@
 
             const step = currentDialogue[currentDialogueIndex];
             
-            // 1. Фон (Кросс-Фейд)
+            // 1. Фон
             if (step.background) { 
                 crossFadeBackground(step.background);
             }
 
-
             // 2. Спрайты и Затемнение
-            const spriteFileName = step.sprite; 
+            
+            const speakingSpriteFile = step.sprite; 
             const activeSpeakerPosition = step.position ? step.position.toLowerCase() : null;
 
-            // Скрываем все спрайты
-            spriteLeftContainer.classList.add('hidden');
-            spriteRightContainer.classList.add('hidden');
-
-            // Убираем затемнение
+            // Сброс затемнения
             spriteLeftElement.classList.remove('dimmed-sprite');
             spriteRightElement.classList.remove('dimmed-sprite');
 
-            if (spriteFileName && activeSpeakerPosition) {
-                const isLeft = activeSpeakerPosition === 'left';
-                const imageElement = isLeft ? spriteLeftElement : spriteRightElement;
+
+            // --- Обновление спрайта ГОВОРЯЩЕГО персонажа ---
+            if (speakingSpriteFile && activeSpeakerPosition) {
+                const isLeftSpeaker = activeSpeakerPosition === 'left';
                 
-                const spriteUrl = spritePath(spriteFileName); 
-                loadSprite(spriteUrl, imageElement);
-            } 
-            
-            // Применение Затемнения
-            // Если у нас есть спрайт слева И он не текущий спикер, затемняем его
-            if (activeSpeakerPosition === 'right' && !spriteLeftContainer.classList.contains('hidden')) {
-                spriteLeftElement.classList.add('dimmed-sprite');
-            } 
-            // Если у нас есть спрайт справа И он не текущий спикер, затемняем его
-            else if (activeSpeakerPosition === 'left' && !spriteRightContainer.classList.contains('hidden')) {
-                spriteRightElement.classList.add('dimmed-sprite');
+                const speakerElement = isLeftSpeaker ? spriteLeftElement : spriteRightElement;
+                const speakerContainer = isLeftSpeaker ? spriteLeftContainer : spriteRightContainer;
+                
+                const dimmedElement = isLeftSpeaker ? spriteRightElement : spriteLeftElement;
+                const dimmedContainer = isLeftSpeaker ? spriteRightContainer : spriteLeftContainer;
+
+                // Определяем, нужно ли загружать новый спрайт
+                let needsLoad = false;
+                if (isLeftSpeaker && currentLeftSpriteFile !== speakingSpriteFile) {
+                    needsLoad = true;
+                    currentLeftSpriteFile = speakingSpriteFile;
+                } else if (!isLeftSpeaker && currentRightSpriteFile !== speakingSpriteFile) {
+                    needsLoad = true;
+                    currentRightSpriteFile = speakingSpriteFile;
+                }
+
+                if (needsLoad) {
+                    loadSprite(spritePath(speakingSpriteFile), speakerElement, speakerContainer);
+                } else {
+                    // Спрайт уже загружен, просто убеждаемся, что он виден
+                    speakerContainer.classList.remove('hidden');
+                }
+
+                // --- Затемнение не говорящего персонажа ---
+                // Затемняем противоположный спрайт, только если он отображается (не hidden)
+                if (!dimmedContainer.classList.contains('hidden')) {
+                    dimmedElement.classList.add('dimmed-sprite');
+                }
+                
+                // Убеждаемся, что говорящий не затемнен (на случай, если он был затемнен на предыдущем шаге)
+                speakerElement.classList.remove('dimmed-sprite');
+
+            } else {
+                // Если нет спрайта в этом шаге, это чистый текст или сцена
+                // Все видимые спрайты должны быть UNDIMMED
+                if (!spriteLeftContainer.classList.contains('hidden')) {
+                    spriteLeftElement.classList.remove('dimmed-sprite');
+                }
+                if (!spriteRightContainer.classList.contains('hidden')) {
+                    spriteRightElement.classList.remove('dimmed-sprite');
+                }
+                
+                // Если нет текста и спрайта, скрываем диалог
+                if (!step.text) {
+                     dialogueWrapper.classList.add('hidden');
+                     return;
+                }
             }
 
 
@@ -537,13 +649,11 @@
         /** Асинхронно пытается загрузить выбранную главу, используя Exponential Backoff. */
         async function updateStoryContent(startIndex = 0) {
             const lang = elements.languageSelect.value; 
-            // Удаляем пробелы из ключа
             const fullStoryKey = elements.chapterSelect.value.trim(); 
             const { loadButton, loadText } = elements;
             
             if (!fullStoryKey) return;
 
-            // Файл JSON главы не нуждается в кодировании
             const expectedFilePath = `${CONFIG.PATHS.STORY_BASE}${lang}/${fullStoryKey}.json`;
             const { INITIAL_DELAY_MS, MAX_DELAY_MS, MAX_ATTEMPTS } = CONFIG.BACKOFF;
 
@@ -584,8 +694,11 @@
                     currentDialogueIndex = Math.min(startIndex, currentDialogue.length - 1);
                     currentDialogueIndex = Math.max(0, currentDialogueIndex); 
                     dialogueIsLoaded = true;
-                    // Сброс фона для принудительной загрузки первого фона главы
                     currentBackgroundUrl = null; 
+                    
+                    // Сброс состояния спрайтов при загрузке новой главы
+                    currentLeftSpriteFile = null;
+                    currentRightSpriteFile = null;
                     
                     loadText.textContent = "Загружено";
                     renderDialogueStep();
@@ -630,7 +743,6 @@
             const header = document.getElementById('header');
             const msgBox = document.createElement('div');
             msgBox.textContent = message;
-            // Используем класс для бирюзового цвета
             msgBox.className = 'fixed top-1 right-1/2 translate-x-1/2 p-2 text-white rounded-lg shadow-xl z-50 text-sm transition-opacity duration-300 alert-message';
             header.appendChild(msgBox);
             
@@ -650,6 +762,10 @@
             elements.loadText.textContent = text.loadText;
             document.getElementById('resetButton').textContent = text.resetProgress;
             
+            // Обновление текста на кнопке темы
+            const currentTheme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
+            elements.themeText.textContent = currentTheme === 'dark' ? text.themeDark : text.themeLight;
+
             const typeSelect = elements.storyTypeSelect;
             const currentType = typeSelect.value;
             typeSelect.innerHTML = '';
@@ -756,6 +872,7 @@
             
             const savedProgress = localStorage.getItem(CONFIG.STORAGE.KEY);
             
+            // Тема уже загружена в loadTheme()
             initializeOrUpdateUI(false); 
 
             if (!savedProgress) {
@@ -795,14 +912,16 @@
             dialogueIsLoaded = false;
             currentDialogueIndex = 0;
             currentDialogue = []; 
-            // Используем цвет по умолчанию
             currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR; 
             activeBgLayer = 1;
+            
+            // Сброс состояния спрайтов
+            currentLeftSpriteFile = null;
+            currentRightSpriteFile = null;
 
             elements.dialogueWrapper.classList.add('hidden');
             elements.languageSelect.value = 'ru';
             
-            // Сброс фоновых слоев: убираем URL-изображение, ставим цвет
             elements.bgLayer1.style.backgroundImage = 'none';
             elements.bgLayer1.style.backgroundColor = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR;
             elements.bgLayer1.style.opacity = '1';
