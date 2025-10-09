@@ -22,23 +22,25 @@
         },
         { "speaker": "Киана", "sprite": "Kiana 1.png", "position": "left", "text": "Теперь нужно найти цель быстрее, чем Шиксал прибудет. В этот раз я не дам тебе сбежать!"},
         
-        { "speaker": "Зомби", "text": "Гррааа!!", "sprite_dimmed": "Kiana 1.png"},
+        { "speaker": "Зомби", "text": "Гррааа!!", "sprite": "Kiana 1.png", "position": "left", "dim": true},
         
         { "speaker": "Киана", "sprite": "Kiana 1.png", "position": "left", "text": "Заражённые Хоукаем зомби объявились... К счастью, я заранее подготовила оружие."},
         
         { 
             "speaker": "", 
             "text": "Щелчок!",
-            "sprite_dimmed": "Kiana 1.png"
+            "sprite": "Kiana 1.png",
+            "position": "left",
+            "dim": true
         },
         { "speaker": "Киана", "sprite": "Kiana 1.png", "position": "left", "text": "Проверка оружия завершена, боеприпасы на месте... Правда я не знаю, как долго продержится это старьё."},
         { "speaker": "Киана", "sprite": "Kiana 1.png", "position": "left", "text": "Ну~ Следуя плану, сначала нужно выбраться из этой библиотеки. И конечно же путь преграждают зомби..."},
         { "speaker": "Киана", "sprite": "Kiana 1.png", "position": "left", "text": "Люди, заражённые Хоукаем и мутировавшие из-за него... Они утратили свои чувства и сознание. Прямо как ходячие мертвецы, какие жалкие создания."},
         
-        { "speaker": "Зомби", "text": "Гррааа!!", "sprite_dimmed": "Kiana 1.png"},
+        { "speaker": "Зомби", "text": "Гррааа!!", "sprite": "Kiana 1.png", "position": "left", "dim": true},
         
         { "speaker": "Киана", "sprite": "Kiana 1.png", "position": "left", "text": "Прости, даже так эта леди не проявит пощады. По крайней мере в качестве компенсации поспите спокойно."},
         
-        { "speaker": "", "text": "Бах! Бах! Бах!", "sprite_dimmed": "Kiana 1.png"}
+        { "speaker": "", "text": "Бах! Бах! Бах!", "sprite": "Kiana 1.png", "position": "left", "dim": true}
     ]
 }
