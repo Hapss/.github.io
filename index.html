@@ -525,7 +525,7 @@
         let elements = {};
 
         // ====================================================================
-        // === УПРАВЛЕНИЕ ТЕМАМИ и ПРЕДУПРЕЖДЕНИЕМ ===
+        // === УПРАВЛЕНИЕ ТЕМАМИ и ПРЕДУПРЕЖДЕНИЕМ (ИСПРАВЛЕНО) ===
         // ====================================================================
 
         function saveTheme(theme) {
@@ -564,8 +564,8 @@
 
                 const closeButton = card.querySelector('#close-warning-button');
                 closeButton.style.backgroundColor = accentColor;
-                // Кнопка должна быть контрастной, делаем текст белым, если фон темный, и черным, если фон светлый.
-                closeButton.style.color = isDark ? 'white' : 'white'; // Оставляем white, т.к. акцентный цвет и так темный в обеих темах
+                // Кнопка должна быть контрастной, делаем текст белым
+                closeButton.style.color = 'white'; 
                 
                 // Убедимся, что цвет фона оверлея тоже соответствует теме
                 const overlay = document.getElementById('warning-overlay');
@@ -595,6 +595,7 @@
             applyTheme(savedTheme);
         }
 
+        /** ИСПРАВЛЕНО: Теперь использует прямое управление стилями для более надежного закрытия. */
         function setupWarningModal() {
             const overlay = document.getElementById('warning-overlay');
             const closeButton = document.getElementById('close-warning-button');
@@ -606,14 +607,17 @@
                 return;
             }
 
+            // Применяем тему, чтобы цвета в модальном окне были корректны
             applyTheme(document.body.classList.contains('dark-theme') ? 'dark' : 'light');
 
             closeButton.addEventListener('click', function() {
+                // 1. Сохраняем, что пользователь закрыл окно
                 localStorage.setItem(CONFIG.STORAGE.WARNING_KEY, 'true');
                 
-                overlay.classList.remove('opacity-100');
-                overlay.classList.add('opacity-0');
+                // 2. Запускаем анимацию исчезновения (opacity)
+                overlay.style.opacity = '0';
                 
+                // 3. Скрываем элемент после завершения CSS-перехода (500ms)
                 setTimeout(() => {
                     overlay.style.display = 'none';
                 }, 500); 
