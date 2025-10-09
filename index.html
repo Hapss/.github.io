@@ -858,18 +858,21 @@
             spriteLeftElement.classList.remove('dimmed-sprite');
             spriteRightElement.classList.remove('dimmed-sprite');
 
-            let dimTarget = 'none';
-            
-            // --- 1. Автоматическое определение, кого затемнить (по спикеру) ---
-            if (step.speaker && step.position) {
-                const isLeftSpeaker = step.position.toLowerCase() === 'left';
-                dimTarget = isLeftSpeaker ? 'right' : 'left';
-            }
-            
-            // --- 2. Применение явного override (если есть) ---
-            // dim_override может быть: 'left', 'right', 'both', 'none'
+            let dimTarget = 'none'; // По умолчанию Затемнение неактивно, согласно правилу
+
+            // Согласно правилу: Затемнение применяется ТОЛЬКО, если dim_override задан.
+            // dim_override может быть: 'left', 'right', 'both', 'none', 'auto'
             if (step.dim_override) {
-                dimTarget = step.dim_override.toLowerCase();
+                const overrideValue = step.dim_override.toLowerCase();
+
+                if (overrideValue === 'auto' && step.speaker && step.position) {
+                    // Если явно задано 'auto', включаем автоматическое затемнение не-спикера
+                    const isLeftSpeaker = step.position.toLowerCase() === 'left';
+                    dimTarget = isLeftSpeaker ? 'right' : 'left';
+                } else if (overrideValue === 'left' || overrideValue === 'right' || overrideValue === 'both' || overrideValue === 'none') {
+                    // Используем явное переопределение
+                    dimTarget = overrideValue;
+                }
             }
 
             // --- 3. Применение затемнения к видимым спрайтам ---
