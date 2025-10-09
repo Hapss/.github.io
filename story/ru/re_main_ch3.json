@@ -4,559 +4,490 @@
         {
             "speaker": "Киана",
             "text": "Ху~Ху~ Им нет конца! Я не ожидала, что все зомби в округе будут привлечены источником Хоукая! Продолжать в таком духе не получится.",
-            "sprite": "Kiana 4.png",
-            "position": "left",
+            "sprite_left": "Kiana 4.png",
             "background": "bg_stage3.png"
         },
         {
             "speaker": "Киана",
             "text": "Патронов почти не осталось, ровно как и времени. Нужно немедленно найти цель...",
-            "sprite": "Kiana 1.png",
-            "position": "left"
+            "sprite_left": "Kiana 1.png"
         },
         {
             "speaker": "",
             "text": "Шорох!",
-            "sprite": "Kiana 1.png",
-            "dim": true
+            "sprite_left": "Kiana 1.png",
+            "dim_override":"left"
         },
         {
             "speaker": "Киана",
             "text": "Кто!?",
-            "sprite": "Kiana 4.png",
+            "sprite_left": "Kiana 4.png",
             "position": "left"
         },
        {
             "speaker": "Киана",
             "text": "Она не похожа на зомби... Может быть!? Наконец-то, я нашла тебя! А ну стоять!",
-            "sprite": "Kiana 3.png",
-            "position": "left"
+            "sprite_left": "Kiana 3.png"
         },
         {
             "speaker": "Мэй",
             "text": "......",
-            "sprite": "Mei 1.png",
-            "position": "left"
+            "sprite_left": "Mei 1.png"
         },
         {
             "speaker": "Киана",
             "text": "А! Это... студент? Кто бы подумал, что здесь окажется человек, не заражённый Хонкаем... Глядя на твою форму ты, должно быть, старшекурсница. Как тебя зовут?",
-            "sprite": "Kiana 1.png",
-            "position": "left"
+            "sprite_left": "Kiana 1.png"
         },
         {
             "speaker": "Мэй",
             "text": "......",
-            "sprite": "Mei 1.png",
-            "position": "left"
+            "sprite_left": "Mei 1.png"
         },
         {
             "speaker": "Киана",
             "text": "Эй! Ты оглохла? Можешь хоть что-то ответить?",
-            "sprite": "Kiana 1.png",
-            "position": "left"
+            "sprite_left": "Kiana 1.png"
         },
         {
             "speaker": "Мэй",
             "text": "......",
-            "sprite": "Mei 1.png",
-            "position": "left"
+            "sprite_left": "Mei 1.png"
         },
         {
             "speaker": "Киана",
             "text": "Эй~ Похоже она в ужасе... Как бы то ни было, я не могу защитить тебя, так что найди укромный уголок и спрячься там.",
-            "sprite": "Kiana 1.png",
-            "position": "left"
+            "sprite_left": "Kiana 1.png"
         },
         {
             "speaker": "Зомби",
             "text": "Грррооо.....",
-            "sprite": "Kiana 1.png",
-            "dim": true
+            "sprite_left": "Kiana 1.png"
         },
         {
             "speaker": "Киана",
             "text": "Тц! Здесь больше небезопасно... Коли ты не хочешь выжить, то тебя никто и не спасёт... Прощай и не вини меня.",
-            "sprite": "Kiana 1.png",
-            "position": "left"
+            "sprite_left": "Kiana 1.png"
         },
         {
             "speaker": "Мэй",
             "text": "......",
-            "sprite": "Mei 1.png",
-            "position": "left"
+            "sprite_left": "Mei 1.png"
         },
         {
-            "speaker": "",
+            "speaker": "Зомби",
             "text": "Грррооо......",
-            "sprite": "Mei 1.png",
-            "dim": true
+            "sprite_left": "Mei 1.png"
         },
         {
             "speaker": "Киана",
             "text": "Эй! Ну что за неудача! Пошли со мной!",
-            "sprite": "Kiana 2.png",
-            "position": "left"
+            "sprite_left": "Kiana 2.png"
         },
         {
             "speaker": "Киана",
             "text": "Фу~ух. Кажется было перебором отбиваться от зомби, защищая нормального человека... Эй! Ты в порядке?",
-            "sprite": "Kiana 1.png",
-            "position": "left"
+            "sprite_left": "Kiana 1.png"
         },
         {
             "speaker": "Мэй",
             "text": "......",
-            "sprite": "Mei 1.png",
-            "position": "left"
+            "sprite_left": "Mei 1.png"
         },
         {
             "speaker": "Киана",
             "text": "Тц... Я такая идиотка. И зачем я её спасла? Даже не может сказать спасибо за все мои труды! Что ж, оставайся здесь. Это старое здание академии, какое-то время здесь будет безопасно. Я не собираюсь и дальше оставаться и помогать тебе, так что теперь ты сама по себе~",
-            "sprite": "Kiana 1.png",
-            "position": "left"
+            "sprite_left": "Kiana 1.png"
         },
         {
             "speaker": "Мэй",
             "text": "...Зачем ты спасла меня?",
-            "sprite": "Mei 1.png",
-            "position": "left"
+            "sprite_left": "Mei 1.png"
         },
         {
             "speaker": "Киана",
             "text": "Э? Ты наконец заговорила.",
-            "sprite": "Kiana 1.png",
-            "position": "left"
+            "sprite_left": "Kiana 1.png"
         },
         {
             "speaker": "Мэй",
             "text": "Подобные мне люди должны умереть и быть забыты... Возможно даже моё рождение было ошибкой...",
-            "sprite": "Mei 1.png",
-            "position": "left"
+            "sprite_left": "Mei 1.png"
         },
         {
             "speaker": "Киана",
             "text": "Ха? О чём ты вообще? Да кто вообще так о себе отзывается!",
-            "sprite": "Kiana 1.png",
-            "position": "left"
+            "sprite_left": "Kiana 1.png"
         },
         {
             "speaker": "Мэй",
             "text": "Оставь меня... Оставь своё лицемерие, в любом случае, ты притворилась, чтобы подобраться ко мне, Райден Мэй...",
-            "sprite": "Mei 1.png",
-            "position": "left"
+            "sprite_left": "Mei 1.png"
         },
         {
             "speaker": "Киана",
             "text": "Райден Мэй? Кажется я слышала о ком-то подобном... Кажется это знаменитость в академии Чиба... Кажется дочка президента корпорации КЭ, верно?",
-            "sprite": "Kiana 3.png",
-            "position": "left"
+            "sprite_left": "Kiana 3.png"
         },
         {
             "speaker": "Мэй",
             "text": "......",
-            "sprite": "Mei 1.png",
-            "position": "left"
+            "sprite_left": "Mei 1.png"
         },
         {
             "speaker": "Киана",
             "text": "Девушка, о которой ходят слухи, что она в один день отшила 12 парней, по прозвищу \"Королева Грома\". И теперь она выглядит обескураженной, какая редкость~",
-            "sprite": "Kiana 1.png",
-            "position": "left"
+            "sprite_left": "Kiana 1.png"
         },
         {
             "speaker": "Мэй",
             "text": "Ты тоже пришла, чтобы посмеяться надо мной... Конечно же все люди прогнившие.",
-            "sprite": "Mei 1.png",
-            "position": "left"
+            "sprite_left": "Mei 1.png"
         },
         {
             "speaker": "Киана",
             "text": "Не пойми меня неправильно, я не за этим здесь. Я просто хочу сказать, что вместо обвинения людей вокруг лучше найти способ измениться.",
-            "sprite": "Kiana 1.png",
-            "position": "left"
+            "sprite_left": "Kiana 1.png"
         },
         {
             "speaker": "Мэй",
             "text": "Измениться? Верно... Верно... Не я здесь ошибаюсь, а этот чёртов мир! Этот лицемерный мир должен быть уничтожен!",
-            "sprite": "Mei 1.png",
-            "position": "left"
+            "sprite_left": "Mei 1.png"
         },
         {
             "speaker": "Киана",
             "text": "Эй, мне кажется это неправильным, эй! Да что не так с тобой!?",
-            "sprite": "Kiana 3.png",
-            "position": "left"
+            "sprite_left": "Kiana 3.png"
         },
         {
             "speaker": "",
             "text": "Грохот!!!",
-            "sprite": "Kiana 3.png",
-            "dim": true
+            "sprite_left": "Kiana 3.png"
         },
         {
             "speaker": "Киана",
             "text": "Агх! Какого чёрта происходит с погодой? Это ещё одно влияние Хоукая?..",
-            "sprite": "Kiana 1.png",
-            "position": "left"
+            "sprite_left": "Kiana 1.png"
         },
         {
             "speaker": "",
             "text": "Бжжжж...",
-            "sprite": "Kiana 1.png",
-            "dim": true
+            "sprite_left": "Kiana 1.png"
         },
         {
             "speaker": "Киана",
             "text": "Тц, ещё и телефон в такое время... Э! Энергия Хоукая обнаружена на... расстоянии в 0 метров?",
-            "sprite": "Kiana 3.png",
-            "position": "left"
+            "sprite_left": "Kiana 3.png"
         },
         {
             "speaker": "",
             "text": "Тззтч!",
-            "sprite": "Kiana 3.png",
-            "dim": true
+            "sprite_left": "Kiana 3.png",
+            "dim_override": "left"
         },
         {
             "speaker": "Киана",
             "text": "А? Почему сигнал прервался? В такой критической ситуации этот телефон тупит! Это ж прямо рядом со мной! Здесь больше никого нет, кроме этой депрессивной богатой девушки!",
-            "sprite": "Kiana 3.png",
-            "position": "left"
+            "sprite_left": "Kiana 3.png"
         },
         {
             "speaker": "Мэй",
             "text": "Когда этот лицемерный мир будет разрушен... Всё сможет вернуться на место... Мой отец и все остальные обязательно вернутся ко мне!",
-            "sprite": "Mei 1.png",
-            "position": "left"
+            "sprite_left": "Mei 1.png"
         },
         {
             "speaker": "Киана",
             "text": "Эй! Куда ты собралась!? Не блуждай в такое время! Погоди меня!",
-            "sprite": "Kiana 1.png",
-            "position": "left"
+            "sprite_left": "Kiana 1.png"
         },
         {
             "speaker": "",
-            "text": "Грохот!!"
+            "text": "Грохот!!",
+            "sprite_left": "Kiana 1.png",
+            "dim_override": "left"
         },
         {
             "speaker": "Киана",
             "text": "Чёрт! Куда она подевалась!? Почему я вообще трачу столь много времени на незнакомку?!",
-            "position": "left"
+            "sprite_left": "Kiana 1.png"
         },
         {
         "speaker": "Киана",
             "text": "Зомби становится всё больше и больше, если я пойду дальше...",
-            "sprite": "Kiana 1.png",
-            "position": "left"
+            "sprite_left": "Kiana 1.png"
         },
         {
             "speaker": "Зомби",
             "text": "Гррраааа...",
-            "sprite": "Kiana 1.png",
-            "dim": true
+            "sprite_left": "Kiana 1.png",
+            "dim_override": "left"
         },
         {
             "speaker": "Мэй",
             "text": "Ооо, все собрались вокруг меня. Пока папа и другие здесь, всё остальное меня не волнует~",
-            "sprite": "Mei 1.png",
-            "position": "left"
+            "sprite_left": "Mei 1.png"
         },
         {
             "speaker": "Киана",
             "text": "Вот она! Чёрт! Она окружена зомби!",
-            "sprite": "Kiana 1.png",
-            "position": "left"
+            "sprite_left": "Kiana 1.png"
         },
         {
             "speaker": "",
             "text": "Бах! Бах! Бах!",
-            "sprite_dimmed": "Kiana 1.png",
-            "position": "left"
+            "sprite_left": "Kiana 1.png",
+            "dim_override": "left"
         },
         {
             "speaker": "Киана",
             "text": "Мёртвые ублюдки! А ну прочь от этой девушки!!",
-            "sprite": "Kiana 4.png",
-            "position": "left"
+            "sprite_left": "Kiana 4.png"
         },
         {
             "speaker": "Мэй",
             "text": "Почему ты... снова здесь, чтобы разрушить моё счастье!",
-            "sprite": "Mei 1.png",
-            "position": "left"
+            "sprite_left": "Mei 1.png"
         },
         {
             "speaker": "Киана",
             "text": "Да о чём ты!? Я пришла спасти тебя!",
-            "sprite": "Kiana 1.png",
-            "position": "left"
+            "sprite_left": "Kiana 1.png"
         },
         {
             "speaker": "Мэй",
             "text": "Прочь отсюда! Мне не нужна твоя жалость!",
-            "sprite": "Mei 1.png",
-            "position": "left"
+            "sprite_left": "Mei 1.png"
         },
         {
             "speaker": "",
             "text": "Гррррооо!!!",
-            "sprite": "Mei 1.png",
-            "dim": true
+            "sprite_left": "Mei 1.png",
+            "dim_override": "left"
         },
         {
             "speaker": "Киана",
             "text": "Агх! Что с этими зомби вокруг тебя...",
-            "sprite": "Kiana 1.png",
-            "position": "left"
+            "sprite_left": "Kiana 1.png"
         },
         {
             "speaker": "Мэй",
             "text": "Исчезни!",
-            "sprite": "Mei 1.png",
-            "position": "left"
+            "sprite_left": "Mei 1.png"
         },
         {
             "speaker": "Киана",
             "text": "Эй! Ты куда собралась?! Чёрт... Когда я покончу с этими зомби, мне следует преподать этой своенравной юной леди урок! Наконец-то я догнала тебя!",
-            "sprite": "Kiana 1.png",
-            "position": "left"
+            "sprite_left": "Kiana 1.png"
         },
         {
             "speaker": "Мэй",
             "text": "Подожди немного... Отец, подожди чуток и Мэй станет такой, какой отец хочёт её видеть!",
-            "sprite": "Mei 1.png",
-            "position": "left"
+            "sprite_left": "Mei 1.png"
         },
         {
             "speaker": "Киана",
             "text": "Да что с ней произошло? Она вдруг переменилась... И реакция окружающих её зомби немного странная... Приблизившись к ней, они не стали её атаковать, а наоборот. Они замедлились и последовали за ней.",
-            "sprite": "Kiana 3.png",
-            "position": "left"
+            "sprite_left": "Kiana 3.png"
         },
         {
             "speaker": "Заражённая Мэй",
             "text": "Ааа~ Какое приятное чувство, весь мир вокруг меня... Никто больше не бросит меня, и каждый обретёт вечное счастье рядом со мной! Ооо~ Райден Мэй, позволь мне исполнить твоё желание~",
-            "sprite": "Herrscher Mei.png",
-            "position": "right",
-            "sprite": "Kiana 3.png",
-            "dim": true
+            "sprite_right": "Herrscher Mei.png",
+            "sprite_left": "Kiana 3.png",
+            "dim_override": "left"
         },
         {
             "speaker": "Киана",
             "text": "Что с твоим видом!? Ты не Райден Мэй! Кто ты такая?!",
-            "sprite": "Kiana 1.png",
-            "position": "left",
-            "sprite": "Herrscher Mei.png",
-            "dim": true
+            "sprite_left": "Kiana 1.png",
+            "sprite_right": "Herrscher Mei.png",
+            "dim_override": "right"
         },
         {
             "speaker": "Заражённая Мэй",
             "text": "О~ Миленький котёнок, больше не важно кто я~ Потому что скоро ты присоединишься к этим ребятам и станешь зомби!",
-            "sprite": "Herrscher Mei.png",
-            "position": "right",
-            "sprite": "Kiana 1.png",
-            "dim": true
+            "sprite_right": "Herrscher Mei.png",
+            "sprite_left": "Kiana 1.png",
+            "dim_override": "left"
         },
         {
             "speaker": "",
             "text": "БУМ!!!",
-            "sprite": "Kiana 1.png",
-            "dim": true,
-            "sprite": "Herrscher Mei.png",
-            "dim": true
+            "sprite_left": "Kiana 1.png",
+            "sprite_right": "Herrscher Mei.png",
+            "dim_override": "both"
         },
         {
             "speaker": "Киана",
             "text": "Воа! Почему вдруг ударила молния?!",
-            "sprite": "Kiana 1.png",
-            "position": "left",
-            "sprite": "Herrscher Mei.png",
-            "dim": true
+            "sprite_left": "Kiana 1.png",
+            "sprite_right": "Herrscher Mei.png",
+            "dim_override": "right"
         },
         {
             "speaker": "Заражённая Мэй",
             "text": "Хо-хо~ А ты хороша, раз смогла уклониться. Кажется это будет хорошей разминкой, позволь мне тебя медленно мучить~",
-            "sprite": "Herrscher Mei.png",
-            "position": "right",
-            "sprite": "Kiana 1.png",
-            "dim": true
+            "sprite_right": "Herrscher Mei.png",
+            "sprite_left": "Kiana 1.png",
+            "dim_override": "left"
         },
         {
             "speaker": "Киана",
             "text": "Скажи уже кто ты! Не так много людей способны пережить выброс Хоукая, кроме семьи Каслана!",
-            "sprite": "Kiana 1.png",
-            "position": "left",
-            "sprite": "Herrscher Mei.png",
-            "dim": true
+            "sprite_right": "Kiana 1.png",
+            "sprite_left": "Herrscher Mei.png",
+            "dim_override": "left"
         },
         {
             "speaker": "Заражённая Мэй",
             "text": "Хмпф... Уже не важно кто я. Райден Мэй исчезла из этого мира. Ну а я существую ради уничтожения этого мерзкого мира!",
-            "sprite": "Herrscher Mei.png",
-            "position": "left",
-            "sprite": "Kiana 1.png",
-            "dim": true
+            "sprite_right": "Herrscher Mei.png",
+            "sprite_left": "Kiana 1.png",
+            "dim_override": "left"
         },
         {
             "speaker": "",
             "text": "Бац! Бах!",
-            "sprite": "Kiana 1.png",
-            "sprite": "Herrscher Mei.png"
+            "sprite_left": "Kiana 1.png",
+            "sprite_left": "Herrscher Mei.png",
+            "dim_override": "both"
         },
         {
             "speaker": "Киана",
             "text": "Энергия молнии передаётся ей... Если это явление вызвано Хонкаем, то сейчас она поглощает энергию Хоукая вокруг! В мире есть люди, которые способны напрямую использовать и манипулировать энергией Хоукая без помощи сторонних сил. И это может быть только...",
-            "sprite": "Kiana 1.png",
-            "position": "left",
-            "sprite_dimmed": "Herrscher Mei.png"
+            "sprite_left": "Kiana 1.png",
+            "sprite_right": "Herrscher Mei.png",
+            "dim_override": "right"
         },
         {
             "speaker": "Киана",
             "text": "Эх, кажется я вовлечена в большой инцидент... Но слишком рано унывать! С другой стороны, быть может я стану спасителем мира! Должен быть способ остановить её!",
-            "sprite": "Kiana 1.png",
-            "position": "left",
-            "sprite": "Herrscher Mei.png",
-            "dim": true
+            "sprite_left": "Kiana 1.png",
+            "sprite_right": "Herrscher Mei.png",
+            "dim_override": "right"
         },
         {
             "speaker": "Заражённая Мэй",
             "text": "Ха-ха! Какой хороший настрой. Ну давай, попробуй!",
-            "sprite": "Herrscher Mei.png",
-            "position": "left",
-            "sprite": "Kiana 1.png",
-            "dim": true
+            "sprite_right": "Herrscher Mei.png",
+            "sprite_left": "Kiana 1.png",
+            "dim_override": "left"
         },
         {
             "speaker": "",
             "text": "Грррооо!",
-            "sprite_dimmed": "Kiana 1.png"
+            "sprite_left": "Kiana 1.png",
+            "dim_override": "left"
         },
         {
             "speaker": "Киана",
             "text": "Прочь!",
-            "sprite": "Kiana 4.png"
+            "sprite_left": "Kiana 4.png"
         },
         {
             "speaker": "Заражённая Мэй",
             "text": "Хмпф! Я была неосторожна... Не ожидала, что мне сможет противостоять такая девчушка. Кажется мне потребуется больше энергии, чтобы победить тебя!",
-            "sprite": "Herrscher Mei.png",
-            "position": "left",
-            "sprite": "Kiana 4.png",
-            "dim": true
+            "sprite_right": "Herrscher Mei.png",
+            "sprite_left": "Kiana 4.png",
+            "dim_override": "left"
         },
         {
             "speaker": "Киана",
             "text": "Не дождёшься!",
-            "sprite": "Kiana 4.png",
-            "position": "left",
-            "sprite": "Herrscher Mei.png",
-            "dim": true
+            "sprite_left": "Kiana 4.png",
+            "sprite_right": "Herrscher Mei.png",
+            "dim_override": "right"
         },
         {
             "speaker": "Заражённая Мэй",
             "text": "Агх! Что ты хочешь сделать!?",
-            "sprite": "Herrscher Mei.png",
-            "position": "left",
-            "sprite": "Kiana 4.png",
-            "dim": true
+            "sprite_right": "Herrscher Mei.png",
+            "sprite_left": "Kiana 4.png",
+            "dim_override": "left"
         },
         {
             "speaker": "Киана",
             "text": "Кровь семьи Каслана имеет совершенное сопротивление энергии Хонкаю! Раз уж моё тело способно выдержать Хоукая, тогда я прекращу подачу твоей энергии Хоукая!",
-            "sprite": "Kiana 1.png",
-            "position": "left",
-            "sprite": "Herrscher Mei.png",
-            "dim": true
+            "sprite_left": "Kiana 1.png",
+            "sprite_right": "Herrscher Mei.png",
+            "dim_override": "right"
         },
         {
             "speaker": "Заражённая Мэй",
             "text": "Сучка! Отпусти! Не прикасайся ко мне!",
-            "sprite": "Herrscher Mei.png",
-            "position": "left",
-            "sprite": "Kiana 1.png",
-            "dim": true
+            "sprite_right": "Herrscher Mei.png",
+            "sprite_left": "Kiana 1.png",
+            "dim_override": "left"
         },
         {
             "speaker": "Киана",
             "text": "Агх...! Всплеск энергии Хоукая непосредственно воздействовал на тело... Впервые я по-настоящему ощутила эту энергию! Так больно!!",
-            "sprite": "Kiana 4.png",
-            "position": "left",
-            "sprite": "Herrscher Mei.png",
-            "dim": true
+            "sprite_left": "Kiana 4.png",
+            "sprite_right": "Herrscher Mei.png",
+            "dim_override": "right"
         },
         {
             "speaker": "",
             "text": "Прошу, помоги мне... Отец! Прошу, помоги мне... Пожалуйста, не оставляй Мэй одну.",
-            "sprite": "Kiana 4.png",
-            "dim": true,
-            "sprite": "Herrscher Mei.png",
-            "dim": true
+            "sprite_left": "Kiana 4.png",
+            "sprite_right": "Herrscher Mei.png",
+            "dim_override": "both"
         },
         {
             "speaker": "Киана",
             "text": "Это... Фрагмент сознания, переданный энергией Хоукая...",
-            "sprite": "Kiana 3.png",
-            "position": "left",
-            "sprite": "Herrscher Mei.png",
-            "dim": true
+            "sprite_left": "Kiana 3.png",
+            "sprite_right": "Herrscher Mei.png",
+            "dim_override": "right"
         },
         {
             "speaker": "",
             "text": "Отец! Почему ты покинул меня.. Почему все меня ненавидят!? Почему! Почему! Почему!!! Такой мир должен быть разрушен!!!",
-            "sprite": "Kiana 3.png",
-            "dim": true,
-            "sprite": "Herrscher Mei.png",
-            "dim": true
+            "sprite_left": "Kiana 3.png",
+            "sprite_right": "Herrscher Mei.png",
+            "dim_override": "both"
         },
         {
             "speaker": "Заражённая Мэй",
             "text": "Не смотри в моё сердце!",
-            "sprite": "Herrscher Mei.png",
-            "position": "left",
-            "sprite": "Kiana 3.png",
-            "dim": true
+            "sprite_right": "Herrscher Mei.png",
+            "sprite_left": "Kiana 3.png",
+            "dim_override": "left"
         },
         {
             "speaker": "Киана",
             "text": "А!",
-            "sprite": "Kiana 1.png",
-            "position": "left",
-            "sprite": "Herrscher Mei.png",
-            "dim": true
+            "sprite_left": "Kiana 1.png",
+            "sprite_r": "Herrscher Mei.png",
+            "dim_override": "right"
         },
         {
             "speaker": "Заражённая Мэй",
             "text": "Чёрт... Будь у меня больше силы, никто бы больше не смог причинить мне вреда!",
-            "sprite": "Herrscher Mei.png",
-            "position": "left",
-            "sprite": "Kiana 1.png",
-            "dim": true
+            "sprite_right": "Herrscher Mei.png",
+            "sprite_left": "Kiana 1.png",
+            "dim_override": "left"
         },
         {
             "speaker": "Киана",
             "text": "Прекрати! Ты уже заражена Хонкаем, если ты вновь поглотишь эту энергию, ты потеряешь рассудок! Тогда уже будешь слишком поздно!",
-            "sprite": "Kiana 1.png",
-            "position": "left",
-            "sprite": "Herrscher Mei.png",
-            "dim": true
+            "sprite_left": "Kiana 1.png",
+            "sprite_right": "Herrscher Mei.png",
+            "dim_override": "right"
         },
         {
             "speaker": "Заражённая Мэй",
             "text": "Ха~ Не лги мне! Я давным-давно раскусила тебя. Ты такая же, как они, но они завидуют моему статусу и семье, а ты завидуешь моим способностям! Я никогда тебя не прощу... Ну погоди меня!",
-            "sprite": "Herrscher Mei.png",
-            "position": "left",
-            "sprite": "Kiana 1.png",
-            "dim": true
+            "sprite_right": "Herrscher Mei.png",
+            "sprite_left": "Kiana 1.png",
+            "dim_override": "left"
         },
         {
             "speaker": "Киана",
             "text": "Эй! Не убегай!",
-            "sprite": "Kiana 1.png",
-            "position": "left",
-            "sprite": "Herrscher Mei.png",
-            "dim": true
+            "sprite_left": "Kiana 1.png",
+            "sprite_right": "Herrscher Mei.png",
+            "dim_override": "right"
         }
     ]
 }
