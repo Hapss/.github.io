@@ -56,7 +56,8 @@
             "speaker": "Зомби", 
             "text": "Гррааа!!",
             "sprite_left": "Kiana 1.png", 
-            "sprite_right": ""
+            "sprite_right": "",
+            "dim_override": "left"
         },
         
         { 
@@ -70,7 +71,8 @@
             "speaker": "", 
             "text": "Щелчок!",
             "sprite_left": "Kiana 1.png", 
-            "sprite_right": ""
+            "sprite_right": "",
+            "dim_override": "left"
         },
         { 
             "speaker": "Киана", 
@@ -109,7 +111,8 @@
             "speaker": "", 
             "text": "Бах! Бах! Бах!", 
             "sprite_left": "Kiana 1.png", 
-            "sprite_right": ""
+            "sprite_right": "",
+            "dim_override": "left"
         }
     ]
 }
