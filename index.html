@@ -1,4 +1,4 @@
-<!-- Визуальный Просмотрщик Новелл с исправлением логики затемнения спрайтов, возможностью смены темы и поддержкой китайского языка. -->
+<!-- Визуальный Просмотрщик Новелл с исправлением логики затемнения спрайтов, возможностью смены темы, историей диалогов и поддержкой нескольких языков. -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -15,12 +15,12 @@
         /* ==================================================================== */
         :root, .dark-theme {
             /* Фоновые цвета */
-            --color-bg-darkest: #171c26; /* Для заголовка */
+            --color-bg-darkest: #171c26; /* Для заголовка и истории */
             --color-bg-main: #1f2937;    /* Основной фон/элементы (VN Viewer default) */
-            --color-bg-medium: #374151;  /* Панель управления */
+            --color-bg-medium: #374151;  /* Панель управления/Фон элемента истории */
             
             /* Акценты */
-            --color-accent-primary: #0891b2; /* Бирюзовый (Load button) */
+            --color-accent-primary: #0891b2; /* Бирюзовый (Load button / Активный элемент истории) */
             --color-accent-secondary: #0e7490; /* Темный Бирюзовый (Reset button) */
             --color-accent-ring: #22d3ee; /* Светлый Бирюзовый (Focus/Hover ring) */
             
@@ -37,12 +37,12 @@
         /* ==================================================================== */
         .light-theme {
             /* Фоновые цвета */
-            --color-bg-darkest: #ffffff;  /* Самый светлый Header */
+            --color-bg-darkest: #ffffff;  /* Самый светлый Header и история */
             --color-bg-main: #f3f4f6;    /* Очень светлый основной фон (VN Viewer default) */
-            --color-bg-medium: #ffffff;  /* Control Panel */
+            --color-bg-medium: #ffffff;  /* Control Panel/Фон элемента истории */
             
             /* Акценты */
-            --color-accent-primary: #0f766e; /* Темный Бирюзовый */
+            --color-accent-primary: #0f766e; /* Темный Бирюзовый (Активный элемент истории) */
             --color-accent-secondary: #115e59; /* Более темный (Reset button) */
             --color-accent-ring: #0d9488; /* Акцент для фокуса */
             
@@ -159,6 +159,24 @@
         #vnViewer {
             background-color: var(--color-bg-main); 
         }
+
+        /* История диалогов */
+        #historyPanel.open {
+            transform: translateX(0);
+        }
+        #historyPanel {
+            /* Мобильный: на весь экран, Десктоп: 1/4 */
+            width: 100%; 
+            max-width: 320px; 
+            left: 0;
+            top: 0;
+        }
+        @media (min-width: 768px) {
+            #historyPanel {
+                max-width: none;
+                width: 320px; 
+            }
+        }
     </style>
 </head>
 <body class="min-h-screen dark-theme">
@@ -202,6 +220,10 @@
             <h1 id="headerTitle" class="text-xl font-bold tracking-wider" style="color: var(--color-text-primary);">Архив Сюжета ВН</h1>
             
             <div class="flex items-center space-x-4">
+                 <!-- Кнопка Истории -->
+                <button id="historyToggle" onclick="toggleHistory()" class="px-3 py-1 text-sm rounded-full transition duration-150" style="background-color: var(--color-bg-medium); color: var(--color-text-primary);">
+                    <span id="historyText">История</span>
+                </button>
                 
                 <!-- Кнопка смены темы -->
                 <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm rounded-full transition duration-150" style="background-color: var(--color-bg-medium); color: var(--color-text-primary);">
@@ -220,6 +242,19 @@
             </div>
         </div>
     </header>
+    
+    <!-- Панель Истории Диалогов -->
+    <div id="historyPanel" class="fixed top-0 h-full z-50 p-4 pt-20 shadow-2xl transition-transform duration-300 transform -translate-x-full" 
+         style="background-color: var(--color-bg-darkest); opacity: 0.95;">
+        <h2 id="historyTitle" class="text-xl font-bold mb-4" style="color: var(--color-text-primary);">История Диалогов</h2>
+        <div id="historyContent" class="space-y-3 overflow-y-auto" style="height: calc(100% - 3.5rem);">
+            <!-- History items here -->
+        </div>
+        <!-- Кнопка закрытия истории -->
+        <button onclick="toggleHistory()" class="absolute top-4 right-4 text-xl p-2 rounded-full hover:bg-gray-700 transition" style="color: var(--color-text-primary);">
+            &times;
+        </button>
+    </div>
 
     <!-- 2. Main Content Area -->
     <main class="pt-20 pb-4 px-4 max-w-7xl mx-auto min-h-screen">
@@ -330,6 +365,7 @@
         let currentBackgroundUrl = null; 
         let activeBgLayer = 1; 
         window.storyMetadata = null; 
+        let isHistoryVisible = false; // Состояние видимости панели истории
         
         // Глобальные переменные для отслеживания текущего спрайта (для исправления затемнения)
         let currentLeftSpriteFile = null;
@@ -343,7 +379,8 @@
                 startOfStory: "Это начало истории.", placeholderMetadata: "--- Метаданные не загружены ---",
                 errorFetchMetadataStrict: "Критическая ошибка: не удалось загрузить метаданные глав. Файл story/story_metadata.json отсутствует или недоступен.",
                 errorChapterNotFound: "Файл главы не найден.",
-                themeDark: "Тёмная", themeLight: "Светлая"
+                themeDark: "Тёмная", themeLight: "Светлая",
+                historyTitle: "История Диалогов", historyButton: "История", historyEmpty: "История пуста."
             },
             en: {
                 headerTitle: "VN Story Archive", labelStoryType: "Story Type", labelChapter: "Chapter",
@@ -351,7 +388,8 @@
                 startOfStory: "This is the start of the story.", placeholderMetadata: "--- Metadata not loaded ---",
                 errorFetchMetadataStrict: "Critical Error: Failed to load chapter metadata. The file story/story_metadata.json is missing or inaccessible.",
                 errorChapterNotFound: "Chapter file not found.",
-                themeDark: "Dark", themeLight: "Light"
+                themeDark: "Dark", themeLight: "Light",
+                historyTitle: "Dialogue History", historyButton: "History", historyEmpty: "History is empty."
             },
             zh: {
                 headerTitle: "视觉小说故事档案", labelStoryType: "故事类型", labelChapter: "章节",
@@ -359,7 +397,8 @@
                 startOfStory: "这是故事的开始。", placeholderMetadata: "--- 未加载元数据 ---",
                 errorFetchMetadataStrict: "致命错误：无法加载章节元数据。文件 story/story_metadata.json 缺失或无法访问。",
                 errorChapterNotFound: "未找到章节文件。",
-                themeDark: "深色", themeLight: "浅色"
+                themeDark: "深色", themeLight: "浅色",
+                historyTitle: "对话历史", historyButton: "历史", historyEmpty: "历史为空。"
             }
         };
 
@@ -435,6 +474,14 @@
             elements.bgLayer2 = document.getElementById('bgLayer2');
             elements.themeIcon = document.getElementById('themeIcon');
             elements.themeText = document.getElementById('themeText');
+            
+            // Элементы истории
+            elements.historyPanel = document.getElementById('historyPanel');
+            elements.historyContent = document.getElementById('historyContent');
+            elements.historyTitle = document.getElementById('historyTitle');
+            elements.historyButton = document.getElementById('historyToggle');
+            elements.historyText = document.getElementById('historyText');
+
 
             // Установка дефолтного фона на активный слой (цвет)
             elements.bgLayer1.style.backgroundColor = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR;
@@ -660,6 +707,11 @@
             }
             
             currentText.textContent = step.text || "";
+            
+            // 4. Обновление Истории
+            if (isHistoryVisible) {
+                renderHistory();
+            }
         }
         
         /** Асинхронно пытается загрузить выбранную главу, используя Exponential Backoff. */
@@ -771,13 +823,15 @@
         function updateI18nStrings() {
             const lang = elements.languageSelect.value;
             const text = i18n[lang] || i18n.ru; // Fallback to Russian
-            const availableLangs = ['ru', 'en', 'zh'];
-
+            
             document.getElementById('headerTitle').textContent = text.headerTitle;
             document.getElementById('labelStoryType').textContent = text.labelStoryType;
             document.getElementById('labelChapter').textContent = text.labelChapter;
             elements.loadText.textContent = text.loadText;
             document.getElementById('resetButton').textContent = text.resetProgress;
+            elements.historyText.textContent = text.historyButton;
+            elements.historyTitle.textContent = text.historyTitle;
+
             
             // Обновление текста на кнопке темы
             const currentTheme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
@@ -874,6 +928,96 @@
         }
 
         // ====================================================================
+        // === УПРАВЛЕНИЕ ИСТОРИЕЙ ===
+        // ====================================================================
+
+        function toggleHistory() {
+            isHistoryVisible = !isHistoryVisible;
+            elements.historyPanel.classList.toggle('-translate-x-full', !isHistoryVisible);
+            elements.historyPanel.classList.toggle('open', isHistoryVisible);
+            
+            if (isHistoryVisible) {
+                renderHistory();
+            }
+        }
+
+        function renderHistory() {
+            const { historyContent } = elements;
+            const lang = elements.languageSelect.value;
+            historyContent.innerHTML = '';
+            
+            if (!dialogueIsLoaded || currentDialogue.length === 0) {
+                historyContent.innerHTML = `<p class="text-center mt-8 p-3 rounded-lg" style="color: var(--color-text-secondary); background-color: var(--color-bg-medium);">${i18n[lang].historyEmpty}</p>`;
+                return;
+            }
+            
+            const fragment = document.createDocumentFragment();
+
+            // Отображаем все просмотренные шаги до текущего индекса
+            for (let i = 0; i <= currentDialogueIndex; i++) {
+                const step = currentDialogue[i];
+                
+                // Пропускаем шаги без текста, если это не чистая смена фона в самом начале
+                if (!step.text && i !== 0) continue; 
+                
+                const isCurrent = (i === currentDialogueIndex);
+
+                const historyItem = document.createElement('div');
+                
+                // Используем класс 'select-field' для наследования цвета текста, но переопределяем фон
+                historyItem.className = `p-3 rounded-lg cursor-pointer transition duration-150 shadow-md border border-transparent`;
+                
+                // Стиль для активного (текущего) элемента
+                if (isCurrent) {
+                    historyItem.classList.add('ring-2', 'ring-offset-2');
+                    historyItem.style.backgroundColor = 'var(--color-accent-primary)'; 
+                    historyItem.style.color = 'white';
+                    historyItem.style.borderColor = 'var(--color-accent-ring)';
+                    historyItem.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+                    historyItem.style.fontWeight = 'bold';
+                } else {
+                    // Стиль для просмотренных элементов
+                    historyItem.style.backgroundColor = 'var(--color-bg-medium)'; 
+                    historyItem.style.color = 'var(--color-text-primary)';
+                }
+                
+                // Клик для возврата к шагу
+                historyItem.dataset.index = i; 
+                historyItem.onclick = () => {
+                    currentDialogueIndex = i;
+                    renderDialogueStep();
+                    saveProgress();
+                    toggleHistory(); // Закрываем панель после перехода
+                };
+
+                if (step.speaker) {
+                    const speakerName = document.createElement('p');
+                    speakerName.className = 'font-bold mb-1';
+                    // Используем цвет спикера, если это не текущий шаг
+                    speakerName.style.color = isCurrent ? 'white' : 'var(--color-speaker-name)'; 
+                    speakerName.textContent = step.speaker;
+                    historyItem.appendChild(speakerName);
+                }
+
+                const textContent = document.createElement('p');
+                textContent.className = 'text-sm leading-snug';
+                textContent.textContent = step.text || `[${step.background ? 'Сцена: ' + step.background : 'Элемент Сюжета'}]`;
+                historyItem.appendChild(textContent);
+
+                fragment.appendChild(historyItem);
+            }
+            
+            historyContent.appendChild(fragment);
+            
+            // Прокрутка к текущему диалоговому шагу
+            const currentItem = historyContent.querySelector(`[data-index="${currentDialogueIndex}"]`);
+            if (currentItem) {
+                // Используем простой scrollIntoView, чтобы избежать проблем с iframe
+                currentItem.scrollIntoView({ behavior: 'auto', block: 'center' });
+            }
+        }
+
+        // ====================================================================
         // === УПРАВЛЕНИЕ ПРОГРЕССОМ ===
         // ====================================================================
         
@@ -937,6 +1081,9 @@
             currentDialogue = []; 
             currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR; 
             activeBgLayer = 1;
+            isHistoryVisible = false;
+            elements.historyPanel.classList.add('-translate-x-full'); // Скрыть историю
+
             
             // Сброс состояния спрайтов
             currentLeftSpriteFile = null;
