@@ -1,4 +1,4 @@
-<!-- Визуальный Просмотрщик Новелл с улучшенной, плавной загрузкой изображений. -->
+<!-- Визуальный Просмотрщик Новелл с улучшенной, плавной загрузкой изображений и поддержкой пробелов в именах файлов. -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -46,7 +46,7 @@
             bottom: 0;
             height: 95%; 
             width: 45%;
-            transition: opacity 0.5s ease; /* Увеличенная длительность для плавности */
+            transition: opacity 0.5s ease; 
             z-index: 10;
             display: flex; 
             justify-content: center;
@@ -64,12 +64,12 @@
             transition: opacity 0.3s ease; 
         }
         .dimmed-sprite {
-            opacity: 0.4 !important; /* !important, чтобы перебить встроенный transition на 1 */
+            opacity: 0.4 !important; 
         }
         
         /* Фоновые слои для кросс-фейда */
         .bg-layer {
-            transition: opacity 1.0s ease; /* Длительный переход для фона */
+            transition: opacity 1.0s ease; 
             background-repeat: no-repeat;
             background-position: center;
             background-size: cover;
@@ -214,7 +214,6 @@
                 MAX_ATTEMPTS: 3,        
             },
             PLACEHOLDERS: {
-                // Добавлены стилизованные плейсхолдеры для визуализации
                 DEFAULT_BG: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyMCIgaGVpZ2h0PSIxMDgwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMzNDNmMzciLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9ImludGVyIiBmb250LXNpemU9IjcwcHgiIGZpbGw9IiNjY2NjY2MiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlZOOiBMb2FkaW5nPC90ZXh0Pjwvc3ZnPg==',
                 KIANA_SPRITE: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRDBFQUZGIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjMDAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5LSUFOQTwvdGV4dD48L3N2Zz4=',
                 MEI_SPRITE: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjVDM0I3Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjMDAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5NRUk8L3RleHQ+PC9zdmc+'
@@ -233,7 +232,7 @@
         let currentDialogueIndex = 0;
         let dialogueIsLoaded = false;
         let currentBackgroundUrl = null; 
-        let activeBgLayer = 1; // Текущий видимый слой фона (1 или 2)
+        let activeBgLayer = 1; 
         window.storyMetadata = null; 
         
         // Переводы UI
@@ -326,17 +325,21 @@
             }
         }
         
-        /** Определяет путь/URL к спрайту (или Base64 плейсхолдер). */
+        /** * Определяет путь/URL к спрайту (или Base64 плейсхолдер).
+         * Использует encodeURIComponent для обработки пробелов в именах файлов.
+         */
         const spritePath = (fileName) => {
             if (!fileName) return null;
             
             const lowerCaseName = fileName.toLowerCase();
+            
             // Пример: если имя файла содержит "kiana", используем плейсхолдер
             if (lowerCaseName.includes('kiana')) return CONFIG.PLACEHOLDERS.KIANA_SPRITE;
             if (lowerCaseName.includes('mei')) return CONFIG.PLACEHOLDERS.MEI_SPRITE;
             
-            // Для локальных файлов
-            return CONFIG.PATHS.SPRITE_BASE + fileName; 
+            // Для локальных файлов: используем encodeURIComponent для обработки пробелов/спецсимволов
+            const encodedFileName = encodeURIComponent(fileName);
+            return CONFIG.PATHS.SPRITE_BASE + encodedFileName; 
         };
         
         /**
@@ -377,14 +380,18 @@
             };
 
             // Используем агрессивный обход кэша для надежности
+            // URL уже закодирован функцией spritePath
             const finalUrl = `${url}?t=${Date.now()}`;
             tempImg.src = finalUrl;
         }
 
         /** * Переключает фон, используя технику кросс-фейда.
+         * Использует encodeURIComponent для обработки пробелов в именах файлов.
          */
         function crossFadeBackground(newBgFileName) {
-            const finalBgUrl = CONFIG.PATHS.BACKGROUND_BASE + newBgFileName;
+            // Используем encodeURIComponent для обработки пробелов/спецсимволов
+            const encodedBgFileName = encodeURIComponent(newBgFileName);
+            const finalBgUrl = CONFIG.PATHS.BACKGROUND_BASE + encodedBgFileName;
             
             if (finalBgUrl === currentBackgroundUrl) return; 
 
@@ -490,6 +497,7 @@
             
             if (!fullStoryKey) return;
 
+            // Файл JSON главы не нуждается в кодировании, так как его имя не содержит пробелов
             const expectedFilePath = `${CONFIG.PATHS.STORY_BASE}${lang}/${fullStoryKey}.json`;
             const { INITIAL_DELAY_MS, MAX_DELAY_MS, MAX_ATTEMPTS } = CONFIG.BACKOFF;
 
