@@ -470,7 +470,7 @@
                 errorFetchMetadataStrict: "致命错误：无法加载章节元数据。文件 story/story_metadata.json 缺失或无法访问。",
                 errorChapterNotFound: "未找到章节文件。",
                 themeDark: "深色", themeLight: "浅色",
-                historyTitle: "对话历史", historyButton: "历史", historyEmpty: "历史为空。",
+                historyTitle: "对话历史", historyButton: "History", historyEmpty: "历史为空。",
                 selectArcPlaceholder: "--- 选择篇章 ---",
                 selectChapterPlaceholder: "--- 选择章节 ---",
             }
@@ -1034,6 +1034,9 @@
             
             let prefix = null;
             let chapterFound = false;
+            let chaptersCount = 0; // Счетчик для отладки
+
+            console.log(`[UpdateChapters] Запуск. Тип: ${typeKey}, Арка: ${arcKey || 'Не выбрана'}. Текущий ключ: ${currentChapterKey}`);
 
             // Определяем префикс и логику фильтрации
             if (typeKey === 'main' && arcKey) {
@@ -1058,6 +1061,7 @@
                             const chapterName = chapterData[lang] || chapterData.ru; 
                             
                             if (chapterName) {
+                                chaptersCount++;
                                 const option = document.createElement('option');
                                 // Устанавливаем полное имя файла как value
                                 option.value = newFullChapterKey; 
@@ -1072,6 +1076,9 @@
                             }
                         }
                     }
+                    console.log(`[UpdateChapters] Найдено глав для Основного сюжета (${arcKey}, префикс: ${prefix}): ${chaptersCount}`);
+                } else {
+                     console.warn(`[UpdateChapters] Ошибка: Не удалось получить префикс для арки "${arcKey}".`);
                 }
                 
             } else if (typeKey !== 'main' && STORY_GROUPS[typeKey]) {
@@ -1084,6 +1091,7 @@
                         const chapterName = chapterData[lang] || chapterData.ru; 
                         
                         if (chapterName) {
+                            chaptersCount++;
                             const option = document.createElement('option');
                             option.value = fullChapterKey; 
                             option.textContent = chapterName; 
@@ -1096,10 +1104,12 @@
                         }
                     }
                 }
+                 console.log(`[UpdateChapters] Найдено глав для типа '${typeKey}': ${chaptersCount}`);
             }
             
             // Если выбран "main", но арка НЕ выбрана, то главы не показываем
             if (typeKey === 'main' && !arcKey) {
+                console.log(`[UpdateChapters] Основной сюжет выбран, но Арка не выбрана. Блокировка выбора глав.`);
                 select.disabled = true;
                 select.value = '';
                 if (!skipSideEffects) enableLoadButton();
