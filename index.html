@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Архив Сюжета Houkai Gakuen 2</title>
+    <title>Архив Сюжета ВН</title>
     <!-- Подключение Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -147,15 +147,16 @@
         }
     </script>
     
-    <!-- 1. Header Bar -->
-    <!-- Обновленный цвет фона - #1f2937 -->
-    <header id="header" class="fixed top-0 left-0 right-0 z-50 p-4 shadow-xl text-white" style="background-color: #1f2937;">
+    <!-- 1. Header Bar: Теперь самый темный фон: #171c26 -->
+    <header id="header" class="fixed top-0 left-0 right-0 z-50 p-4 shadow-xl text-white" style="background-color: var(--color-bg-darkest);">
         <div class="flex justify-between items-center max-w-7xl mx-auto">
             <h1 id="headerTitle" class="text-xl font-bold tracking-wider">Архив Сюжета ВН</h1>
             
             <div class="flex items-center space-x-4">
-                <button id="resetButton" onclick="resetProgress()" class="px-3 py-1 bg-red-800 hover:bg-red-700 rounded-full transition duration-150 text-sm">Сброс</button>
-                <select id="languageSelect" onchange="initializeOrUpdateUI(true)" class="text-white rounded-lg p-2 cursor-pointer transition hover:ring-2 ring-red-400" style="background-color: #374151;">
+                <!-- Кнопка сброса: bg-teal-700, hover:bg-teal-600 -->
+                <button id="resetButton" onclick="resetProgress()" class="px-3 py-1 reset-button hover:bg-red-700 rounded-full transition duration-150 text-sm">Сброс</button>
+                <!-- Выбор языка: bg-medium, ring-teal-400 -->
+                <select id="languageSelect" onchange="initializeOrUpdateUI(true)" class="select-field text-white rounded-lg p-2 cursor-pointer transition hover:ring-2 ring-[#22d3ee]" style="background-color: var(--color-bg-medium);">
                     <option value="ru">Русский</option>
                     <option value="en">English</option>
                 </select>
@@ -166,32 +167,32 @@
     <!-- 2. Main Content Area -->
     <main class="pt-20 pb-4 px-4 max-w-7xl mx-auto min-h-screen">
         
-        <!-- Controls Panel -->
-        <!-- Обновленный цвет фона - #374151 -->
-        <div class="p-4 rounded-xl shadow-lg mb-6 flex flex-wrap gap-4 items-end" style="background-color: #374151;">
+        <!-- Controls Panel: Фон - #374151 -->
+        <div class="p-4 rounded-xl shadow-lg mb-6 flex flex-wrap gap-4 items-end" style="background-color: var(--color-bg-medium);">
             <div class="flex-1 min-w-[180px]">
                 <label for="storyTypeSelect" id="labelStoryType" class="block text-sm font-medium mb-1 text-gray-300">Тип сюжета</label>
-                <!-- Обновленный цвет фона - #1f2937 -->
-                <select id="storyTypeSelect" onchange="initializeOrUpdateUI(true)" class="w-full text-white rounded-lg p-2.5 cursor-pointer focus:ring-red-400 focus:border-red-400 transition" style="background-color: #1f2937;">
+                <!-- Select: bg-main, focus:ring-teal-400 -->
+                <select id="storyTypeSelect" onchange="initializeOrUpdateUI(true)" class="select-field w-full text-white rounded-lg p-2.5 cursor-pointer focus:ring-[#22d3ee] focus:border-[#22d3ee] transition" style="background-color: var(--color-bg-main);">
                     <!-- Options populated by JS -->
                 </select>
             </div>
 
             <div class="flex-1 min-w-[250px]">
                 <label for="chapterSelect" id="labelChapter" class="block text-sm font-medium mb-1 text-gray-300">Сюжет (Глава)</label>
-                <!-- Обновленный цвет фона - #1f2937 -->
-                <select id="chapterSelect" onchange="enableLoadButton(); saveProgress()" class="w-full text-white rounded-lg p-2.5 cursor-pointer focus:ring-red-400 focus:border-red-400 transition" disabled style="background-color: #1f2937;">
+                <!-- Select: bg-main, focus:ring-teal-400 -->
+                <select id="chapterSelect" onchange="enableLoadButton(); saveProgress()" class="select-field w-full text-white rounded-lg p-2.5 cursor-pointer focus:ring-[#22d3ee] focus:border-[#22d3ee] transition" disabled style="background-color: var(--color-bg-main);">
                     <!-- Options populated by JS -->
                 </select>
             </div>
             
-            <button id="loadButton" onclick="updateStoryContent(0)" class="min-w-[120px] bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition duration-150 disabled:opacity-50" disabled>
+            <!-- Кнопка загрузки: bg-teal-600, hover:bg-teal-700 -->
+            <button id="loadButton" onclick="updateStoryContent(0)" class="min-w-[120px] load-button text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition duration-150 disabled:opacity-50" disabled>
                 <span id="loadText">Загрузить</span>
             </button>
         </div>
 
         <!-- 3. Visual Novel Viewer (Main View) -->
-        <!-- Фон самого вьювера установлен через CSS (#1f2937) -->
+        <!-- Фон вьювера: #1f2937 -->
         <div id="vnViewer" class="relative w-full aspect-[16/9] bg-gray-900 rounded-xl shadow-2xl overflow-hidden flex flex-col justify-end transition-colors duration-500 cursor-pointer" 
              style="min-height: 400px;"
              onclick="navigateDialogue(1)"> 
@@ -252,7 +253,7 @@
                 MAX_ATTEMPTS: 3,        
             },
             PLACEHOLDERS: {
-                // Используем цвет по умолчанию (#1f2937) как запасной фон
+                // Используем основной цвет фона (#1f2937) как запасной
                 DEFAULT_BG_COLOR: '#1f2937', 
             }
         };
@@ -629,7 +630,8 @@
             const header = document.getElementById('header');
             const msgBox = document.createElement('div');
             msgBox.textContent = message;
-            msgBox.className = 'fixed top-1 right-1/2 translate-x-1/2 p-2 bg-red-600 text-white rounded-lg shadow-xl z-50 text-sm transition-opacity duration-300';
+            // Используем класс для бирюзового цвета
+            msgBox.className = 'fixed top-1 right-1/2 translate-x-1/2 p-2 text-white rounded-lg shadow-xl z-50 text-sm transition-opacity duration-300 alert-message';
             header.appendChild(msgBox);
             
             setTimeout(() => {
@@ -793,7 +795,7 @@
             dialogueIsLoaded = false;
             currentDialogueIndex = 0;
             currentDialogue = []; 
-            // Используем цвет, а не Base64 плейсхолдер
+            // Используем цвет по умолчанию
             currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR; 
             activeBgLayer = 1;
 
