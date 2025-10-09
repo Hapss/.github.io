@@ -12,7 +12,7 @@
         { "speaker": "", "sprite": "", "position": "", "text": "Тууу, тууу... Абонент временно недоступен, перезвоните позже"},
         { "speaker": "", "sprite": "", "position": "", "text": "Бип--"},
         { "speaker": "Киана", "sprite": "", "position": "left", "text": "Я Киана. В данный момент нахожусь в дальневосточном регионе Нагазоры, академия Чиба. Ты, должно быть, сейчас направляешься к этому месту выброса. Просто знай, что я тебя обязательно найду, куда бы ты ни отправился!"},
-        { "speaker": "", "sprite": "", "position": "", "text": "Клик!"},
+        { "speaker": "", "text": "Клик!"},
         
         { 
             "speaker": "Киана", 
@@ -22,14 +22,12 @@
         },
         { "speaker": "Киана", "sprite": "Kiana 1.png", "position": "left", "text": "Теперь нужно найти цель быстрее, чем Шиксал прибудет. В этот раз я не дам тебе сбежать!"},
         
-        { "speaker": "Зомби", "sprite": "", "position": "", "text": "Гррааа!!", "sprite_dimmed": "Kiana 1.png"},
+        { "speaker": "Зомби", "text": "Гррааа!!", "sprite_dimmed": "Kiana 1.png"},
         
         { "speaker": "Киана", "sprite": "Kiana 1.png", "position": "left", "text": "Заражённые Хоукаем зомби объявились... К счастью, я заранее подготовила оружие."},
         
         { 
             "speaker": "", 
-            "sprite": "", 
-            "position": "", 
             "text": "Щелчок!",
             "sprite_dimmed": "Kiana 1.png"
         },
@@ -37,10 +35,10 @@
         { "speaker": "Киана", "sprite": "Kiana 1.png", "position": "left", "text": "Ну~ Следуя плану, сначала нужно выбраться из этой библиотеки. И конечно же путь преграждают зомби..."},
         { "speaker": "Киана", "sprite": "Kiana 1.png", "position": "left", "text": "Люди, заражённые Хоукаем и мутировавшие из-за него... Они утратили свои чувства и сознание. Прямо как ходячие мертвецы, какие жалкие создания."},
         
-        { "speaker": "Зомби", "sprite": "", "position": "left", "text": "Гррааа!!", "sprite_dimmed": "Kiana 1.png"},
+        { "speaker": "Зомби", "text": "Гррааа!!", "sprite_dimmed": "Kiana 1.png"},
         
         { "speaker": "Киана", "sprite": "Kiana 1.png", "position": "left", "text": "Прости, даже так эта леди не проявит пощады. По крайней мере в качестве компенсации поспите спокойно."},
         
-        { "speaker": "", "sprite": "", "position": "", "text": "Бах! Бах! Бах!", "sprite_dimmed": "Kiana 1.png"}
+        { "speaker": "", "text": "Бах! Бах! Бах!", "sprite_dimmed": "Kiana 1.png"}
     ]
 }
