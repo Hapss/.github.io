@@ -368,7 +368,7 @@
             </div>
 
             <!-- Sprite Container -->
-            <div id="spriteContainer" class="absolute inset-0 z-10 pointer-events-none flex justify-center items-end p-2 md:p-0">
+            <div id="spriteContainer" class="absolute inset-0 z-10 pointer-events-none flex justify-center items-end p-2 md:p-4">
                 
                 <div id="spriteLeftContainer" class="sprite-position left hidden">
                     <img id="spriteLeft" class="sprite-image" src="" alt="Левый персонаж" ondragstart="return false;">
@@ -492,9 +492,13 @@
         let isHistoryVisible = false; 
         let activeBgLayer = 1; // 1 or 2
         
+        // Отслеживание текущих файлов спрайтов на каждой позиции
         let currentLeftSpriteFile = null;
         let currentRightSpriteFile = null;
         
+        // НОВОЕ: Отслеживание активной стороны для затемнения при отсутствии position
+        let lastActiveSpeakerSide = null;
+
         const i18n = {
             ru: {
                 headerTitle: "Архив сюжета Houkai Gakuen 2", labelStoryType: "Тип сюжета", labelArc: "Арка", labelChapter: "Сюжет (Глава)",
@@ -531,7 +535,7 @@
         let elements = {};
 
         // ====================================================================
-        // === УПРАВЛЕНИЕ ТЕМАМИ и ПРЕДУПРЕЖДЕНИЕМ ===
+        // === УПРАВЛЕНИЕ ТЕМАМИ и ПРЕДУПРЕЖДЕНИЕМ (ОК) ===
         // ====================================================================
 
         function saveTheme(theme) {
@@ -627,7 +631,7 @@
 
 
         // ====================================================================
-        // === ИНИЦИАЛИЗАЦИЯ ===
+        // === ИНИЦИАЛИЗАЦИЯ (ОК) ===
         // ====================================================================
         
         document.addEventListener('DOMContentLoaded', () => {
@@ -813,26 +817,43 @@
                 crossFadeBackground(step.background);
             }
 
-            const activeSpeakerPosition = step.position ? step.position.toLowerCase() : null;
+            // 2. Определение активной стороны и стороны для подсветки
+            const newSpritePosition = step.position ? step.position.toLowerCase() : null;
+            let sideToHighlight = null;
 
-            // 2. Сброс затемнения для текущей линии
-            spriteLeftElement.classList.remove('dimmed-sprite');
-            spriteRightElement.classList.remove('dimmed-sprite');
+            // Если в текущем шаге явно указана позиция, это говорящий
+            if (newSpritePosition) {
+                sideToHighlight = newSpritePosition;
+                // Обновляем последнюю активную сторону только при явном указании position
+                lastActiveSpeakerSide = newSpritePosition;
+            } 
+            // Если есть спикер, но нет position, используем последнюю известную активную сторону
+            else if (step.speaker && lastActiveSpeakerSide) {
+                sideToHighlight = lastActiveSpeakerSide;
+            }
+            // Если нет ни спикера, ни позиции
+            else {
+                sideToHighlight = null;
+            }
 
-            // 3. Загрузка/Обновление Спрайтов (требует step.sprite и step.position)
-            if (step.sprite && activeSpeakerPosition) {
-                const isLeftSpeaker = activeSpeakerPosition === 'left';
+            // 3. Загрузка/Обновление Спрайтов (требует step.sprite и newSpritePosition)
+            if (step.sprite && newSpritePosition) {
+                const isLeftSpeaker = newSpritePosition === 'left';
                 
                 const speakerElement = isLeftSpeaker ? spriteLeftElement : spriteRightElement;
                 const speakerContainer = isLeftSpeaker ? spriteLeftContainer : spriteRightContainer;
                 
                 let needsLoad = false;
-                if (isLeftSpeaker && currentLeftSpriteFile !== step.sprite) {
+                
+                // Проверяем, нужно ли загружать новый файл спрайта
+                const currentFile = isLeftSpeaker ? currentLeftSpriteFile : currentRightSpriteFile;
+                if (currentFile !== step.sprite) {
                     needsLoad = true;
-                    currentLeftSpriteFile = step.sprite;
-                } else if (!isLeftSpeaker && currentRightSpriteFile !== step.sprite) {
-                    needsLoad = true;
-                    currentRightSpriteFile = step.sprite;
+                    if (isLeftSpeaker) {
+                        currentLeftSpriteFile = step.sprite;
+                    } else {
+                        currentRightSpriteFile = step.sprite;
+                    }
                 }
 
                 if (needsLoad) {
@@ -842,41 +863,35 @@
                     speakerContainer.classList.remove('hidden');
                 }
             }
+            // ПРИМЕЧАНИЕ: Если step.sprite отсутствует, спрайты остаются как есть.
+            // НЕ добавляем здесь логику скрытия/перемещения.
 
+            // 4. Логика Затемнения (Критическая часть)
+            
+            // 4.1 Сброс Затемнения
+            spriteLeftElement.classList.remove('dimmed-sprite');
+            spriteRightElement.classList.remove('dimmed-sprite');
 
-            // 4. Логика Затемнения (требует step.speaker и step.position, чтобы определить, кто говорит)
-            const spriteElementToDim = (position) => position === 'left' ? spriteRightElement : spriteLeftElement;
-            const spriteContainerToDim = (position) => position === 'left' ? spriteRightContainer : spriteLeftContainer;
-
-            if (step.speaker && activeSpeakerPosition) {
-                // Если есть спикер, затемняем НЕ говорящего (если он есть)
-                const dimmedElement = spriteElementToDim(activeSpeakerPosition);
-                const dimmedContainer = spriteContainerToDim(activeSpeakerPosition);
-
-                // Спрайт говорящего всегда не затемнен
-                const speakingElement = activeSpeakerPosition === 'left' ? spriteLeftElement : spriteRightElement;
-                speakingElement.classList.remove('dimmed-sprite'); 
-                
-                // Затемняем не говорящего, если он виден
-                if (!dimmedContainer.classList.contains('hidden')) {
-                    dimmedElement.classList.add('dimmed-sprite');
+            if (sideToHighlight === 'left') {
+                // Говорит левый: затемняем правый (если он виден)
+                if (!spriteRightContainer.classList.contains('hidden')) {
+                    spriteRightElement.classList.add('dimmed-sprite');
                 }
-            } else if (!step.speaker) {
-                // Если нет спикера (повествование), проверяем dim флаг
-                const isDimmedLine = step.dim === true;
-                
-                // Если dim: true, все видимые спрайты затемняются
-                if (isDimmedLine) {
-                    if (!elements.spriteLeftContainer.classList.contains('hidden')) {
+            } else if (sideToHighlight === 'right') {
+                // Говорит правый: затемняем левый (если он виден)
+                if (!spriteLeftContainer.classList.contains('hidden')) {
+                    spriteLeftElement.classList.add('dimmed-sprite');
+                }
+            } else {
+                // Если нет активного спикера (narration), проверяем dim флаг
+                if (step.dim === true) {
+                    // Затемняем оба, если они видны
+                    if (!spriteLeftContainer.classList.contains('hidden')) {
                         spriteLeftElement.classList.add('dimmed-sprite');
                     }
-                    if (!elements.spriteRightContainer.classList.contains('hidden')) {
+                    if (!spriteRightContainer.classList.contains('hidden')) {
                         spriteRightElement.classList.add('dimmed-sprite');
                     }
-                } else {
-                    // Если dim: false или отсутствует, все спрайты не затемнены
-                    spriteLeftElement.classList.remove('dimmed-sprite');
-                    spriteRightElement.classList.remove('dimmed-sprite');
                 }
             }
             
@@ -948,8 +963,11 @@
                     dialogueIsLoaded = true;
                     currentBackgroundUrl = null; 
                     
+                    // Сброс состояния спрайтов при загрузке новой главы
                     currentLeftSpriteFile = null;
                     currentRightSpriteFile = null;
+                    lastActiveSpeakerSide = null; // Сброс активной стороны
+                    
                     elements.spriteLeftContainer.classList.add('hidden');
                     elements.spriteRightContainer.classList.add('hidden');
                     elements.spriteLeftElement.src = ''; 
@@ -989,7 +1007,7 @@
         }
 
         // ====================================================================
-        // === UI & I18N FUNCTIONS ===
+        // === UI & I18N FUNCTIONS (ОК) ===
         // ====================================================================
 
         function alertMessage(message) {
@@ -1086,7 +1104,7 @@
             }
         }
 
-        // **КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ:** Явно сбрасываем arc и chapter при смене типа
+        // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Явно сбрасываем arc и chapter при смене типа
         function updateArcAndChapterUI(calledByUIEvent) {
             updateI18nStrings();
             
@@ -1211,7 +1229,7 @@
         }
 
         // ====================================================================
-        // === УПРАВЛЕНИЕ ИСТОРИЕЙ ===
+        // === УПРАВЛЕНИЕ ИСТОРИЕЙ (ОК) ===
         // ====================================================================
 
         function toggleHistory() {
@@ -1376,6 +1394,7 @@
 
             currentLeftSpriteFile = null;
             currentRightSpriteFile = null;
+            lastActiveSpeakerSide = null; // Сброс активной стороны
 
             elements.dialogueWrapper.classList.add('hidden');
             elements.languageSelect.value = 'ru';
