@@ -316,7 +316,7 @@
     </div>
 
     <!-- 2. Main Content Area -->
-    <main class="pt-20 pb-4 px-4 max-w-7xl mx-auto min-h-screen">
+    <main id="mainContent" class="pt-20 pb-4 px-4 max-w-7xl mx-auto min-h-screen">
         
         <!-- Controls Panel: Использует var(--color-bg-medium) -->
         <div class="control-panel p-4 rounded-xl shadow-lg mb-6 flex flex-wrap gap-4 items-end transition-colors duration-300">
@@ -551,7 +551,6 @@
                 const style = getComputedStyle(document.body);
                 const accentColor = style.getPropertyValue('--color-warning-accent').trim();
                 const bgColor = style.getPropertyValue('--color-warning-bg').trim();
-                const textColor = style.getPropertyValue('--color-text-primary').trim();
                 const secondaryTextColor = style.getPropertyValue('--color-text-secondary').trim();
                 
                 card.style.backgroundColor = bgColor;
@@ -567,13 +566,15 @@
                 // Кнопка должна быть контрастной, делаем текст белым
                 closeButton.style.color = 'white'; 
                 
-                // Убедимся, что цвет фона оверлея тоже соответствует теме
+                // Убеждаемся, что цвет фона оверлея тоже соответствует теме
                 const overlay = document.getElementById('warning-overlay');
+                // Обновляем цвет, так как у Tailwind нет переменных для цветов оверлея, используем inline style
                 overlay.style.backgroundColor = isDark ? 'rgba(15, 23, 42, 0.95)' : 'rgba(241, 245, 249, 0.95)';
             }
 
             // Обновление цвета дефолтного фона VN
             if (currentBackgroundUrl === CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR) {
+                 const style = getComputedStyle(document.body);
                  const themeBgColor = style.getPropertyValue('--color-bg-main').trim();
                  
                  const activeLayer = activeBgLayer === 1 ? elements.bgLayer1 : elements.bgLayer2;
@@ -594,34 +595,44 @@
             const savedTheme = localStorage.getItem(CONFIG.STORAGE.THEME_KEY) || 'dark';
             applyTheme(savedTheme);
         }
-
-        /** ИСПРАВЛЕНО: Теперь использует прямое управление стилями для более надежного закрытия. */
-        function setupWarningModal() {
-            const overlay = document.getElementById('warning-overlay');
-            const closeButton = document.getElementById('close-warning-button');
-
+        
+        /** * НОВАЯ ФУНКЦИЯ: Обрабатывает начальное состояние модального окна предупреждения 
+         * и привязывает обработчик закрытия.
+         */
+        function handleWarningModalState() {
+            const { warningOverlay, closeWarningButton } = elements;
+            
+            // 1. Проверяем, было ли окно уже закрыто ранее
             const isDismissed = localStorage.getItem(CONFIG.STORAGE.WARNING_KEY) === 'true';
 
             if (isDismissed) {
-                overlay.style.display = 'none';
+                // Если закрыто, сразу скрываем
+                warningOverlay.style.display = 'none';
                 return;
             }
 
-            // Применяем тему, чтобы цвета в модальном окне были корректны
-            applyTheme(document.body.classList.contains('dark-theme') ? 'dark' : 'light');
-
-            closeButton.addEventListener('click', function() {
-                // 1. Сохраняем, что пользователь закрыл окно
-                localStorage.setItem(CONFIG.STORAGE.WARNING_KEY, 'true');
-                
-                // 2. Запускаем анимацию исчезновения (opacity)
-                overlay.style.opacity = '0';
-                
-                // 3. Скрываем элемент после завершения CSS-перехода (500ms)
-                setTimeout(() => {
-                    overlay.style.display = 'none';
-                }, 500); 
-            });
+            // 2. Если оно должно быть видно, привязываем обработчик к кнопке
+            if (closeWarningButton) {
+                 closeWarningButton.addEventListener('click', dismissWarningModal);
+            }
+        }
+        
+        /** * НОВАЯ ФУНКЦИЯ: Управляет процессом закрытия модального окна предупреждения.
+         */
+        function dismissWarningModal() {
+            const overlay = elements.warningOverlay;
+            if (!overlay) return;
+            
+            // 1. Сохраняем, что пользователь закрыл окно
+            localStorage.setItem(CONFIG.STORAGE.WARNING_KEY, 'true');
+            
+            // 2. Запускаем анимацию исчезновения (opacity)
+            overlay.style.opacity = '0';
+            
+            // 3. Скрываем элемент после завершения CSS-перехода (500ms)
+            setTimeout(() => {
+                overlay.style.display = 'none';
+            }, 500); 
         }
 
 
@@ -661,16 +672,35 @@
             elements.historyTitle = document.getElementById('historyTitle');
             elements.historyButton = document.getElementById('historyToggle');
             elements.historyText = document.getElementById('historyText');
+            elements.mainContent = document.getElementById('mainContent'); 
 
+            // Элементы предупреждения
+            elements.warningOverlay = document.getElementById('warning-overlay');
+            elements.closeWarningButton = document.getElementById('close-warning-button');
 
             // Установка дефолтного фона на активный слой (цвет)
             elements.bgLayer1.style.backgroundColor = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR;
             elements.bgLayer1.style.backgroundImage = 'none';
             currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR; 
             
-            loadTheme(); // Загрузка и применение темы перед загрузкой прогресса
-            setupWarningModal(); // Настройка модального окна предупреждения
+            loadTheme(); // Загрузка и применение темы
+            handleWarningModalState(); // *** НОВОЕ: Обрабатываем и привязываем кнопку предупреждения ***
             loadProgress(); 
+            
+            // === ИСПРАВЛЕНИЕ: Добавление обработчика для закрытия Истории по клику вне панели ===
+            document.addEventListener('click', (event) => {
+                const historyPanel = elements.historyPanel;
+                const historyToggle = elements.historyButton;
+                
+                // Проверяем, открыта ли история
+                if (isHistoryVisible) {
+                    // Проверяем, произошел ли клик вне самой панели И вне кнопки переключения
+                    if (!historyPanel.contains(event.target) && !historyToggle.contains(event.target)) {
+                        toggleHistory(); // Закрываем историю
+                    }
+                }
+            });
+            // === КОНЕЦ ИСПРАВЛЕНИЯ ===
         });
 
         // ====================================================================
@@ -692,6 +722,9 @@
 
         /** Переходит к следующему или предыдущему шагу диалога. */
         function navigateDialogue(direction) {
+            // === ИСПРАВЛЕНИЕ: Блокируем навигацию, если открыта панель истории (чтобы избежать случайных кликов) ===
+            if (isHistoryVisible) return;
+            
             if (!dialogueIsLoaded || currentDialogue.length === 0) return;
             
             const newIndex = currentDialogueIndex + direction;
