@@ -412,13 +412,13 @@
                 ru: "Основной сюжет", 
                 en: "Main Story", 
                 zh: "主线故事", 
-                // Определение арок для основного сюжета
+                // Определение арок для основного сюжета (ПРЕФИКСЫ ОБНОВЛЕНЫ)
                 arcs: { 
-                    retrospect: { ru: "Ретроспектр", en: "Retrospect", zh: "回顾", prefix: "main_ret_" },
-                    legacy: { ru: "Наследие", en: "Legacy", zh: "遗产", prefix: "main_leg_" },
-                    moth: { ru: "Огненный Мотылёк", en: "Fire Moth", zh: "火焰蛾", prefix: "main_moth_" },
-                    new_start: { ru: "Новое начало", en: "New Start", zh: "新开始", prefix: "main_new_" },
-                    academy: { ru: "Академия Хоукая", en: "Houkai Academy", zh: "崩坏学园", prefix: "main_acad_" },
+                    retrospect: { ru: "Ретроспектр", en: "Retrospect", zh: "回顾", prefix: "re" },       // re
+                    legacy: { ru: "Наследие", en: "Legacy", zh: "遗产", prefix: "in" },           // in
+                    moth: { ru: "Огненный Мотылёк", en: "Fire Moth", zh: "火焰蛾", prefix: "fm" },  // fm
+                    new_start: { ru: "Новое начало", en: "New Start", zh: "新开始", prefix: "nb" }, // nb
+                    academy: { ru: "Академия Хоукая", en: "Houkai Academy", zh: "崩坏学园", prefix: "ha" }, // ha
                 }
             },
             extra: { ru: "Дополнительный сюжет", en: "Extra Story", zh: "额外故事", prefix: "extra_" },
@@ -797,11 +797,13 @@
         /** Асинхронно пытается загрузить выбранную главу, используя Exponential Backoff. */
         async function updateStoryContent(startIndex = 0) {
             const lang = elements.languageSelect.value; 
+            // fullStoryKey теперь содержит полный компонент имени файла, например, "re_main_ch1"
             const fullStoryKey = elements.chapterSelect.value.trim(); 
             const { loadButton, loadText } = elements;
             
             if (!fullStoryKey) return;
 
+            // Формируем путь к файлу, используя полный ключ
             const expectedFilePath = `${CONFIG.PATHS.STORY_BASE}${lang}/${fullStoryKey}.json`;
             const { INITIAL_DELAY_MS, MAX_DELAY_MS, MAX_ATTEMPTS } = CONFIG.BACKOFF;
 
@@ -923,7 +925,6 @@
             elements.themeText.textContent = currentTheme === 'dark' ? text.themeDark : text.themeLight;
 
             const typeSelect = elements.storyTypeSelect;
-            const currentType = typeSelect.value;
             const savedType = typeSelect.value; // Сохраняем текущее значение, чтобы установить его обратно
             typeSelect.innerHTML = '';
             
@@ -1011,7 +1012,7 @@
             const arcKey = elements.arcSelect.value; // Используется только если typeKey === 'main'
             const select = elements.chapterSelect;
             const lang = elements.languageSelect.value;
-            const currentChapterKey = select.value; 
+            const currentChapterKey = select.value; // Теперь это "re_main_ch1", "extra_1", и т.д.
 
             select.innerHTML = '';
             select.disabled = true; 
@@ -1034,13 +1035,67 @@
             let prefix = null;
             let chapterFound = false;
 
-            // Определяем префикс на основе типа и арки
+            // Определяем префикс и логику фильтрации
             if (typeKey === 'main' && arcKey) {
-                // Основной сюжет + Арка
-                prefix = STORY_GROUPS.main.arcs[arcKey]?.prefix;
+                // --- ЛОГИКА ДЛЯ ОСНОВНОГО СЮЖЕТА: Используем новый формат имени файла ---
+                const arcData = STORY_GROUPS.main.arcs[arcKey];
+                prefix = arcData ? arcData.prefix : null;
+
+                if (prefix) {
+                    // Предполагаем, что ключи в метаданных имеют формат 're_1', 're_2' для простоты извлечения номера
+                    for (const metaKey in window.storyMetadata) {
+                        // Фильтруем по метаданным, начинающимся с префикса арки
+                        if (metaKey.startsWith(prefix + '_')) { 
+                            const chapterData = window.storyMetadata[metaKey];
+                            
+                            // Извлекаем номер главы (то, что идет после префикса и _)
+                            const chapterNumber = metaKey.substring(prefix.length + 1); 
+                            
+                            // Формируем компонент имени файла в соответствии с запрошенным шаблоном
+                            // Например: "re_main_ch1"
+                            const newFullChapterKey = `${prefix}_main_ch${chapterNumber}`; 
+
+                            const chapterName = chapterData[lang] || chapterData.ru; 
+                            
+                            if (chapterName) {
+                                const option = document.createElement('option');
+                                // Устанавливаем полное имя файла как value
+                                option.value = newFullChapterKey; 
+                                option.textContent = chapterName; 
+                                
+                                // Проверяем сохраненный ключ по новому формату
+                                if (newFullChapterKey === currentChapterKey) {
+                                     option.selected = true;
+                                     chapterFound = true; 
+                                }
+                                select.appendChild(option);
+                            }
+                        }
+                    }
+                }
+                
             } else if (typeKey !== 'main' && STORY_GROUPS[typeKey]) {
-                // Другой тип сюжета
+                // --- ЛОГИКА ДЛЯ ДРУГИХ СЮЖЕТОВ: Используем старый формат (prefix_number) ---
                 prefix = STORY_GROUPS[typeKey].prefix;
+
+                for (const fullChapterKey in window.storyMetadata) {
+                    if (fullChapterKey.startsWith(prefix)) { 
+                        const chapterData = window.storyMetadata[fullChapterKey];
+                        const chapterName = chapterData[lang] || chapterData.ru; 
+                        
+                        if (chapterName) {
+                            const option = document.createElement('option');
+                            option.value = fullChapterKey; 
+                            option.textContent = chapterName; 
+                            
+                            if (fullChapterKey === currentChapterKey) {
+                                 option.selected = true;
+                                 chapterFound = true; 
+                            }
+                            select.appendChild(option);
+                        }
+                    }
+                }
             }
             
             // Если выбран "main", но арка НЕ выбрана, то главы не показываем
@@ -1051,35 +1106,13 @@
                 return;
             }
 
-            if (prefix) {
-                
-                for (const fullChapterKey in window.storyMetadata) {
-                    if (fullChapterKey.startsWith(prefix)) {
-                        const chapterData = window.storyMetadata[fullChapterKey];
-                        // Проверяем наличие перевода для текущего языка
-                        const chapterName = chapterData[lang] || chapterData.ru; 
-                        if (chapterName) {
-                            const option = document.createElement('option');
-                            option.value = fullChapterKey; 
-                            option.textContent = chapterName; 
-                            
-                            // Выбираем главу, если ее значение совпадает с currentChapterKey
-                            if (fullChapterKey === currentChapterKey) {
-                                 option.selected = true;
-                                 chapterFound = true; // Глава успешно найдена в новом списке
-                            }
-                            select.appendChild(option);
-                        }
-                    }
-                }
-                
-                if (select.options.length > 1) { // > 1, потому что есть заглушка
-                     select.disabled = false;
-                }
-                
-                // Если сохраненная глава не найдена в новом списке, сбрасываем значение
-                if (!chapterFound) select.value = '';
-            } 
+            if (select.options.length > 1) { // > 1, потому что есть заглушка
+                 select.disabled = false;
+            }
+            
+            // Если сохраненная глава не найдена в новом списке, сбрасываем значение
+            if (!chapterFound) select.value = '';
+            
             
             if (!skipSideEffects) {
                 enableLoadButton();
@@ -1095,8 +1128,7 @@
         // ВАЖНО: Вызывается при смене языка или типа сюжета
         function initializeOrUpdateUI(calledByUIEvent) {
             updateI18nStrings(); // Обновляет названия UI и опции storyTypeSelect
-            updateArcSelect(); // Обновляет опции arcSelect и управляет видимостью arcSelectContainer
-            // updateChapterSelect() вызывается внутри updateArcSelect()
+            updateArcSelect(); // Обновляет опции arcSelect и вызывает updateChapterSelect()
             
             if (calledByUIEvent) {
                  saveProgress(); 
@@ -1229,6 +1261,7 @@
             // 2. Установка сохраненных значений в селекты (без немедленного вызова onchange)
             storyTypeSelect.value = progress.type && STORY_GROUPS[progress.type] ? progress.type : '';
             arcSelect.value = progress.arc || '';
+            // chapterSelect.value теперь может быть в новом формате "re_main_ch1"
             chapterSelect.value = progress.chapter || '';
 
 
@@ -1236,8 +1269,28 @@
             updateArcSelect(); // Заполняет опции Арки и вызывает updateChapterSelect()
             
             // 4. Загрузка контента, если глава была успешно восстановлена и найдена в метаданных
-            const chapterExists = window.storyMetadata && window.storyMetadata[chapterSelect.value];
-            if (chapterSelect.value && chapterExists) {
+            // Для Main Story метаданные теперь будут проверяться по упрощенному ключу (например, 're_1')
+            // Для Other Stories проверяется полный ключ ('extra_1', и т.д.)
+            
+            const currentChapterValue = chapterSelect.value;
+            let chapterExists = false;
+
+            if (currentChapterValue) {
+                if (storyTypeSelect.value === 'main') {
+                    // Извлекаем префикс и номер из "re_main_ch1" -> "re", "1"
+                    const match = currentChapterValue.match(/^(\w+)_main_ch(\d+)$/);
+                    if (match && window.storyMetadata) {
+                         // Проверяем наличие ключа в метаданных в формате 're_1'
+                         const metaKey = `${match[1]}_${match[2]}`;
+                         chapterExists = !!window.storyMetadata[metaKey];
+                    }
+                } else {
+                    // Для других типов используем старый ключ
+                    chapterExists = window.storyMetadata && !!window.storyMetadata[currentChapterValue];
+                }
+            }
+
+            if (currentChapterValue && chapterExists) {
                  updateStoryContent(progress.index); 
             } else {
                  enableLoadButton();
