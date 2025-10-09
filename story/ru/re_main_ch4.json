@@ -1,0 +1,627 @@
+{
+  "scene": [
+    {
+      "text": "Тззтч!!!",
+      "background": "bg_stage4.png"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Грозовые тучи только что собрались над главным учебным корпусом... Райден Мэй тоже ушла в том направлении. Конечно же, это изменение погоды тоже связано с ней.....",
+    },
+    {
+      "speaker": "Киана",
+      "text": "Этот человек раньше говорил, что существует особый вид крупномасштабного выброса Хоукая. Катастрофа достаточная, чтобы уничтожить всю землю... Но по-настоящему ужасен не сам Хоукай, а в результате него рождённый....",
+    },
+    {
+      "speaker": "Киана",
+      "text": "Херршер, сильнейшее создание, порождённое Хоукаем. Энергия Хоукая собирается в человеческом теле, изничтожая разум, создавая сущность исключительно для разрушения и опустошения.",
+      "sprite_left": "Kiana 3.png"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Судя по текущей ситуации, Райден Мэй и есть Херршер.",
+      "sprite_left": "Kiana 1.png"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Я не ожидала, что на этот раз столкнусь с таким сложным выбросом, и боюсь, что мне это не по силам.",
+      "sprite_left": "Kiana 1.png"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Не важно... Бесполезно дальше об этом думать, но, надеюсь, худшего сценария можно исбежать.",
+      "sprite_left": "Kiana 1.png"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Поскольку я с самого начала решила встретиться лицом к лицу с Хоукаем, я не упущу эту возможность! Он также должен быть рядом и преследовать ту же цель, что и я. И Райден Мэй, должно быть, в центре этого выброса.",
+      "sprite_left": "Kiana 1.png"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Боюсь, одной лишь грубой силы недостаточно, чтобы победить этого проблематичного сэмпая. Те фрагменты воспоминаний, полученные с энергией Хоукая, могут стать ключом к её пробуждению.",
+      "sprite_left": "Kiana 3.png"
+    },
+    {
+      "text": "Бжжжж...",
+      "sprite_left": "Kiana 3.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Этот телефон всё ещё сломан... И так каждый раз, в самый важный момент!",
+      "sprite_left": "Kiana 1.png"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Но нынешняя ситуация предупреждения не требуется. Над головой - огромный вихрь грозовых облаков, а округа кишит зомби... Да это явно самое опасное место.",
+      "sprite_left": "Kiana 1.png"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Если я и правда помру в этот раз... Нет! Неа! О чём я вообще думаю!? Я, Киана Каслана, так просто не сдамся!",
+      "sprite_left": "Kiana 1.png"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Верно! Я не сдамся, пока не найду его! Я ни за что не сдамся!",
+      "sprite_left": "Kiana 1.png"
+    },
+    {
+      "speaker": "Заражённая Мэй",
+      "text": "О~ Милый кохай, ты действительно хочешь умереть. Ах, как трогательно~ В качестве награды, скажи мне, что ты хочешь сказать напоследок~",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Напоследок? Тогда я расскажу тебе историю об одной из моих сэмпаев.",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Заражённая Мэй",
+      "text": "..?",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Киана",
+      "text": "В глазах окружающих эта сэмпай - дочь невероятно крупной компании. С детства она получала чрезвычайно строгое воспитание. Она никогда не чувствовала материнской любви, ведь потеряла мать, а её отец относится к ней как к инструменту и готовит её как преемницу компании.",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Чтобы соответствовать требованиям своего отца, она изо всех сил старалась стать лучше, чем кто-либо другой. Сэмпай отказалась от возможности жить счастливо, как другие сверстницы, ввергла себя в боль и довела себя до отчаянного конца. Просто чтобы быть самой лучшей, чтобы отец ценил её и относился как к дочери.",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Заражённая Мэй",
+      "text": "Закрой свой чёртов рот!",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Поступив в школу, сэмпай завоевала любовь и внимание учителей и одноклассников своими отличными оценками и милой внешностью. Но, несмотря на это, она всё равно не получила одобрения своего отца. Постепенно сэмпай потеряла надежду. Она чувствовала, что даже если она станет инструментом, это не будет иметь значения, по крайней мере, её одноклассники и учителя заметят её существование.",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Однако инцидент месячной давности разрушил всё, к чему она стремилась......",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Заражённая Мэй",
+      "text": "Хватит!! Не напоминай мне о тех событиях!!",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "left"
+    },
+    {
+      "text": "Тзззтч!!",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "both"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Её отец был арестован за экономические преступления в компании и потерял свой первоначальный социальный статус. К сэмпай, которая изначально думала, что окружающие её одноклассники и учителя поддержат её, отнеслись совершенно по-другому...",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Изоляция, издевательства, оскорбления, клевета... Когда она была физически и морально опустошена, старшекурсница очнулась ото сна. Оказалось, что мир не так дружелюбен, как она думала, и окружающие её люди льстили ей только из-за страха перед её аурой.",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Потеряв это, она стала ничем. Даже ценность от бытия инструментом отца исчезла...",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Заражённая Мэй",
+      "text": "Не говори так, словно знаешь меня!!! Да, у меня никого не осталось, все предали меня! Но они мне больше не нужны!",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Заражённая Мэй",
+      "text": "Даже одна... Я смогу выжить в этом мире Хоукая! Моя сила – доказательство моей ценности!",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Киана",
+      "text": "...Сознание, контролируемое энергией Хоукая, наконец начала возвращать рассудок. Если она сможет найти себя, то её ещё можно спасти.",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Мэй! Я понимаю твою боль! Гонишься за неосуществимой мечтой, чтобы в конце быть преданной всеми...",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Но ты должна жить! Не ради имени Райден Мэй, не ради семейного бизнеса, и не ради жалости и милосердия других для получения их доброты! Но ради самой себя!",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Заражённая Мэй",
+      "text": "Ради самой себя...",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Мэй! Возьми мою руку! Я помогу избавиться от энергии Хоукая в своём теле!",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Заражённая Мэй",
+      "text": "Я правда могу доверять тебе?",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Да! Клянусь! Я не обману тебя!",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Заражённая Мэй",
+      "text": "Ты первый человек, который так обратился ко мне... Спасибо.",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Заражённая Мэй",
+      "text": "Но... Уже слишком поздно.",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Мэй!?",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Заражённая Мэй",
+      "text": "Она уже не сможет вернуться! Она станет смертью для этого мира! Уничтожит всё!",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Сволочь! Другая личность, созданная Хоукаем? А ну прочь из тела Мэй!",
+      "sprite_left": "Kiana 4.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Заражённая Мэй",
+      "text": "Хмпф... Тебе не справиться со мной, как только я полностью захвачу её разу!",
+      "sprite_left": "Kiana 4.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Тварь! А ну вернись!",
+      "sprite_left": "Kiana 4.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Чёрт, почти сработало... Раздражает! Кажется та штука захватила контроль над телом Мэй.",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Уже темнеет, а вместе с этим будет всё опаснее и опаснее... Я уже слишком отошла от первоначального плана, но раз уж я выбрала этот путь, то должна дойти до конца!",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Когда огни города потускнели, я поняла, что ночное небо такое зачаровывающее. Не будь над моей головой не было грозовых туч, это была бы потрясающая сцена~",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "...Иногда я не могу понять: прогнил ли мир или мы сами?",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Прошу... Не иди сюда, оставь меня! Я больше не могу её сдерживать, я не хочу быть её марионеткой!",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Mei 1.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Мэй! Не сдавайся! Не позволяй Хоукаю поглотить тебя!",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Mei 1.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Нет... Я уже устала жить, у меня не осталось сил для борьбы. Если я умру сейчас, то, возможно, смогу найти покой.",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Mei 1.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Мэй! Что ты хочешь сделать!?",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Mei 1.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Спасибо... Я так рада была встретить тебя в конце своей жизни. Самое лучшее, что я могу сейчас сделать – спрыгнуть с этой крыши.",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Mei 2.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Нет!!",
+      "sprite_right": "Mei 2.png"
+    },
+    {
+      "speaker": "Мэй",
+      "text": "......",
+      "sprite_right": "Mei 2.png",
+    },
+    {
+      "speaker": "Киана",
+      "text": "Она спрыгнула... Я так и не смогла ей помочь! А ведь была так близко!",
+      "sprite_left": "Kiana 1.png"
+    },
+    {
+      "text": "......",
+      "sprite_left": "Kiana 1.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Заражённая Мэй",
+      "text": "Ха-ха-ха-ха!",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Киана",
+      "text": "!?",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Заражённая Мэй",
+      "text": "И чего же ты грустишь? Как я могу позволить, чтобы моё с таким трудом полученное тело было так просто уничтожено?",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Опять ты!",
+      "sprite_left": "Kiana 4.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Заражённая Мэй",
+      "text": "Ооо~ Не волнуйся, Райден Мэй не одинока. Я стану ей самым близком человеком~ И исполню все её мечты.",
+      "sprite_left": "Kiana 4.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Заражённая Мэй",
+      "text": "Но сперва! Я хочу убить тебя, отвратная девчонка!",
+      "sprite_left": "Kiana 4.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Обойдёшься!! Я верну её!",
+      "sprite_left": "Kiana 4.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Заражённая Мэй",
+      "text": "Невозможно... Я была побеждена таким человеком...",
+      "sprite_right": "Herrscher Mei.png"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Мэй! Мэй! Очнись!",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Я жива...",
+      "sprite_right": "Herrscher Mei.png",
+      "sprite_left": "Mei 2.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Зачем рисковать своей жизнью ради спасения подобного мне человека?",
+      "sprite_right": "Herrscher Mei.png",
+      "sprite_left": "Mei 1.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Ха~ Я и сама не знаю. Когда мне передалась часть твоих воспоминаний, я увидела в тебе саму себя. Быть может я спасаю тебя ради самой себя~",
+      "sprite_left": "Kiana 2.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Скажешь как тебя зовут?",
+      "sprite_left": "Mei 2.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Киана Каслана. Я всего лишь кохай, которая просто проходила мимо ради своей цели~",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Какая ты странная...",
+      "sprite_left": "Mei 2.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Ты тоже странная! Ты смогла пережить подобный выброс Хоукая и...",
+      "sprite_left": "Kiana 2.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Мэй",
+      "text": "И?",
+      "sprite_left": "Mei 3.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Нет, ничего. Не волнуйся об этом, сэмпай~ Всё уже закончилось.",
+      "sprite_left": "Kiana 2.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Просто зови меня Мэй. Хоукай, который ты упомянула... название этой катастрофы?",
+      "sprite_left": "Mei 2.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Ну~ Немного проблематично это объяснять. На первый взгляд, Хоукай - это то, что ты можешь видеть: явление, которое приводит к разрушению мира и гибели человечества.",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Мэй",
+      "text": "..?",
+      "sprite_left": "Mei 3.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Приносящий конец света Хоукай, можешь ли ты принять это сейчас или нет, - это явление, которое происходит периодически. Прямо сейчас человечество не может объяснить, в чём причина, и можно лишь сказать, что это непредсказуемая катастрофа.",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Она может принимать разные формы: войны, инфекционные заболевания, климатические катастрофы, удары метеоритов... Даже громадные монстры могут внезапно появиться. Согласно имеющейся информации, Хоукай приносит огромные разрушения доминирующим видам в мире.",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Например, недавняя крупномасштабная вспышка болезни Хоукая, Чёрная смерть в 14 веке, прямо или косвенно привела к уничтожению трети населения Земли.",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Так что же в моём теле?",
+      "sprite_left": "Mei 3.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Это источник энергии Хоукая, которая будет сопровождать Хоукай, и это энергия, которая может исказить правила мира. Предполагается, что он является незаменимым элементом для возникновения Хоукая, и природу его существования также трудно понять.",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Однако, похоже, у него есть значительная тенденция к сознанию, хотя об этом нет ни в одной из записей. Возможно, что-то подобное происходило и раньше, но тогда было засекречено.",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Мэй",
+      "text": "И теперь его нет во мне?",
+      "sprite_left": "Mei 3.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Не уверена. Может быть и нет, а может просто дремлет в сердце Мэй... Но, думаю, если Мэй будет сильна волей и верна своему сердцу, этот источник больше не появится~",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Хорошо, спасибо...",
+      "sprite_left": "Mei 2.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Ха~ Не за что! В конце концов мы партнёрши~",
+      "sprite_left": "Kiana 2.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Партнёрши? Впервые в жизни ко мне обращаются, как к партнёру.",
+      "sprite_left": "Mei 2.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Мэй, что с тобой?",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Ничего, в моём сердце есть чувство, которого у меня никогда раньше не было. Но может ли кто-то вроде меня действительно стать партнёром? Я убила их, я хотела проклясть весь мир. Я... Я...",
+      "sprite_left": "Mei 2.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Нет, это не вина Мэй. Это был Хоукай, вершащий суд над человечеством.",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "На мой взгляд, в этом мире нет абсолютного добра и зла. Такого никогда не было, и не думаю, что когда-нибудь будет в этом разрушенном мире.",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Тебе удалось выжить благодаря своей воле. Те, кто слаб, кто отказался от веры в выживание, уже давно превратились в зомби. Независимо от того, каких убеждений ты придерживаешься, выжить - это самое главное.",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Я правда могу быть твоим партнёром?",
+      "sprite_left": "Mei 2.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Прошу, прикрывай мне спину и сражайся рядом со мной.",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Herrscher Mei.png",
+      "dim_override": "right"
+    }
+  ]
+}
