@@ -1096,69 +1096,79 @@
             }
             
             select.innerHTML = `<option value="">--- Выберите главу ---</option>`;
+            
+            if (!typeKey || !STORY_GROUPS[typeKey]) {
+                if (!skipSideEffects) { enableLoadButton(); saveProgress(); }
+                return;
+            }
+            
+            // --- Улучшенная логика фильтрации для устранения утечек и отображения Extra ---
+            
+            let requiredStartPrefix = null;
+            let requiredInclusion = null;
+            let requiredExclusion = null;
+            
+            const mainStoryPrefix = STORY_GROUPS.main.prefix;
 
-            if (typeKey && STORY_GROUPS[typeKey]) {
-                const prefix = STORY_GROUPS[typeKey].prefix; 
-                let chapterFound = false;
-                
-                if (typeKey === 'main' && !arcKey) {
-                    select.disabled = true;
+            if (typeKey === 'main') {
+                // Для Основного сюжета требуется выбранная арка
+                if (!arcKey) {
                     if (!skipSideEffects) { enableLoadButton(); saveProgress(); }
                     return;
                 }
+                // Глава должна начинаться с префикса арки и содержать 'main_'
+                requiredStartPrefix = `${arcKey}_`;
+                requiredInclusion = mainStoryPrefix;
+            } else {
+                // Для всех остальных типов (Extra, Bosses и т.д.)
+                // Глава должна начинаться с префикса типа (e.g., 'extra_')
+                // И НЕ должна содержать 'main_' (предотвращение утечки)
+                requiredStartPrefix = STORY_GROUPS[typeKey].prefix; 
+                requiredExclusion = mainStoryPrefix;
+            }
+
+            let chapterFound = false;
+
+            for (const fullChapterKey in window.storyMetadata) {
                 
-                // --- ИСПРАВЛЕНИЕ: Логика фильтрации глав (Баг 1 и Баг 2) ---
-                // Предполагаем, что: 
-                // 1. Главы 'main' используют префикс арки (e.g., 're_') для фильтрации.
-                // 2. Главы 'extra' и другие используют префикс типа (e.g., 'extra_').
+                // 1. Проверка префикса начала
+                if (!fullChapterKey.startsWith(requiredStartPrefix)) {
+                    continue;
+                }
 
-                let targetPrefix = typeKey === 'main' ? `${arcKey}_` : prefix;
-                const mainStoryPrefix = STORY_GROUPS.main.prefix;
+                // 2. Проверка обязательного включения (только для main)
+                if (requiredInclusion && !fullChapterKey.includes(requiredInclusion)) {
+                    continue; 
+                }
+                
+                // 3. Проверка обязательного исключения (для всех кроме main)
+                if (requiredExclusion && fullChapterKey.includes(requiredExclusion)) {
+                    continue; 
+                }
 
-                for (const fullChapterKey in window.storyMetadata) {
+                // Глава прошла все проверки, добавляем её
+                const chapterData = window.storyMetadata[fullChapterKey];
+                const chapterName = chapterData[lang] || chapterData.ru; 
+                
+                if (chapterName) {
+                    const option = document.createElement('option');
+                    option.value = fullChapterKey; 
+                    option.textContent = chapterName; 
                     
-                    // 1. Основная фильтрация по префиксу (арки для main, типа для остальных)
-                    if (fullChapterKey.startsWith(targetPrefix)) { 
-                        
-                        let shouldInclude = false;
-
-                        if (typeKey === 'main') {
-                            // Для Main Story: ключ должен начинаться с ArcKey И содержать префикс 'main_' (для дополнительной гарантии).
-                            if (fullChapterKey.includes(mainStoryPrefix)) {
-                                shouldInclude = true;
-                            }
-                        } else {
-                            // Для Extra/Others (Баг 2: устранение утечки глав Main): 
-                            // Ключ должен начинаться с префикса типа И НЕ содержать префикс 'main_'.
-                            if (!fullChapterKey.includes(mainStoryPrefix)) {
-                                shouldInclude = true;
-                            }
-                        }
-
-                        if (shouldInclude) {
-                            const chapterData = window.storyMetadata[fullChapterKey];
-                            const chapterName = chapterData[lang] || chapterData.ru; 
-                            
-                            if (chapterName) {
-                                const option = document.createElement('option');
-                                option.value = fullChapterKey; 
-                                option.textContent = chapterName; 
-                                
-                                if (fullChapterKey === currentChapterKey) {
-                                     option.selected = true;
-                                }
-                                select.appendChild(option);
-                                chapterFound = true;
-                            }
-                        }
+                    if (fullChapterKey === currentChapterKey) {
+                         option.selected = true;
                     }
+                    select.appendChild(option);
+                    chapterFound = true;
                 }
-                // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
-                
-                if (chapterFound) {
-                     select.disabled = false;
-                }
-            } 
+            }
+            // --- КОНЕЦ УЛУЧШЕННОЙ ЛОГИКИ ФИЛЬТРАЦИИ ---
+            
+            if (chapterFound) {
+                 select.disabled = false;
+            } else if (typeKey === 'extra') {
+                 select.innerHTML = `<option value="">--- Главы дополнительного сюжета не найдены ---</option>`;
+            }
             
             if (!skipSideEffects) {
                 enableLoadButton();
@@ -1292,24 +1302,30 @@
             updateI18nStrings(); 
             
             let typeRestored = false;
+            // Сначала устанавливаем StoryType, чтобы ArcSelect и ChapterSelect могли корректно отфильтровать
             if (progress.type && STORY_GROUPS[progress.type]) {
                 storyTypeSelect.value = progress.type;
                 typeRestored = true;
             }
             
             let arcRestored = false;
+            // Обновляем список арок (не вызывает updateChapterSelect)
+            updateArcSelect(true); 
+            
             if (progress.type === 'main') {
-                updateArcSelect(true); 
+                // Если тип 'main', пытаемся восстановить арку
                 if (progress.arc && MAIN_STORY_ARCS[progress.arc]) {
                     arcSelect.value = progress.arc;
                     arcRestored = true;
                 }
             } else {
-                 updateArcSelect(true); 
+                 // Для не-main типов arcSelect пуст
+                 arcSelect.value = "";
             }
             
             let chapterRestored = false;
             if (window.storyMetadata && typeRestored && progress.chapter) {
+                // Обновляем список глав с учетом восстановленных type/arc
                 updateChapterSelect(true); 
                 
                 if (Array.from(chapterSelect.options).some(opt => opt.value === progress.chapter)) {
