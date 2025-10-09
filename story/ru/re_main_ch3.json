@@ -16,7 +16,9 @@
         },
         {
             "speaker": "",
-            "text": "Шорох!"
+            "text": "Шорох!",
+            "sprite": "Kiana 1.png",
+            "dim": true
         },
         {
             "speaker": "Киана",
@@ -68,7 +70,9 @@
         },
         {
             "speaker": "Зомби",
-            "text": "Грррооо....."
+            "text": "Грррооо.....",
+            "sprite": "Kiana 1.png",
+            "dim": true
         },
         {
             "speaker": "Киана",
@@ -84,7 +88,9 @@
         },
         {
             "speaker": "",
-            "text": "Грррооо......"
+            "text": "Грррооо......",
+            "sprite": "Mei 1.png",
+            "dim": true
         },
         {
             "speaker": "Киана",
@@ -196,7 +202,9 @@
         },
         {
             "speaker": "",
-            "text": "Бжжжж..."
+            "text": "Бжжжж...",
+            "sprite": "Kiana 1.png",
+            "dim": true
         },
         {
             "speaker": "Киана",
