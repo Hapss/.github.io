@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Архив Сюжета Houkai Gakuen 2</title>
+    <title>Архив Сюжета ВН</title>
     <!-- Подключение Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -75,6 +75,7 @@
             background-size: cover;
         }
         #vnViewer {
+            /* Цвет по умолчанию, когда нет фона */
             background-color: #1a1a1a; 
         }
     </style>
@@ -214,9 +215,8 @@
                 MAX_ATTEMPTS: 3,        
             },
             PLACEHOLDERS: {
-                DEFAULT_BG: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyMCIgaGVpZ2h0PSIxMDgwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMzNDNmMzciLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9ImludGVyIiBmb250LXNpemU9IjcwcHgiIGZpbGw9IiNjY2NjY2MiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlZOOiBMb2FkaW5nPC90ZXh0Pjwvc3ZnPg==',
-                KIANA_SPRITE: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRDBFQUZGIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjMDAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5LSUFOQTwvdGV4dD48L3N2Zz4=',
-                MEI_SPRITE: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjVDM0I3Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjMDAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5NRUk8L3RleHQ+PC9zdmc+'
+                // Используем цвет по умолчанию (из CSS: #1a1a1a) как запасной фон
+                DEFAULT_BG_COLOR: '#1a1a1a', 
             }
         };
 
@@ -281,9 +281,10 @@
             elements.bgLayer1 = document.getElementById('bgLayer1');
             elements.bgLayer2 = document.getElementById('bgLayer2');
             
-            // Установка дефолтного фона на активный слой
-            elements.bgLayer1.style.backgroundImage = `url('${CONFIG.PLACEHOLDERS.DEFAULT_BG}')`;
-            currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG; 
+            // Установка дефолтного фона на активный слой (цвет)
+            elements.bgLayer1.style.backgroundColor = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR;
+            elements.bgLayer1.style.backgroundImage = 'none';
+            currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR; 
             
             loadProgress(); 
         });
@@ -325,19 +326,13 @@
             }
         }
         
-        /** * Определяет путь/URL к спрайту (или Base64 плейсхолдер).
+        /** * Определяет путь/URL к спрайту.
          * Использует encodeURIComponent для обработки пробелов в именах файлов.
          */
         const spritePath = (fileName) => {
             if (!fileName) return null;
             
-            const lowerCaseName = fileName.toLowerCase();
-            
-            // Пример: если имя файла содержит "kiana", используем плейсхолдер
-            if (lowerCaseName.includes('kiana')) return CONFIG.PLACEHOLDERS.KIANA_SPRITE;
-            if (lowerCaseName.includes('mei')) return CONFIG.PLACEHOLDERS.MEI_SPRITE;
-            
-            // Для локальных файлов: используем encodeURIComponent для обработки пробелов/спецсимволов
+            // Используем encodeURIComponent для обработки пробелов/спецсимволов
             const encodedFileName = encodeURIComponent(fileName);
             return CONFIG.PATHS.SPRITE_BASE + encodedFileName; 
         };
@@ -348,11 +343,8 @@
         function loadSprite(url, element) {
             const container = element.parentElement;
 
-            if (url.startsWith('data:')) {
-                // Если это Base64 плейсхолдер, немедленно устанавливаем и отображаем
-                element.src = url;
-                element.style.opacity = '1';
-                container.classList.remove('hidden');
+            if (!url) {
+                container.classList.add('hidden');
                 return;
             }
             
@@ -360,6 +352,7 @@
             // 1. Скрываем контейнер и устанавливаем прозрачность 0 (чтобы не было старого изображения)
             container.classList.add('hidden');
             element.style.opacity = '0';
+            element.src = ''; // Очистка старого SRC
 
             const tempImg = new Image();
             
@@ -377,10 +370,10 @@
             tempImg.onerror = () => {
                 container.classList.add('hidden');
                 console.warn(`[Sprite Load] Не удалось загрузить спрайт: ${url}.`);
+                element.src = '';
             };
 
             // Используем агрессивный обход кэша для надежности
-            // URL уже закодирован функцией spritePath
             const finalUrl = `${url}?t=${Date.now()}`;
             tempImg.src = finalUrl;
         }
@@ -393,6 +386,7 @@
             const encodedBgFileName = encodeURIComponent(newBgFileName);
             const finalBgUrl = CONFIG.PATHS.BACKGROUND_BASE + encodedBgFileName;
             
+            // Сравнение с текущим URL
             if (finalBgUrl === currentBackgroundUrl) return; 
 
             const { bgLayer1, bgLayer2 } = elements;
@@ -405,9 +399,9 @@
             tempImg.onload = () => {
                 // 2. Once loaded, apply the image to the next layer
                 nextLayer.style.backgroundImage = `url('${tempImg.src}')`;
-
+                nextLayer.style.backgroundColor = 'transparent'; // Изображение загружено, убираем цвет фона
+                
                 // 3. Perform the fade: make next layer visible, current layer invisible
-                // Делаем это асинхронно, чтобы браузер успел отрисовать новый фон на невидимом слое
                 setTimeout(() => {
                     currentLayer.style.opacity = '0';
                     nextLayer.style.opacity = '1';
@@ -419,7 +413,18 @@
             };
             
             tempImg.onerror = () => {
-                console.warn(`[BG Fade] Не удалось загрузить фон: ${finalBgUrl}. Сохранение текущего фона.`);
+                console.warn(`[BG Fade] Не удалось загрузить фон: ${finalBgUrl}. Применение цвета фона.`);
+                // Если изображение не загрузилось, устанавливаем цвет и выполняем фейд
+                 setTimeout(() => {
+                    nextLayer.style.backgroundImage = 'none';
+                    nextLayer.style.backgroundColor = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR;
+
+                    currentLayer.style.opacity = '0';
+                    nextLayer.style.opacity = '1';
+
+                    activeBgLayer = activeBgLayer === 1 ? 2 : 1;
+                    currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR;
+                }, 10);
             };
 
             // Агрессивный обход кэша
@@ -450,7 +455,7 @@
             const spriteFileName = step.sprite; 
             const activeSpeakerPosition = step.position ? step.position.toLowerCase() : null;
 
-            // Сбрасываем все спрайты в невидимость
+            // Скрываем все спрайты
             spriteLeftContainer.classList.add('hidden');
             spriteRightContainer.classList.add('hidden');
 
@@ -467,9 +472,12 @@
             } 
             
             // Применение Затемнения
+            // Если у нас есть спрайт слева И он не текущий спикер, затемняем его
             if (activeSpeakerPosition === 'right' && !spriteLeftContainer.classList.contains('hidden')) {
                 spriteLeftElement.classList.add('dimmed-sprite');
-            } else if (activeSpeakerPosition === 'left' && !spriteRightContainer.classList.contains('hidden')) {
+            } 
+            // Если у нас есть спрайт справа И он не текущий спикер, затемняем его
+            else if (activeSpeakerPosition === 'left' && !spriteRightContainer.classList.contains('hidden')) {
                 spriteRightElement.classList.add('dimmed-sprite');
             }
 
@@ -497,7 +505,7 @@
             
             if (!fullStoryKey) return;
 
-            // Файл JSON главы не нуждается в кодировании, так как его имя не содержит пробелов
+            // Файл JSON главы не нуждается в кодировании
             const expectedFilePath = `${CONFIG.PATHS.STORY_BASE}${lang}/${fullStoryKey}.json`;
             const { INITIAL_DELAY_MS, MAX_DELAY_MS, MAX_ATTEMPTS } = CONFIG.BACKOFF;
 
@@ -748,14 +756,16 @@
             dialogueIsLoaded = false;
             currentDialogueIndex = 0;
             currentDialogue = []; 
-            currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG; 
+            // Используем цвет, а не Base64 плейсхолдер
+            currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR; 
             activeBgLayer = 1;
 
             elements.dialogueWrapper.classList.add('hidden');
             elements.languageSelect.value = 'ru';
             
-            // Сброс фоновых слоев
-            elements.bgLayer1.style.backgroundImage = `url('${CONFIG.PLACEHOLDERS.DEFAULT_BG}')`;
+            // Сброс фоновых слоев: убираем URL-изображение, ставим цвет
+            elements.bgLayer1.style.backgroundImage = 'none';
+            elements.bgLayer1.style.backgroundColor = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR;
             elements.bgLayer1.style.opacity = '1';
             elements.bgLayer2.style.opacity = '0';
             
