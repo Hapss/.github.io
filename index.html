@@ -194,6 +194,7 @@
             opacity: 1; 
         }
         
+        /* КЛАСС ДЛЯ ЗАТЕМНЕНИЯ/НЕАКТИВНОСТИ */
         .dimmed-sprite {
             filter: brightness(0.3) grayscale(30%) !important; 
             opacity: 1 !important; 
@@ -496,7 +497,7 @@
         let currentLeftSpriteFile = null;
         let currentRightSpriteFile = null;
         
-        // НОВОЕ: Отслеживание активной стороны для затемнения при отсутствии position
+        // Отслеживание активной стороны для затемнения при отсутствии position
         let lastActiveSpeakerSide = null; // null, 'left', или 'right'
 
         const i18n = {
@@ -817,28 +818,27 @@
                 crossFadeBackground(step.background);
             }
 
-            // 2. Определение активной стороны и стороны для подсветки
-            const newSpritePosition = step.position ? step.position.toLowerCase() : null;
-            let sideToHighlight = null;
+            // --- КРИТИЧЕСКАЯ ЛОГИКА АКТИВНОСТИ И ЗАТЕМНЕНИЯ ---
+            
+            // A. Определение активной стороны
+            let sideToActivate = null;
 
-            // Если в текущем шаге явно указана позиция, это говорящий ИЛИ новый спрайт
-            if (newSpritePosition) {
-                sideToHighlight = newSpritePosition;
-                // Обновляем последнюю активную сторону
-                lastActiveSpeakerSide = newSpritePosition;
-            } 
-            // Если есть спикер, но нет position, используем последнюю известную активную сторону
-            else if (step.speaker && lastActiveSpeakerSide) {
-                sideToHighlight = lastActiveSpeakerSide;
+            if (step.position) {
+                // Case 1: Позиция явно задана (для нового спрайта или смены стороны).
+                // ЭТО ГОВОРЯЩИЙ.
+                sideToActivate = step.position.toLowerCase();
+                lastActiveSpeakerSide = sideToActivate;
+            } else if (step.speaker && lastActiveSpeakerSide) {
+                // Case 2: Говорящий есть, но позиция не указана. 
+                // Продолжаем использовать последнюю активную сторону.
+                sideToActivate = lastActiveSpeakerSide;
             }
-            // Если нет ни спикера, ни позиции
-            else {
-                sideToHighlight = null;
-            }
+            // Если speaker === null, sideToActivate будет null (например, для режима narration/dim)
 
-            // 3. Загрузка/Обновление Спрайтов (требует step.sprite и newSpritePosition)
-            if (step.sprite && newSpritePosition) {
-                const isLeftSpeaker = newSpritePosition === 'left';
+
+            // B. Загрузка/Обновление Спрайтов
+            if (step.sprite && step.position) {
+                const isLeftSpeaker = step.position.toLowerCase() === 'left';
                 
                 const speakerElement = isLeftSpeaker ? spriteLeftElement : spriteRightElement;
                 const speakerContainer = isLeftSpeaker ? spriteLeftContainer : spriteRightContainer;
@@ -862,38 +862,49 @@
                     // Если спрайт уже загружен, просто показываем контейнер, если он был скрыт
                     speakerContainer.classList.remove('hidden');
                 }
+            } else if (step.position && step.sprite === null) {
+                // Скрыть спрайт на указанной позиции
+                 const isLeft = step.position.toLowerCase() === 'left';
+                 const container = isLeft ? spriteLeftContainer : spriteRightContainer;
+                 const element = isLeft ? spriteLeftElement : spriteRightElement;
+                 
+                 container.classList.add('hidden');
+                 element.src = '';
+                 
+                 if (isLeft) currentLeftSpriteFile = null;
+                 else currentRightSpriteFile = null;
             }
+
+
+            // C. ЛОГИКА ЗАТЕМНЕНИЯ (КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ)
             
-            // 4. Логика Затемнения (Критическая часть)
-            
-            // 4.1 Сброс Затемнения
+            // 1. Сброс всех стилей затемнения
             spriteLeftElement.classList.remove('dimmed-sprite');
             spriteRightElement.classList.remove('dimmed-sprite');
 
-            if (sideToHighlight === 'left') {
+            if (sideToActivate === 'left') {
                 // Говорит левый: затемняем правый (если он виден)
-                if (!spriteRightContainer.classList.contains('hidden')) {
+                if (currentRightSpriteFile) { 
                     spriteRightElement.classList.add('dimmed-sprite');
                 }
-            } else if (sideToHighlight === 'right') {
+            } else if (sideToActivate === 'right') {
                 // Говорит правый: затемняем левый (если он виден)
-                if (!spriteLeftContainer.classList.contains('hidden')) {
+                if (currentLeftSpriteFile) {
                     spriteLeftElement.classList.add('dimmed-sprite');
                 }
-            } else {
-                // Если нет активного спикера (narration), проверяем dim флаг
-                if (step.dim === true) {
-                    // Затемняем оба, если они видны
-                    if (!spriteLeftContainer.classList.contains('hidden')) {
-                        spriteLeftElement.classList.add('dimmed-sprite');
-                    }
-                    if (!spriteRightContainer.classList.contains('hidden')) {
-                        spriteRightElement.classList.add('dimmed-sprite');
-                    }
+            } else if (step.dim === true) {
+                // Наррация с запросом на затемнение: затемняем оба видимых спрайта.
+                if (currentLeftSpriteFile) { 
+                    spriteLeftElement.classList.add('dimmed-sprite');
+                }
+                if (currentRightSpriteFile) { 
+                    spriteRightElement.classList.add('dimmed-sprite');
                 }
             }
             
-            // 5. Текст и Имя Спикера
+            // --- КОНЕЦ КРИТИЧЕСКОЙ ЛОГИКИ ---
+            
+            // 3. Текст и Имя Спикера
             dialogueWrapper.classList.remove('hidden');
             
             if (step.speaker) {
@@ -906,7 +917,7 @@
             
             currentText.textContent = step.text || "";
             
-            // 6. Обновление Истории
+            // 4. Обновление Истории
             if (isHistoryVisible) {
                 renderHistory();
             }
