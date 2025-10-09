@@ -47,11 +47,9 @@
             --color-warning-accent: #9333ea; 
             --color-warning-bg: #ede9fe; 
             
-            /* Текст */
             --color-text-primary: #111827; 
             --color-text-secondary: #4b5563; 
             
-            /* Фиолетовый */
             --color-speaker-name: #9333ea; 
         }
 
@@ -194,7 +192,6 @@
             opacity: 1; 
         }
         
-        /* КЛАСС ДЛЯ ЗАТЕМНЕНИЯ/НЕАКТИВНОСТИ */
         .dimmed-sprite {
             filter: brightness(0.3) grayscale(30%) !important; 
             opacity: 1 !important; 
@@ -468,9 +465,7 @@
         };
 
         const STORY_GROUPS = {
-            // 'main_' prefix is used by the logic to distinguish Main Story content
             main: { ru: "Основной сюжет", en: "Main Story", zh: "主线故事", prefix: "main_" },
-            // 'extra_' prefix used to select all extra content
             extra: { ru: "Дополнительный сюжет", en: "Extra Story", zh: "额外故事", prefix: "extra_" },
             bosses: { ru: "Боссы", en: "Boss Fights", zh: "Boss 战", prefix: "boss_" },
             vn: { ru: "Визуальная новелла", en: "Visual Novel", zh: "视觉小说", prefix: "vn_" },
@@ -493,13 +488,9 @@
         let isHistoryVisible = false; 
         let activeBgLayer = 1; // 1 or 2
         
-        // Отслеживание текущих файлов спрайтов на каждой позиции
         let currentLeftSpriteFile = null;
         let currentRightSpriteFile = null;
         
-        // Отслеживание активной стороны для затемнения при отсутствии position
-        let lastActiveSpeakerSide = null; // null, 'left', или 'right'
-
         const i18n = {
             ru: {
                 headerTitle: "Архив сюжета Houkai Gakuen 2", labelStoryType: "Тип сюжета", labelArc: "Арка", labelChapter: "Сюжет (Глава)",
@@ -508,8 +499,7 @@
                 errorFetchMetadataStrict: "Критическая ошибка: не удалось загрузить метаданные глав. Файл story/story_metadata.json отсутствует или недоступен.",
                 errorChapterNotFound: "Файл главы не найден.",
                 themeDark: "Тёмная", themeLight: "Светлая",
-                historyTitle: "История Диалогов", historyButton: "История", historyEmpty: "История пуста.",
-                noExtraChapters: "Главы дополнительного сюжета не найдены.",
+                historyTitle: "История Диалогов", historyButton: "История", historyEmpty: "История пуста."
             },
             en: {
                 headerTitle: "VN Story Archive", labelStoryType: "Story Type", labelArc: "Arc", labelChapter: "Chapter",
@@ -518,8 +508,7 @@
                 errorFetchMetadataStrict: "Critical Error: Failed to load chapter metadata. The file story/story_metadata.json is missing or inaccessible.",
                 errorChapterNotFound: "Chapter file not found.",
                 themeDark: "Dark", themeLight: "Light",
-                historyTitle: "Dialogue History", historyButton: "History", historyEmpty: "History is empty.",
-                noExtraChapters: "No extra story chapters found.",
+                historyTitle: "Dialogue History", historyButton: "History", historyEmpty: "History is empty."
             },
             zh: {
                 headerTitle: "视觉小说故事档案", labelStoryType: "故事类型", labelArc: "篇章", labelChapter: "章节",
@@ -528,15 +517,14 @@
                 errorFetchMetadataStrict: "致命错误：无法加载章节元数据。文件 story/story_metadata.json 缺失或无法访问。",
                 errorChapterNotFound: "未找到章节文件。",
                 themeDark: "深色", themeLight: "浅色",
-                historyTitle: "对话历史", historyButton: "History", historyEmpty: "历史为空。",
-                noExtraChapters: "未找到额外故事章节。",
+                historyTitle: "对话历史", historyButton: "History", historyEmpty: "历史为空。"
             }
         };
 
         let elements = {};
 
         // ====================================================================
-        // === УПРАВЛЕНИЕ ТЕМАМИ и ПРЕДУПРЕЖДЕНИЕМ (ОК) ===
+        // === УПРАВЛЕНИЕ ТЕМАМИ и ПРЕДУПРЕЖДЕНИЕМ ===
         // ====================================================================
 
         function saveTheme(theme) {
@@ -632,7 +620,7 @@
 
 
         // ====================================================================
-        // === ИНИЦИАЛИЗАЦИЯ (ОК) ===
+        // === ИНИЦИАЛИЗАЦИЯ ===
         // ====================================================================
         
         document.addEventListener('DOMContentLoaded', () => {
@@ -818,42 +806,26 @@
                 crossFadeBackground(step.background);
             }
 
-            // --- КРИТИЧЕСКАЯ ЛОГИКА АКТИВНОСТИ И ЗАТЕМНЕНИЯ ---
-            
-            // A. Определение активной стороны
-            let sideToActivate = null;
+            const activeSpeakerPosition = step.position ? step.position.toLowerCase() : null;
 
-            if (step.position) {
-                // Case 1: Позиция явно задана (для нового спрайта или смены стороны).
-                // ЭТО ГОВОРЯЩИЙ.
-                sideToActivate = step.position.toLowerCase();
-                lastActiveSpeakerSide = sideToActivate;
-            } else if (step.speaker && lastActiveSpeakerSide) {
-                // Case 2: Говорящий есть, но позиция не указана. 
-                // Продолжаем использовать последнюю активную сторону.
-                sideToActivate = lastActiveSpeakerSide;
-            }
-            // Если speaker === null, sideToActivate будет null (например, для режима narration/dim)
+            // 2. Сброс затемнения для текущей линии
+            spriteLeftElement.classList.remove('dimmed-sprite');
+            spriteRightElement.classList.remove('dimmed-sprite');
 
-
-            // B. Загрузка/Обновление Спрайтов
-            if (step.sprite && step.position) {
-                const isLeftSpeaker = step.position.toLowerCase() === 'left';
+            // 3. Загрузка/Обновление Спрайтов (требует step.sprite и step.position)
+            if (step.sprite && activeSpeakerPosition) {
+                const isLeftSpeaker = activeSpeakerPosition === 'left';
                 
                 const speakerElement = isLeftSpeaker ? spriteLeftElement : spriteRightElement;
                 const speakerContainer = isLeftSpeaker ? spriteLeftContainer : spriteRightContainer;
                 
                 let needsLoad = false;
-                
-                // Проверяем, нужно ли загружать новый файл спрайта
-                const currentFile = isLeftSpeaker ? currentLeftSpriteFile : currentRightSpriteFile;
-                if (currentFile !== step.sprite) {
+                if (isLeftSpeaker && currentLeftSpriteFile !== step.sprite) {
                     needsLoad = true;
-                    if (isLeftSpeaker) {
-                        currentLeftSpriteFile = step.sprite;
-                    } else {
-                        currentRightSpriteFile = step.sprite;
-                    }
+                    currentLeftSpriteFile = step.sprite;
+                } else if (!isLeftSpeaker && currentRightSpriteFile !== step.sprite) {
+                    needsLoad = true;
+                    currentRightSpriteFile = step.sprite;
                 }
 
                 if (needsLoad) {
@@ -862,49 +834,31 @@
                     // Если спрайт уже загружен, просто показываем контейнер, если он был скрыт
                     speakerContainer.classList.remove('hidden');
                 }
-            } else if (step.position && step.sprite === null) {
-                // Скрыть спрайт на указанной позиции
-                 const isLeft = step.position.toLowerCase() === 'left';
-                 const container = isLeft ? spriteLeftContainer : spriteRightContainer;
-                 const element = isLeft ? spriteLeftElement : spriteRightElement;
-                 
-                 container.classList.add('hidden');
-                 element.src = '';
-                 
-                 if (isLeft) currentLeftSpriteFile = null;
-                 else currentRightSpriteFile = null;
             }
 
 
-            // C. ЛОГИКА ЗАТЕМНЕНИЯ (КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ)
-            
-            // 1. Сброс всех стилей затемнения
-            spriteLeftElement.classList.remove('dimmed-sprite');
-            spriteRightElement.classList.remove('dimmed-sprite');
+            // 4. Логика Затемнения (требует step.speaker и step.position, чтобы определить, кто говорит)
+            if (step.speaker && activeSpeakerPosition) {
+                const isLeftSpeaker = activeSpeakerPosition === 'left';
+                
+                const speakerElement = isLeftSpeaker ? spriteLeftElement : spriteRightElement;
+                const dimmedElement = isLeftSpeaker ? spriteRightElement : spriteLeftElement;
+                const dimmedContainer = isLeftSpeaker ? spriteRightContainer : spriteLeftContainer;
 
-            if (sideToActivate === 'left') {
-                // Говорит левый: затемняем правый (если он виден)
-                if (currentRightSpriteFile) { 
-                    spriteRightElement.classList.add('dimmed-sprite');
+                // Спрайт говорящего всегда не затемнен
+                speakerElement.classList.remove('dimmed-sprite'); 
+                
+                // Затемняем не говорящего, если он виден
+                if (!dimmedContainer.classList.contains('hidden')) {
+                    dimmedElement.classList.add('dimmed-sprite');
                 }
-            } else if (sideToActivate === 'right') {
-                // Говорит правый: затемняем левый (если он виден)
-                if (currentLeftSpriteFile) {
-                    spriteLeftElement.classList.add('dimmed-sprite');
-                }
-            } else if (step.dim === true) {
-                // Наррация с запросом на затемнение: затемняем оба видимых спрайта.
-                if (currentLeftSpriteFile) { 
-                    spriteLeftElement.classList.add('dimmed-sprite');
-                }
-                if (currentRightSpriteFile) { 
-                    spriteRightElement.classList.add('dimmed-sprite');
-                }
+            } else if (!step.speaker) {
+                // Если нет спикера (повествование), все спрайты не затемнены
+                spriteLeftElement.classList.remove('dimmed-sprite');
+                spriteRightElement.classList.remove('dimmed-sprite');
             }
             
-            // --- КОНЕЦ КРИТИЧЕСКОЙ ЛОГИКИ ---
-            
-            // 3. Текст и Имя Спикера
+            // 5. Текст и Имя Спикера
             dialogueWrapper.classList.remove('hidden');
             
             if (step.speaker) {
@@ -917,7 +871,7 @@
             
             currentText.textContent = step.text || "";
             
-            // 4. Обновление Истории
+            // 6. Обновление Истории
             if (isHistoryVisible) {
                 renderHistory();
             }
@@ -972,11 +926,8 @@
                     dialogueIsLoaded = true;
                     currentBackgroundUrl = null; 
                     
-                    // Сброс состояния спрайтов при загрузке новой главы (КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ)
                     currentLeftSpriteFile = null;
                     currentRightSpriteFile = null;
-                    lastActiveSpeakerSide = null; // Сброс активной стороны
-
                     elements.spriteLeftContainer.classList.add('hidden');
                     elements.spriteRightContainer.classList.add('hidden');
                     elements.spriteLeftElement.src = ''; 
@@ -1016,7 +967,7 @@
         }
 
         // ====================================================================
-        // === UI & I18N FUNCTIONS (ОК) ===
+        // === UI & I18N FUNCTIONS ===
         // ====================================================================
 
         function alertMessage(message) {
@@ -1068,7 +1019,7 @@
             }
         }
         
-        function updateArcSelect(skipChapterUpdate = false) {
+        function updateArcSelect(skipSideEffects = false) {
             const typeKey = elements.storyTypeSelect.value;
             const select = elements.arcSelect;
             const container = elements.arcSelectContainer;
@@ -1103,35 +1054,16 @@
                 }
 
             } else {
-                // Если тип не 'main', скрываем арки и очищаем значение
                 container.classList.add('hidden');
                 select.value = ""; 
             }
 
-            if (!skipChapterUpdate) {
-                updateChapterSelect(false); // Не пропускаем обновление глав
+            if (!skipSideEffects) {
+                updateChapterSelect(true);
             }
         }
 
-        // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Явно сбрасываем arc и chapter при смене типа
-        function updateArcAndChapterUI(calledByUIEvent) {
-            updateI18nStrings();
-            
-            // Если пользователь вручную меняет тип сюжета, необходимо сбросить arc и chapter
-            // для предотвращения сохранения несовместимых старых значений.
-            if (calledByUIEvent) {
-                elements.arcSelect.value = "";
-                elements.chapterSelect.value = "";
-                // Важно: не вызываем saveProgress здесь, saveProgress будет вызвана в updateChapterSelect
-            }
-
-            updateArcSelect(!calledByUIEvent); 
-            // Если вызвано пользователем, updateArcSelect вызовет updateChapterSelect, 
-            // иначе, если вызвано loadProgress, мы позволяем updateArcSelect делать свое дело
-        }
-
-
-        function updateChapterSelect(skipSave = false) {
+        function updateChapterSelect(skipSideEffects = false) {
             const typeKey = elements.storyTypeSelect.value;
             const arcKey = elements.arcSelect.value; 
             const select = elements.chapterSelect;
@@ -1147,98 +1079,61 @@
             }
             
             select.innerHTML = `<option value="">--- Выберите главу ---</option>`;
-            
-            if (!typeKey || !STORY_GROUPS[typeKey]) {
-                enableLoadButton();
-                if (!skipSave) saveProgress();
-                return;
-            }
-            
-            let requiredStartPrefix = STORY_GROUPS[typeKey].prefix;
-            let requiredInclusion = null;
-            let requiredExclusion = null;
-            
-            const mainStoryPrefix = STORY_GROUPS.main.prefix;
 
-            if (typeKey === 'main') {
-                // Для Основного сюжета
-                if (!arcKey) {
-                    enableLoadButton();
-                    if (!skipSave) saveProgress();
+            if (typeKey && STORY_GROUPS[typeKey]) {
+                const prefix = STORY_GROUPS[typeKey].prefix; 
+                let chapterFound = false;
+                
+                if (typeKey === 'main' && !arcKey) {
+                    select.disabled = true;
+                    if (!skipSideEffects) { enableLoadButton(); saveProgress(); }
                     return;
                 }
-                // Глава должна начинаться с префикса арки (re_, in_ и т.д.)
-                requiredStartPrefix = `${arcKey}_`; 
-                // И должна содержать 'main_'
-                requiredInclusion = mainStoryPrefix;
-                requiredExclusion = null; // Не исключаем ничего
                 
-            } else {
-                // Для всех остальных типов (Extra, Bosses и т.д.)
-                // Глава должна начинаться с префикса типа (extra_, boss_ и т.д.)
-                // И ГАРАНТИРОВАННО НЕ должна содержать 'main_' (для предотвращения утечки)
-                requiredStartPrefix = STORY_GROUPS[typeKey].prefix; 
-                requiredExclusion = mainStoryPrefix;
-                requiredInclusion = null;
-            }
+                let targetPrefix = typeKey === 'main' ? `${arcKey}_${prefix}` : prefix;
 
-            let chapterFound = false;
-
-            for (const fullChapterKey in window.storyMetadata) {
-                
-                // 1. Проверка префикса начала
-                if (!fullChapterKey.startsWith(requiredStartPrefix)) {
-                    continue;
-                }
-
-                // 2. Проверка обязательного включения (только для main)
-                if (requiredInclusion && !fullChapterKey.includes(requiredInclusion)) {
-                    continue; 
-                }
-                
-                // 3. Проверка обязательного исключения (для всех кроме main)
-                if (requiredExclusion && fullChapterKey.includes(requiredExclusion)) {
-                    continue; 
-                }
-
-                // Глава прошла все проверки, добавляем её
-                const chapterData = window.storyMetadata[fullChapterKey];
-                const chapterName = chapterData[lang] || chapterData.ru; 
-                
-                if (chapterName) {
-                    const option = document.createElement('option');
-                    option.value = fullChapterKey; 
-                    option.textContent = chapterName; 
-                    
-                    if (fullChapterKey === currentChapterKey) {
-                         option.selected = true;
+                for (const fullChapterKey in window.storyMetadata) {
+                    if (fullChapterKey.startsWith(targetPrefix)) {
+                        const chapterData = window.storyMetadata[fullChapterKey];
+                        const chapterName = chapterData[lang] || chapterData.ru; 
+                        
+                        if (chapterName) {
+                            const option = document.createElement('option');
+                            option.value = fullChapterKey; 
+                            option.textContent = chapterName; 
+                            
+                            if (fullChapterKey === currentChapterKey) {
+                                 option.selected = true;
+                            }
+                            select.appendChild(option);
+                            chapterFound = true;
+                        }
                     }
-                    select.appendChild(option);
-                    chapterFound = true;
                 }
-            }
+                
+                if (chapterFound) {
+                     select.disabled = false;
+                }
+            } 
             
-            if (chapterFound) {
-                 select.disabled = false;
-            } else if (typeKey === 'extra') {
-                 // Специальное сообщение, если Extra-главы не найдены
-                 select.innerHTML = `<option value="">--- ${i18n[lang].noExtraChapters} ---</option>`;
-            }
-            
-            enableLoadButton();
-            if (!skipSave) {
-                // Сохраняем прогресс только после полного обновления
+            if (!skipSideEffects) {
+                enableLoadButton();
                 saveProgress(); 
             }
         }
         
+        function updateArcAndChapterUI(calledByUIEvent) {
+            updateI18nStrings();
+            updateArcSelect(calledByUIEvent); 
+        }
+
         function enableLoadButton() {
             const storyId = elements.chapterSelect.value;
             elements.loadButton.disabled = !storyId;
         }
 
         // ====================================================================
-        // === УПРАВЛЕНИЕ ИСТОРИЕЙ (ОК) ===
+        // === УПРАВЛЕНИЕ ИСТОРИЕЙ ===
         // ====================================================================
 
         function toggleHistory() {
@@ -1347,38 +1242,32 @@
             const progress = JSON.parse(savedProgress);
             const { languageSelect, storyTypeSelect, arcSelect, chapterSelect } = elements;
             
-            // 1. Восстановление языка
             if (i18n[progress.lang]) {
                 languageSelect.value = progress.lang;
             }
             updateI18nStrings(); 
             
             let typeRestored = false;
-            // 2. Восстановление типа сюжета
             if (progress.type && STORY_GROUPS[progress.type]) {
                 storyTypeSelect.value = progress.type;
                 typeRestored = true;
             }
             
-            // 3. Обновление списка арок (только UI)
-            updateArcSelect(true); // skipChapterUpdate = true, чтобы не вызывать updateChapterSelect дважды
-            
             let arcRestored = false;
             if (progress.type === 'main') {
+                updateArcSelect(true); 
                 if (progress.arc && MAIN_STORY_ARCS[progress.arc]) {
                     arcSelect.value = progress.arc;
                     arcRestored = true;
                 }
             } else {
-                 arcSelect.value = ""; // Для не-main типов arc всегда пуст
+                 updateArcSelect(true); 
             }
             
             let chapterRestored = false;
             if (window.storyMetadata && typeRestored && progress.chapter) {
-                // 4. Обновляем список глав с учетом восстановленных type/arc
-                updateChapterSelect(true); // skipSave = true
+                updateChapterSelect(true); 
                 
-                // Проверяем, существует ли сохраненная глава в текущем отфильтрованном списке
                 if (Array.from(chapterSelect.options).some(opt => opt.value === progress.chapter)) {
                     chapterSelect.value = progress.chapter;
                     chapterRestored = true;
@@ -1403,7 +1292,6 @@
 
             currentLeftSpriteFile = null;
             currentRightSpriteFile = null;
-            lastActiveSpeakerSide = null; // Сброс активной стороны
 
             elements.dialogueWrapper.classList.add('hidden');
             elements.languageSelect.value = 'ru';
