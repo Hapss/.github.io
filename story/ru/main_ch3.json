@@ -95,7 +95,6 @@
         {
             "speaker": "Киана",
             "text": "Фу~ух. Кажется было перебором отбиваться от зомби, защищая нормального человека... Эй! Ты в порядке?",
-            "background": "bg_old_classroom.png",
             "sprite": "Kiana 1.png",
             "position": "left"
         },
@@ -186,7 +185,6 @@
         {
             "speaker": "",
             "text": "Грохот!!!",
-            "background": "bg_storm.png",
             "sprite_dimmed": "Kiana 3.png"
         },
         {
