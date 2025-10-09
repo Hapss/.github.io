@@ -6,7 +6,7 @@
             "speaker": "Киана",
             "sprite": "Kiana 1.png",
             "position": "right",
-            "background": "images/background/bg_stage1.png",
+            "background": "images/background/bg_stage1.png"
         },
         {
             "text": "Я уже здесь, следует избегать зон, где зомби плотно скучковались, чтобы продвинуться дальше. В таком случае самым эффективным путём будет через вишнёвую дорогу в центре кампуса академии Чиба. Вперёд!",
