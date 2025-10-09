@@ -44,6 +44,7 @@
             --color-accent-primary: #0f766e; 
             --color-accent-secondary: #115e59; 
             --color-accent-ring: #0d9488; 
+            
             --color-warning-accent: #9333ea; 
             --color-warning-bg: #ede9fe; 
             
@@ -195,6 +196,7 @@
         }
         
         .dimmed-sprite {
+            /* Установлено в 30% яркости и 30% серого, чтобы сохранить немного цвета */
             filter: brightness(0.3) grayscale(30%) !important; 
             opacity: 1 !important; 
         }
@@ -728,21 +730,27 @@
                 return;
             }
             
-            const tempImg = new Image();
+            // Сбрасываем src сразу, чтобы браузер начал загрузку
+            element.src = url;
+            container.classList.add('hidden'); // Скрываем контейнер пока идет загрузка
             
-            tempImg.onload = () => {
-                element.src = tempImg.src; 
+            // Использование `element.onload` и `element.onerror` вместо создания нового Image()
+            element.onload = () => {
+                // Показываем, только если src успешно загружен
                 container.classList.remove('hidden'); 
+                element.onload = null; // Удаляем обработчик, чтобы избежать повторных вызовов
             };
             
-            tempImg.onerror = () => {
+            element.onerror = () => {
                 container.classList.add('hidden');
                 console.warn(`[Sprite Load] Не удалось загрузить спрайт: ${url}.`);
-                element.src = '';
+                element.src = ''; // Сброс src при ошибке
+                element.onerror = null; // Удаляем обработчик
             };
 
+            // Применяем cache-buster к URL
             const finalUrl = `${url}?t=${Date.now()}`;
-            tempImg.src = finalUrl;
+            element.src = finalUrl;
         }
 
         function crossFadeBackground(newBgFileName) {
@@ -808,72 +816,79 @@
                 crossFadeBackground(step.background);
             }
 
-            // 2. Сброс затемнения для текущей линии
-            spriteLeftElement.classList.remove('dimmed-sprite');
-            spriteRightElement.classList.remove('dimmed-sprite');
-
-            // --- ОБНОВЛЕННАЯ ЛОГИКА СПРАЙТОВ (Использует sprite_left и sprite_right) ---
+            // --- 2. Управление Спрайтами (Видимость и Загрузка) ---
             
-            const leftSpriteFile = step.sprite_left || null;
-            const rightSpriteFile = step.sprite_right || null;
+            // Определяем файлы спрайтов для текущего шага
+            const newLeftSpriteFile = step.sprite_left || null;
+            const newRightSpriteFile = step.sprite_right || null;
 
-            // 3. Обновление и Загрузка Левого Спрайта
-            if (leftSpriteFile) {
-                if (currentLeftSpriteFile !== leftSpriteFile) {
-                    loadSprite(spritePath(leftSpriteFile), spriteLeftElement, spriteLeftContainer);
-                    currentLeftSpriteFile = leftSpriteFile;
+            // --- A. Левый Спрайт ---
+            if (newLeftSpriteFile) {
+                if (currentLeftSpriteFile !== newLeftSpriteFile) {
+                    loadSprite(spritePath(newLeftSpriteFile), spriteLeftElement, spriteLeftContainer);
+                    currentLeftSpriteFile = newLeftSpriteFile;
                 } else {
-                    // Если файл тот же, просто показываем (если был скрыт)
+                    // Если файл тот же, просто убеждаемся, что контейнер показан (если он был скрыт)
                     spriteLeftContainer.classList.remove('hidden');
                 }
             } else {
-                // Если нет файла, скрываем спрайт
+                // Если нет файла, скрываем спрайт и сбрасываем состояние
                 spriteLeftContainer.classList.add('hidden');
                 currentLeftSpriteFile = null;
             }
 
-            // 4. Обновление и Загрузка Правого Спрайта
-            if (rightSpriteFile) {
-                if (currentRightSpriteFile !== rightSpriteFile) {
-                    loadSprite(spritePath(rightSpriteFile), spriteRightElement, spriteRightContainer);
-                    currentRightSpriteFile = rightSpriteFile;
+            // --- B. Правый Спрайт ---
+            if (newRightSpriteFile) {
+                if (currentRightSpriteFile !== newRightSpriteFile) {
+                    loadSprite(spritePath(newRightSpriteFile), spriteRightElement, spriteRightContainer);
+                    currentRightSpriteFile = newRightSpriteFile;
                 } else {
-                    // Если файл тот же, просто показываем (если был скрыт)
+                    // Если файл тот же, просто убеждаемся, что контейнер показан
                     spriteRightContainer.classList.remove('hidden');
                 }
             } else {
-                // Если нет файла, скрываем спрайт
+                // Если нет файла, скрываем спрайт и сбрасываем состояние
                 spriteRightContainer.classList.add('hidden');
                 currentRightSpriteFile = null;
             }
-
-
-            // 5. Логика Затемнения
-            // Использует поля step.speaker и step.position для определения говорящего и затемнения.
             
+            // --- C. ИСПРАВЛЕННАЯ Логика Затемнения (с учетом dim_override) ---
+            
+            // 1. Сброс затемнения для ВСЕХ спрайтов перед обновлением
+            spriteLeftElement.classList.remove('dimmed-sprite');
+            spriteRightElement.classList.remove('dimmed-sprite');
+
+            let dimTarget = 'none';
+            
+            // --- 1. Автоматическое определение, кого затемнить (по спикеру) ---
             if (step.speaker && step.position) {
                 const isLeftSpeaker = step.position.toLowerCase() === 'left';
-                
-                const speakerElement = isLeftSpeaker ? spriteLeftElement : spriteRightElement;
-                const dimmedElement = isLeftSpeaker ? spriteRightElement : spriteLeftElement;
-                const dimmedContainer = isLeftSpeaker ? spriteRightContainer : spriteLeftContainer;
-
-                // Спрайт говорящего всегда не затемнен
-                speakerElement.classList.remove('dimmed-sprite'); 
-                
-                // Затемняем не говорящего, если его контейнер видим (т.е., спрайт загружен)
-                if (!dimmedContainer.classList.contains('hidden')) {
-                    dimmedElement.classList.add('dimmed-sprite');
-                }
-            } else if (!step.speaker) {
-                // Если нет спикера (повествование), все спрайты не затемнены
-                spriteLeftElement.classList.remove('dimmed-sprite');
-                spriteRightElement.classList.remove('dimmed-sprite');
+                dimTarget = isLeftSpeaker ? 'right' : 'left';
             }
             
-            // --- КОНЕЦ ОБНОВЛЕННОЙ ЛОГИКИ СПРАЙТОВ ---
+            // --- 2. Применение явного override (если есть) ---
+            // dim_override может быть: 'left', 'right', 'both', 'none'
+            if (step.dim_override) {
+                dimTarget = step.dim_override.toLowerCase();
+            }
 
-            // 6. Текст и Имя Спикера
+            // --- 3. Применение затемнения к видимым спрайтам ---
+            
+            // Затемнение левого спрайта
+            const shouldDimLeft = dimTarget === 'left' || dimTarget === 'both';
+            if (shouldDimLeft && !spriteLeftContainer.classList.contains('hidden')) {
+                spriteLeftElement.classList.add('dimmed-sprite');
+            }
+
+            // Затемнение правого спрайта
+            const shouldDimRight = dimTarget === 'right' || dimTarget === 'both';
+            if (shouldDimRight && !spriteRightContainer.classList.contains('hidden')) {
+                spriteRightElement.classList.add('dimmed-sprite');
+            }
+            
+            // --- КОНЕЦ ИСПРАВЛЕННОЙ ЛОГИКИ СПРАЙТОВ ---
+
+            // 3. Текст и Имя Спикера
             dialogueWrapper.classList.remove('hidden');
             
             if (step.speaker) {
@@ -886,7 +901,7 @@
             
             currentText.textContent = step.text || "";
             
-            // 7. Обновление Истории
+            // 4. Обновление Истории
             if (isHistoryVisible) {
                 renderHistory();
             }
