@@ -215,7 +215,7 @@
             "position": "left"
         },
         {
-            "speaker": "Заражённая Мэй",
+            "speaker": "Мэй",
             "text": "Когда этот лицемерный мир будет разрушен... Всё сможет вернуться на место... Мой отец и все остальные обязательно вернутся ко мне!",
             "sprite": "Mei 1.png",
             "position": "left"
@@ -281,7 +281,7 @@
             "position": "left"
         },
         {
-            "speaker": "Заражённая Мэй",
+            "speaker": "Мэй",
             "text": "Прочь отсюда! Мне не нужна твоя жалость!",
             "sprite": "Mei 1.png",
             "position": "left"
@@ -333,7 +333,7 @@
             "text": "Что с твоим видом!? Ты не Райден Мэй! Кто ты такая?!",
             "sprite": "Kiana 1.png",
             "position": "left",
-            "sprite_dimmed": "Herrscher 1.png"
+            "sprite_dimmed": "Herrscher Mei.png"
         },
         {
             "speaker": "Заражённая Мэй",
@@ -372,7 +372,7 @@
         {
             "speaker": "Заражённая Мэй",
             "text": "Хмпф... Уже не важно кто я. Райден Мэй исчезла из этого мира. Ну а я существую ради уничтожения этого мерзкого мира!",
-            "sprite": "Mei 1.png",
+            "sprite": "Herrscher Mei.png",
             "position": "left",
             "sprite_dimmed": "Kiana 1.png"
         },
