@@ -331,6 +331,7 @@
             <!-- Выбор Типа Сюжета -->
             <div class="flex-1 min-w-[45%] md:min-w-[180px]">
                 <label for="storyTypeSelect" id="labelStoryType" class="block text-sm font-medium mb-1" style="color: var(--color-text-secondary);">Тип сюжета</label>
+                <!-- Использование обновленной функции для обработки изменений типа -->
                 <select id="storyTypeSelect" onchange="updateArcAndChapterUI(true)" class="select-field w-full rounded-lg p-2.5 cursor-pointer focus:ring-4 transition text-sm" style="background-color: var(--color-bg-main);">
                     <!-- Options populated by JS -->
                 </select>
@@ -339,7 +340,8 @@
             <!-- Выбор Арки -->
             <div id="arcSelectContainer" class="flex-1 min-w-[45%] md:min-w-[180px] hidden">
                 <label for="arcSelect" id="labelArc" class="block text-sm font-medium mb-1" style="color: var(--color-text-secondary);">Арка</label>
-                <select id="arcSelect" onchange="updateChapterSelect(true)" class="select-field w-full rounded-lg p-2.5 cursor-pointer focus:ring-4 transition text-sm" style="background-color: var(--color-bg-main);">
+                 <!-- Вызов обновления глав при изменении арки -->
+                <select id="arcSelect" onchange="updateChapterSelect(true); saveProgress()" class="select-field w-full rounded-lg p-2.5 cursor-pointer focus:ring-4 transition text-sm" style="background-color: var(--color-bg-main);">
                     <!-- Options populated by JS -->
                 </select>
             </div>
@@ -1001,7 +1003,7 @@
         }
 
         // ====================================================================
-        // === UI & I18N FUNCTIONS ===
+        // === UI & I18N FUNCTIONS (ИСПРАВЛЕНИЕ: Объединение логики обновления выборов) ===
         // ====================================================================
 
         function alertMessage(message) {
@@ -1053,23 +1055,31 @@
             }
         }
         
-        function updateArcSelect(skipSideEffects = false) {
-            const typeKey = elements.storyTypeSelect.value;
-            const select = elements.arcSelect;
-            const container = elements.arcSelectContainer;
-            const lang = elements.languageSelect.value;
-            const currentArcKey = select.value;
-
-            select.innerHTML = '';
-            select.disabled = true;
+        /**
+         * ИСПРАВЛЕНИЕ: Объединенная функция для обновления Арки и Глав.
+         * Вызывается при смене языка или типа сюжета.
+         * @param {boolean} skipSideEffects - Пропускать ли вызов enableLoadButton/saveProgress.
+         */
+        function updateArcAndChapterUI(skipSideEffects = false) {
+            updateI18nStrings(); 
             
+            // === 1. Обновление и скрытие/показ Арки ===
+            const typeKey = elements.storyTypeSelect.value;
+            const arcSelect = elements.arcSelect;
+            const arcContainer = elements.arcSelectContainer;
+            const lang = elements.languageSelect.value;
+            const currentArcKey = arcSelect.value;
+            
+            arcSelect.innerHTML = '';
+            arcSelect.disabled = true;
+
             if (typeKey === 'main') {
-                container.classList.remove('hidden');
+                arcContainer.classList.remove('hidden');
                 
                 const defaultOption = document.createElement('option');
                 defaultOption.value = "";
-                defaultOption.textContent = "--- Выберите арку ---";
-                select.appendChild(defaultOption);
+                defaultOption.textContent = `--- Выберите арку ---`;
+                arcSelect.appendChild(defaultOption);
                 
                 let arcFound = false;
                 for (const key in MAIN_STORY_ARCS) {
@@ -1079,27 +1089,28 @@
                     if (key === currentArcKey) {
                         option.selected = true;
                     }
-                    select.appendChild(option);
+                    arcSelect.appendChild(option);
                     arcFound = true;
                 }
-                
-                if (arcFound) {
-                    select.disabled = false;
-                }
+                arcSelect.disabled = !arcFound;
 
             } else {
-                container.classList.add('hidden');
-                select.value = ""; 
+                // Если тип сюжета не основной, сбрасываем арку и скрываем контейнер.
+                // Это исправляет Bug 1 (загрузка глав основной истории при смене типа).
+                arcContainer.classList.add('hidden');
+                arcSelect.value = ""; 
             }
-
-            if (!skipSideEffects) {
-                updateChapterSelect(true);
-            }
+            
+            // === 2. Обновление Глав ===
+            // Вызов updateChapterSelect гарантирует, что список глав будет обновлен 
+            // для всех типов сюжета, исправляя Bug 2.
+            updateChapterSelect(skipSideEffects);
         }
 
         function updateChapterSelect(skipSideEffects = false) {
             const typeKey = elements.storyTypeSelect.value;
-            const arcKey = elements.arcSelect.value; 
+            // CRITICAL: Получаем arcKey после обновления arcSelect в updateArcAndChapterUI
+            const arcKey = elements.arcSelect.value;       
             const select = elements.chapterSelect;
             const lang = elements.languageSelect.value;
             const currentChapterKey = select.value; 
@@ -1118,12 +1129,13 @@
                 const prefix = STORY_GROUPS[typeKey].prefix; 
                 let chapterFound = false;
                 
-                if (typeKey === 'main' && !arcKey) {
-                    select.disabled = true;
+                // Блокируем загрузку, если выбран основной сюжет, но не выбрана арка.
+                if (typeKey === 'main' && !arcKey) { 
                     if (!skipSideEffects) { enableLoadButton(); saveProgress(); }
                     return;
                 }
                 
+                // Определяем префикс для фильтрации
                 let targetPrefix = typeKey === 'main' ? `${arcKey}_${prefix}` : prefix;
 
                 for (const fullChapterKey in window.storyMetadata) {
@@ -1156,9 +1168,9 @@
             }
         }
         
-        function updateArcAndChapterUI(calledByUIEvent) {
-            updateI18nStrings();
-            updateArcSelect(calledByUIEvent); 
+        // Переименована для единообразия с onchange в HTML
+        function initializeOrUpdateUI(isUserEvent) {
+             updateArcAndChapterUI(isUserEvent); 
         }
 
         function enableLoadButton() {
@@ -1268,7 +1280,7 @@
             updateI18nStrings(); 
 
             if (!savedProgress) {
-                updateArcAndChapterUI(false); 
+                updateArcAndChapterUI(false); // Вызываем унифицированную функцию
                 enableLoadButton();
                 return; 
             }
@@ -1287,26 +1299,26 @@
                 typeRestored = true;
             }
             
-            let arcRestored = false;
-            if (progress.type === 'main') {
-                updateArcSelect(true); 
-                if (progress.arc && MAIN_STORY_ARCS[progress.arc]) {
-                    arcSelect.value = progress.arc;
-                    arcRestored = true;
-                }
-            } else {
-                 updateArcSelect(true); 
+            // Устанавливаем значение арки *до* вызова updateArcAndChapterUI для восстановления
+            if (typeRestored && progress.type === 'main' && progress.arc) {
+                 arcSelect.value = progress.arc;
+            } else if (typeRestored && progress.type !== 'main') {
+                 // Если тип не основной, явно очищаем arcSelect.value, чтобы избежать ошибки.
+                 arcSelect.value = "";
             }
-            
+
+            // Эта функция теперь обновляет и Arc, и Chapter UI на основе сохраненного состояния
+            updateArcAndChapterUI(true); 
+
+            // После обновления UI проверяем, восстановлена ли глава
             let chapterRestored = false;
             if (window.storyMetadata && typeRestored && progress.chapter) {
-                updateChapterSelect(true); 
-                
                 if (Array.from(chapterSelect.options).some(opt => opt.value === progress.chapter)) {
                     chapterSelect.value = progress.chapter;
                     chapterRestored = true;
                 }
             }
+            
             enableLoadButton();
             
             if (chapterRestored) {
