@@ -424,8 +424,9 @@
                 Сайт сделан при помощи Gemini.
             </p>
 
-            <!-- Кнопка закрытия -->
+            <!-- Кнопка закрытия (ИСПРАВЛЕНО: добавлен onclick) -->
             <button id="close-warning-button" 
+                    onclick="dismissWarningModal()"
                     class="warning-button font-bold py-3 px-8 text-base md:text-lg rounded-full 
                            transition duration-200 ease-in-out shadow-xl hover:shadow-2xl 
                            focus:outline-none focus:ring-4" 
@@ -485,6 +486,7 @@
         let currentBackgroundUrl = null; 
         window.storyMetadata = null; 
         let isHistoryVisible = false; 
+        let activeBgLayer = 1; // 1 or 2
         
         let currentLeftSpriteFile = null;
         let currentRightSpriteFile = null;
@@ -562,6 +564,7 @@
                 closeButton.style.color = 'white'; 
                 
                 const overlay = document.getElementById('warning-overlay');
+                // Адаптивное затемнение для оверлея
                 overlay.style.backgroundColor = isDark ? 'rgba(15, 23, 42, 0.95)' : 'rgba(241, 245, 249, 0.95)';
             }
 
@@ -590,7 +593,7 @@
         }
         
         function handleWarningModalState() {
-            const { warningOverlay, closeWarningButton } = elements;
+            const { warningOverlay } = elements;
             
             const isDismissed = localStorage.getItem(CONFIG.STORAGE.WARNING_KEY) === 'true';
 
@@ -598,12 +601,10 @@
                 warningOverlay.style.display = 'none';
                 return;
             }
-
-            if (closeWarningButton) {
-                 closeWarningButton.addEventListener('click', dismissWarningModal);
-            }
+            // Кнопка обрабатывается через inline onclick="dismissWarningModal()" в HTML
         }
         
+        // Эта функция вызывается напрямую из HTML: onclick="dismissWarningModal()"
         function dismissWarningModal() {
             const overlay = elements.warningOverlay;
             if (!overlay) return;
@@ -659,7 +660,7 @@
             currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR; 
             
             loadTheme(); 
-            handleWarningModalState(); 
+            handleWarningModalState(); // Проверяет localStorage и показывает/скрывает
             loadProgress(); 
             
             // Закрытие Истории по клику вне панели
