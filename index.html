@@ -47,9 +47,11 @@
             --color-warning-accent: #9333ea; 
             --color-warning-bg: #ede9fe; 
             
+            /* Текст */
             --color-text-primary: #111827; 
             --color-text-secondary: #4b5563; 
             
+            /* Фиолетовый */
             --color-speaker-name: #9333ea; 
         }
 
@@ -838,24 +840,39 @@
 
 
             // 4. Логика Затемнения (требует step.speaker и step.position, чтобы определить, кто говорит)
+            const spriteElementToDim = (position) => position === 'left' ? spriteRightElement : spriteLeftElement;
+            const spriteContainerToDim = (position) => position === 'left' ? spriteRightContainer : spriteLeftContainer;
+
             if (step.speaker && activeSpeakerPosition) {
-                const isLeftSpeaker = activeSpeakerPosition === 'left';
-                
-                const speakerElement = isLeftSpeaker ? spriteLeftElement : spriteRightElement;
-                const dimmedElement = isLeftSpeaker ? spriteRightElement : spriteLeftElement;
-                const dimmedContainer = isLeftSpeaker ? spriteRightContainer : spriteLeftContainer;
+                // Если есть спикер, затемняем НЕ говорящего (если он есть)
+                const dimmedElement = spriteElementToDim(activeSpeakerPosition);
+                const dimmedContainer = spriteContainerToDim(activeSpeakerPosition);
 
                 // Спрайт говорящего всегда не затемнен
-                speakerElement.classList.remove('dimmed-sprite'); 
+                const speakingElement = activeSpeakerPosition === 'left' ? spriteLeftElement : spriteRightElement;
+                speakingElement.classList.remove('dimmed-sprite'); 
                 
                 // Затемняем не говорящего, если он виден
                 if (!dimmedContainer.classList.contains('hidden')) {
                     dimmedElement.classList.add('dimmed-sprite');
                 }
             } else if (!step.speaker) {
-                // Если нет спикера (повествование), все спрайты не затемнены
-                spriteLeftElement.classList.remove('dimmed-sprite');
-                spriteRightElement.classList.remove('dimmed-sprite');
+                // Если нет спикера (повествование), проверяем dim флаг
+                const isDimmedLine = step.dim === true;
+                
+                // Если dim: true, все видимые спрайты затемняются
+                if (isDimmedLine) {
+                    if (!elements.spriteLeftContainer.classList.contains('hidden')) {
+                        spriteLeftElement.classList.add('dimmed-sprite');
+                    }
+                    if (!elements.spriteRightContainer.classList.contains('hidden')) {
+                        spriteRightElement.classList.add('dimmed-sprite');
+                    }
+                } else {
+                    // Если dim: false или отсутствует, все спрайты не затемнены
+                    spriteLeftElement.classList.remove('dimmed-sprite');
+                    spriteRightElement.classList.remove('dimmed-sprite');
+                }
             }
             
             // 5. Текст и Имя Спикера
@@ -1090,26 +1107,53 @@
                     return;
                 }
                 
-                let targetPrefix = typeKey === 'main' ? `${arcKey}_${prefix}` : prefix;
+                // --- ИСПРАВЛЕНИЕ: Логика фильтрации глав (Баг 1 и Баг 2) ---
+                // Предполагаем, что: 
+                // 1. Главы 'main' используют префикс арки (e.g., 're_') для фильтрации.
+                // 2. Главы 'extra' и другие используют префикс типа (e.g., 'extra_').
+
+                let targetPrefix = typeKey === 'main' ? `${arcKey}_` : prefix;
+                const mainStoryPrefix = STORY_GROUPS.main.prefix;
 
                 for (const fullChapterKey in window.storyMetadata) {
-                    if (fullChapterKey.startsWith(targetPrefix)) {
-                        const chapterData = window.storyMetadata[fullChapterKey];
-                        const chapterName = chapterData[lang] || chapterData.ru; 
+                    
+                    // 1. Основная фильтрация по префиксу (арки для main, типа для остальных)
+                    if (fullChapterKey.startsWith(targetPrefix)) { 
                         
-                        if (chapterName) {
-                            const option = document.createElement('option');
-                            option.value = fullChapterKey; 
-                            option.textContent = chapterName; 
-                            
-                            if (fullChapterKey === currentChapterKey) {
-                                 option.selected = true;
+                        let shouldInclude = false;
+
+                        if (typeKey === 'main') {
+                            // Для Main Story: ключ должен начинаться с ArcKey И содержать префикс 'main_' (для дополнительной гарантии).
+                            if (fullChapterKey.includes(mainStoryPrefix)) {
+                                shouldInclude = true;
                             }
-                            select.appendChild(option);
-                            chapterFound = true;
+                        } else {
+                            // Для Extra/Others (Баг 2: устранение утечки глав Main): 
+                            // Ключ должен начинаться с префикса типа И НЕ содержать префикс 'main_'.
+                            if (!fullChapterKey.includes(mainStoryPrefix)) {
+                                shouldInclude = true;
+                            }
+                        }
+
+                        if (shouldInclude) {
+                            const chapterData = window.storyMetadata[fullChapterKey];
+                            const chapterName = chapterData[lang] || chapterData.ru; 
+                            
+                            if (chapterName) {
+                                const option = document.createElement('option');
+                                option.value = fullChapterKey; 
+                                option.textContent = chapterName; 
+                                
+                                if (fullChapterKey === currentChapterKey) {
+                                     option.selected = true;
+                                }
+                                select.appendChild(option);
+                                chapterFound = true;
+                            }
                         }
                     }
                 }
+                // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
                 
                 if (chapterFound) {
                      select.disabled = false;
