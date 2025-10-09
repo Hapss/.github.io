@@ -264,12 +264,14 @@
         {
             "speaker": "",
             "text": "Бах! Бах! Бах!",
-            "sprite_dimmed": "Kiana 1.png"
+            "sprite_dimmed": "Kiana 1.png",
+            "position": "left"
         },
         {
             "speaker": "Киана",
             "text": "Мёртвые ублюдки! А ну прочь от этой девушки!!",
-            "sprite": "Kiana 4.png"
+            "sprite": "Kiana 4.png",
+            "position": "left"
         },
         {
             "speaker": "Мэй",
@@ -393,9 +395,7 @@
             "speaker": "",
             "text": "Бац! Бах!",
             "sprite": "Kiana 1.png",
-            "dim": true,
-            "sprite": "Herrscher Mei.png",
-            "dim": true
+            "sprite": "Herrscher Mei.png"
         },
         {
             "speaker": "Киана",
