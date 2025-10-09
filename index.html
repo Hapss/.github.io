@@ -3,195 +3,1416 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Диалоговая Сцена с Исправлением Ошибок</title>
+    <title>Архив сюжета Houkai Gakuen 2</title>
+    <!-- Подключение Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        
+        /* ==================================================================== */
+        /* === Цветовые переменные (Dark Theme - по умолчанию) === */
+        /* ==================================================================== */
+        :root, .dark-theme {
+            /* Фоновые цвета */
+            --color-bg-darkest: #171c26; /* Для заголовка и истории */
+            --color-bg-main: #1f2937;    /* Основной фон/элементы (VN Viewer default) */
+            --color-bg-medium: #374151;  /* Панель управления/Фон элемента истории */
+            
+            /* Акценты */
+            --color-accent-primary: #0891b2; 
+            --color-accent-secondary: #0e7490; 
+            --color-accent-ring: #22d3ee; 
+            --color-warning-accent: #d946ef; 
+            --color-warning-bg: #1e1b4b; 
+            
+            /* Текст */
+            --color-text-primary: #e5e7eb; 
+            --color-text-secondary: #d1d5db; 
+            
+            /* Фиолетовый */
+            --color-speaker-name: #ca7cfe; 
+        }
+
+        /* ==================================================================== */
+        /* === Цветовые переменные (Light Theme) === */
+        /* ==================================================================== */
+        .light-theme {
+            --color-bg-darkest: #ffffff;  
+            --color-bg-main: #f3f4f6;    
+            --color-bg-medium: #ffffff;  
+            
+            --color-accent-primary: #0f766e; 
+            --color-accent-secondary: #115e59; 
+            --color-accent-ring: #0d9488; 
+            --color-warning-accent: #9333ea; 
+            --color-warning-bg: #ede9fe; 
+            
+            /* Текст */
+            --color-text-primary: #111827; 
+            --color-text-secondary: #4b5563; 
+            
+            /* Фиолетовый */
+            --color-speaker-name: #9333ea; 
+        }
+
+        /* ==================================================================== */
+        /* === Общие стили и привязка к переменным === */
+        /* ==================================================================== */
+        
+        body, #vnViewer, .sprite-image {
+            user-select: none;
+            -webkit-user-select: none; 
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-drag: none;
+            -webkit-user-drag: none;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0d1117;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            background-color: var(--color-bg-main); 
+            color: var(--color-text-primary);
+            transition: background-color 0.3s ease;
         }
-        .container {
-            width: 100%;
-            max-width: 900px;
+        
+        .vn-overlay {
+            background-color: var(--color-bg-main); 
+            opacity: 0.9;
+            backdrop-filter: blur(4px);
+            color: var(--color-text-primary);
+            border: 1px solid var(--color-bg-medium); 
+        }
+        
+        .speaker-name {
+            background-color: var(--color-bg-main);
+            color: var(--color-speaker-name); 
+            padding: 4px 12px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            display: inline-block;
+            font-weight: bold;
+            /* Уменьшаем размер имени спикера на мобильных */
+            font-size: 1rem; 
+        }
+        @media (min-width: 768px) {
+            .speaker-name {
+                font-size: 1.25rem; /* Восстанавливаем размер на десктопе */
+            }
+        }
+        
+        .reset-button { background-color: var(--color-accent-secondary); }
+        .reset-button:hover { background-color: var(--color-accent-primary); }
+        .load-button { background-color: var(--color-accent-primary); }
+        .load-button:hover { background-color: var(--color-accent-secondary); }
+        .alert-message { background-color: var(--color-accent-primary); }
+        
+        .warning-button {
+            background-color: var(--color-warning-accent);
+            color: var(--color-text-primary);
+            transition: background-color 0.2s;
+        }
+        .warning-button:hover {
+            background-color: var(--color-accent-primary); 
+        }
+
+        /* ==================================================================== */
+        /* === АДАПТИВНЫЙ ДИАЛОГОВЫЙ БЛОК (MOBILE-FIRST) === */
+        /* ==================================================================== */
+
+        /* Wrapper, который центрирует и ограничивает ширину */
+        #dialogueWrapper {
+            /* На мобильных (по умолчанию) */
+            width: 95%; /* Почти полная ширина экрана */
+            max-width: 95%; 
+        }
+
+        @media (min-width: 1024px) {
+            #dialogueWrapper {
+                /* На десктопе */
+                width: 900px;
+                max-width: 900px;
+            }
+        }
+
+        /* Контейнер текста */
+        #dialogueContentBox { 
+            /* Высота и отступы адаптированы */
+            height: 150px; 
             padding: 1rem;
         }
-        .speaker-box {
-            transition: all 0.3s ease;
-            filter: grayscale(80%) opacity(50%); /* Неактивный вид */
-            transform: scale(0.98);
-            border-bottom: 4px solid transparent;
+        @media (min-width: 768px) {
+            #dialogueContentBox {
+                height: 200px; 
+                padding: 2rem;
+            }
         }
-        .speaker-active {
-            filter: grayscale(0%) opacity(100%); /* Активный вид */
-            transform: scale(1);
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-            border-bottom: 4px solid;
+
+        /* Текст диалога */
+        #currentText {
+            /* Уменьшаем размер текста на мобильных */
+            font-size: 1.125rem; /* text-lg */
         }
-        .sprite {
-            height: 120px;
-            width: 120px;
-            border-radius: 50%;
-            display: flex;
+        @media (min-width: 768px) {
+            #currentText {
+                /* Восстанавливаем на десктопе */
+                font-size: 1.25rem; /* text-xl */
+            }
+        }
+        
+        /* ==================================================================== */
+        /* === СПРАЙТЫ И ФОН === */
+        /* ==================================================================== */
+        
+        .sprite-position {
+            position: absolute;
+            bottom: 0; 
+            height: 95%; 
+            /* Уменьшаем ширину спрайта, чтобы освободить место на узких экранах */
+            width: 40%;
+            transition: opacity 0.5s ease; 
+            z-index: 10;
+            display: flex; 
             justify-content: center;
-            align-items: center;
-            font-size: 3rem;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-            margin-bottom: 0.5rem;
+            align-items: flex-end;
         }
-        .dialogue-text {
-            min-height: 80px;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+        @media (min-width: 768px) {
+            .sprite-position {
+                width: 45%; /* Увеличиваем на больших экранах */
+            }
         }
+
+        .sprite-position.left { left: 0; }
+        .sprite-position.right { right: 0; }
+        
+        .sprite-image {
+            height: 100%; 
+            width: auto;
+            max-height: 100%; 
+            object-fit: contain;
+            display: block; 
+            transition: opacity 0.3s ease, filter 0.3s ease; 
+            opacity: 1; 
+        }
+        
+        .dimmed-sprite {
+            filter: brightness(0.3) grayscale(30%) !important; 
+            opacity: 1 !important; 
+        }
+        
+        .bg-layer {
+            transition: opacity 1.0s ease; 
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: cover;
+        }
+
+        /* ==================================================================== */
+        /* === ИСТОРИЯ ДИАЛОГОВ (ОК) === */
+        /* ==================================================================== */
+        
+        #historyPanel.open {
+            transform: translateX(0); 
+        }
+        #historyPanel {
+            right: 0; 
+            left: auto; 
+            top: 0;
+            transform: translateX(100%); 
+            transition: transform 0.3s ease; 
+            z-index: 50; 
+            width: 100%; 
+            max-width: 90vw; /* Почти полная ширина на мобильных */
+            display: flex;
+            flex-direction: column;
+        }
+        @media (min-width: 768px) {
+            #historyPanel {
+                max-width: 400px; /* Фиксированная ширина на десктопе */
+            }
+        }
+        
+        #historyContent {
+            flex-grow: 1; 
+            overflow-y: auto; 
+            padding-bottom: 2rem; 
+        }
+        
+        /* Кастомный Scrollbar */
+        #historyContent::-webkit-scrollbar { width: 8px; }
+        #historyContent::-webkit-scrollbar-track { background: var(--color-bg-medium); border-radius: 10px; }
+        #historyContent::-webkit-scrollbar-thumb { background: var(--color-accent-primary); border-radius: 10px; border: 2px solid var(--color-bg-darkest); }
+        #historyContent::-webkit-scrollbar-thumb:hover { background: var(--color-accent-secondary); }
     </style>
 </head>
-<body>
+<body class="min-h-screen dark-theme">
+    
+    <!-- Инициализация Firebase (сохранена для совместимости) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    <div id="app" class="container">
-        <!-- Фон сцены -->
-        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl relative">
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-            <!-- Контейнер для спрайтов/иконок персонажей -->
-            <div class="flex justify-around items-end mb-4 h-48">
+        if (firebaseConfig) {
+            try {
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                getFirestore(app);
 
-                <!-- Спрайт Кианы -->
-                <div id="speaker-kiana" class="speaker-box p-3 rounded-t-xl transition-all border-yellow-400">
-                    <div class="sprite bg-yellow-600 border-4 border-yellow-400">✨</div>
-                    <p class="text-white text-center font-bold text-lg">Киана</p>
-                </div>
+                async function authenticate() {
+                    try {
+                        if (initialAuthToken) {
+                            await signInWithCustomToken(auth, initialAuthToken);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    } catch (error) {
+                        console.error("[Firebase] Ошибка аутентификации:", error);
+                    }
+                }
+                authenticate();
+            } catch (e) {
+                console.error("[Firebase] Критическая ошибка инициализации:", e);
+            }
+        }
+    </script>
+    
+    <!-- 1. Header Bar: Оптимизирован для мобильных -->
+    <header id="header" class="fixed top-0 left-0 right-0 z-50 p-3 md:p-4 shadow-xl transition-colors duration-300" style="background-color: var(--color-bg-darkest);">
+        <div class="flex flex-wrap justify-between items-center max-w-7xl mx-auto">
+            <h1 id="headerTitle" class="text-lg md:text-xl font-bold tracking-wider mb-2 md:mb-0" style="color: var(--color-text-primary);">Архив сюжета Houkai Gakuen 2</h1>
+            
+            <div class="flex items-center space-x-2 md:space-x-4">
+                 <!-- Кнопка Истории -->
+                <button id="historyToggle" onclick="toggleHistory()" class="px-2 py-1 text-xs md:text-sm rounded-full transition duration-150" style="background-color: var(--color-bg-medium); color: var(--color-text-primary);">
+                    <span id="historyText">История</span>
+                </button>
+                
+                <!-- Кнопка смены темы -->
+                <button id="themeToggle" onclick="toggleTheme()" class="px-2 py-1 text-xs md:text-sm rounded-full transition duration-150" style="background-color: var(--color-bg-medium); color: var(--color-text-primary);">
+                    <span id="themeIcon">🌙</span> <span id="themeText">Тёмная</span>
+                </button>
 
-                <!-- Спрайт Заражённой Мэй -->
-                <div id="speaker-mei" class="speaker-box p-3 rounded-t-xl transition-all border-red-500">
-                    <div class="sprite bg-red-800 border-4 border-red-500">🔪</div>
-                    <p class="text-white text-center font-bold text-lg">Заражённая Мэй</p>
-                </div>
+                <!-- Кнопка сброса -->
+                <button id="resetButton" onclick="resetProgress()" class="px-2 py-1 reset-button rounded-full transition duration-150 text-xs md:text-sm">Сброс</button>
+                
+                <!-- Выбор языка -->
+                <select id="languageSelect" onchange="initializeOrUpdateUI(true)" class="select-field rounded-lg p-1 md:p-2 cursor-pointer transition hover:ring-2 text-xs md:text-sm" style="background-color: var(--color-bg-medium);">
+                    <option value="ru">Русский</option>
+                    <option value="en">English</option>
+                    <option value="zh">中文 (Chinese)</option>
+                </select>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Панель Истории Диалогов (Адаптивная ширина в CSS) -->
+    <div id="historyPanel" class="fixed top-0 h-full z-50 p-4 pt-20 shadow-2xl transition-transform duration-300" 
+         style="background-color: var(--color-bg-darkest); opacity: 0.95;">
+        <h2 id="historyTitle" class="text-xl font-bold mb-4" style="color: var(--color-text-primary);">История Диалогов</h2>
+        <div id="historyContent" class="space-y-3" style="height: calc(100% - 3.5rem);">
+            <!-- History items here -->
+        </div>
+        <!-- Кнопка закрытия истории -->
+        <button onclick="toggleHistory()" class="absolute top-4 right-4 text-xl p-2 rounded-full hover:bg-gray-700 transition" style="color: var(--color-text-primary);">
+            &times;
+        </button>
+    </div>
 
+    <!-- 2. Main Content Area -->
+    <main id="mainContent" class="pt-[6rem] md:pt-20 pb-4 px-2 md:px-4 max-w-7xl mx-auto min-h-screen">
+        
+        <!-- Controls Panel: Использует flex-wrap для мобильных -->
+        <div class="control-panel p-4 rounded-xl shadow-lg mb-6 flex flex-wrap gap-3 md:gap-4 items-end transition-colors duration-300">
+            <!-- Выбор Типа Сюжета -->
+            <div class="flex-1 min-w-[45%] md:min-w-[180px]">
+                <label for="storyTypeSelect" id="labelStoryType" class="block text-sm font-medium mb-1" style="color: var(--color-text-secondary);">Тип сюжета</label>
+                <select id="storyTypeSelect" onchange="updateArcAndChapterUI(true)" class="select-field w-full rounded-lg p-2.5 cursor-pointer focus:ring-4 transition text-sm" style="background-color: var(--color-bg-main);">
+                    <!-- Options populated by JS -->
+                </select>
+            </div>
+
+            <!-- Выбор Арки -->
+            <div id="arcSelectContainer" class="flex-1 min-w-[45%] md:min-w-[180px] hidden">
+                <label for="arcSelect" id="labelArc" class="block text-sm font-medium mb-1" style="color: var(--color-text-secondary);">Арка</label>
+                <select id="arcSelect" onchange="updateChapterSelect(true)" class="select-field w-full rounded-lg p-2.5 cursor-pointer focus:ring-4 transition text-sm" style="background-color: var(--color-bg-main);">
+                    <!-- Options populated by JS -->
+                </select>
+            </div>
+
+            <!-- Выбор Главы -->
+            <div class="w-full md:flex-1 md:min-w-[250px]">
+                <label for="chapterSelect" id="labelChapter" class="block text-sm font-medium mb-1" style="color: var(--color-text-secondary);">Сюжет (Глава)</label>
+                <select id="chapterSelect" onchange="enableLoadButton(); saveProgress()" class="select-field w-full rounded-lg p-2.5 cursor-pointer focus:ring-4 transition text-sm" disabled style="background-color: var(--color-bg-main);">
+                    <!-- Options populated by JS -->
+                </select>
             </div>
             
-            <!-- Диалоговое окно -->
-            <div class="bg-gray-900/90 p-5 rounded-xl border-t-4 border-white shadow-xl">
-                <p id="speaker-name" class="text-2xl font-extrabold text-white mb-2 uppercase"></p>
-                <p id="dialogue-text" class="dialogue-text text-gray-200 text-xl font-medium"></p>
-                <button id="next-button" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
-                    Далее (Нажмите или Tap)
-                </button>
+            <!-- Кнопка загрузки -->
+            <button id="loadButton" onclick="updateStoryContent(0)" class="w-full md:w-auto min-w-[120px] load-button text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition duration-150 disabled:opacity-50 text-sm md:text-base" disabled>
+                <span id="loadText">Загрузить</span>
+            </button>
+        </div>
+
+        <!-- 3. Visual Novel Viewer (Main View) -->
+        <div id="vnViewer" class="relative w-full aspect-[16/9] rounded-xl shadow-2xl overflow-hidden flex flex-col justify-end transition-colors duration-500 cursor-pointer" 
+             style="min-height: 400px; background-color: var(--color-bg-main);"
+             onclick="navigateDialogue(1)"> 
+            
+            <!-- Background Layers Container -->
+            <div id="backgroundContainer" class="absolute inset-0 z-0">
+                <div id="bgLayer1" class="absolute inset-0 bg-layer opacity-100"></div>
+                <div id="bgLayer2" class="absolute inset-0 bg-layer opacity-0"></div>
             </div>
+
+            <!-- Sprite Container -->
+            <div id="spriteContainer" class="absolute inset-0 z-10 pointer-events-none flex justify-center items-end p-2 md:p-4">
+                
+                <div id="spriteLeftContainer" class="sprite-position left hidden">
+                    <img id="spriteLeft" class="sprite-image" src="" alt="Левый персонаж" ondragstart="return false;">
+                </div>
+                
+                <div id="spriteRightContainer" class="sprite-position right hidden">
+                    <img id="spriteRight" class="sprite-image" src="" alt="Правый персонаж" ondragstart="return false;">
+                </div>
+            </div>
+
+            <!-- Dialogue Wrapper (width is controlled in CSS) -->
+            <div id="dialogueWrapper" class="absolute bottom-2 md:bottom-4 left-1/2 -translate-x-1/2 z-20 transition-all duration-300 opacity-100 hidden">
+                
+                <!-- Speaker Name Container -->
+                <div id="speakerNameContainer" class="text-left mb-0 ml-4 md:ml-8"> 
+                    <div id="currentSpeaker" class="speaker-name rounded-t-lg rounded-b-none"></div>
+                </div>
+                
+                <!-- Dialogue Text Content Box (height and padding are adaptive in CSS) -->
+                <div id="dialogueContentBox" 
+                    class="vn-overlay rounded-xl shadow-2xl overflow-hidden flex items-start justify-start text-left"> 
+                    <p id="currentText" class="leading-tight transition-opacity duration-300">Текст диалога...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- 4. Полноэкранное предупреждение (Modal Overlay) -->
+    <div id="warning-overlay" class="fixed inset-0 z-[100] bg-gray-900/95 flex items-center justify-center p-4 md:p-8 transition-opacity duration-500 opacity-100">
+        
+        <!-- Карточка предупреждения -->
+        <div id="warning-card" class="p-8 md:p-12 rounded-3xl shadow-2xl max-w-sm md:max-w-xl w-full text-center 
+                    transform scale-100 transition-transform duration-300 border-2" 
+                    style="background-color: var(--color-warning-bg); border-color: var(--color-warning-accent); color: var(--color-text-primary);">
+
+            <!-- Заголовок -->
+            <h1 class="text-4xl md:text-7xl font-extrabold mb-6 select-none tracking-tight" 
+                style="color: var(--color-warning-accent);">
+                Примечание
+            </h1>
+
+            <!-- Основной текст предупреждения -->
+            <p class="text-base md:text-xl mb-3 font-medium leading-relaxed" 
+               style="color: var(--color-text-secondary);">
+                Это фанатский перевод Houkai Gakuen 2. Все права принадлежат miHoYo.
+            </p>
+
+            <!-- Добавленные строки -->
+            <p class="text-sm md:text-base mb-1 font-medium" 
+               style="color: var(--color-text-secondary);">
+                Перевод выполнен Haps.
+            </p>
+            <p class="text-sm md:text-base mb-8 font-medium" 
+               style="color: var(--color-text-secondary);">
+                Сайт сделан при помощи Gemini.
+            </p>
+
+            <!-- Кнопка закрытия (ИСПРАВЛЕНО: добавлен onclick) -->
+            <button id="close-warning-button" 
+                    onclick="dismissWarningModal()"
+                    class="warning-button font-bold py-3 px-8 text-base md:text-lg rounded-full 
+                           transition duration-200 ease-in-out shadow-xl hover:shadow-2xl 
+                           focus:outline-none focus:ring-4" 
+                           style="background-color: var(--color-warning-accent);">
+                Закрыть
+            </button>
         </div>
     </div>
 
-    <script>
-        // --- Конфигурация Сцены и Данные Диалога ---
-        
-        // Диалог (Массив объектов)
-        const dialogue = [
-            // ПЕРВОЕ ПОЯВЛЕНИЕ ЗАРАЖЕННОЙ МЭЙ (Исправлена ошибка: теперь активна Мэй, а не Киана)
-            { speaker: 'Меи', text: '...Приветствую, Киана. Ты выглядишь немного удивленной.' },
-            
-            // Заражённая Мэй активна (Проверка бага: Киана не должна быть активной)
-            { speaker: 'Меи', text: 'Мы, наконец, встретились снова. Должна признать, я скучала по этим нашим маленьким играм.' },
-            
-            // Киана отвечает (Проверка смены активного говорящего)
-            { speaker: 'Киана', text: 'Мэй... Это ты? Что произошло? Почему ты выглядишь... так?' },
-            
-            // Заражённая Мэй снова говорит (Проверка бага: Киана снова не должна быть активной)
-            { speaker: 'Меи', text: 'Произошло лишь то, что должно было произойти. Я приняла свою истинную силу.' },
-            
-            // Киана в ярости
-            { speaker: 'Киана', text: 'Нет! Ты не моя Мэй! Я верну тебя, чего бы это ни стоило!' },
-            
-            // Конец
-            { speaker: 'System', text: 'Конец Демонстрации.' }
-        ];
 
-        // Цвета и спрайты для персонажей
-        const CHARACTERS = {
-            'Киана': { 
-                color: 'text-yellow-400', 
-                boxBorder: 'border-yellow-400',
-                spriteElement: document.getElementById('speaker-kiana'),
-                nameElement: 'Киана'
+    <script>
+        // ====================================================================
+        // === КОНФИГУРАЦИЯ И ДАННЫЕ ===
+        // ====================================================================
+        
+        const CONFIG = {
+            PATHS: {
+                SPRITE_BASE: 'images/sprites/',
+                BACKGROUND_BASE: 'images/background/',
+                METADATA_FILE: 'story/story_metadata.json', 
+                STORY_BASE: 'story/', 
             },
-            'Меи': { 
-                color: 'text-red-500', 
-                boxBorder: 'border-red-500',
-                spriteElement: document.getElementById('speaker-mei'),
-                nameElement: 'Заражённая Мэй'
+            STORAGE: {
+                KEY: 'vn_story_progress_v6', 
+                THEME_KEY: 'vn_theme',
+                WARNING_KEY: 'vn_warning_dismissed',
             },
-            'System': { // Для системных сообщений
-                color: 'text-white', 
-                boxBorder: 'border-white',
-                spriteElement: null,
-                nameElement: 'СИСТЕМА'
+            BACKOFF: {
+                INITIAL_DELAY_MS: 750,  
+                MAX_DELAY_MS: 7500,     
+                MAX_ATTEMPTS: 3,        
+            },
+            PLACEHOLDERS: {
+                DEFAULT_BG_COLOR: '#1f2937', 
             }
         };
 
-        // --- Управление Состоянием Игры ---
-        let currentSceneIndex = 0;
+        const STORY_GROUPS = {
+            // 'main_' prefix is used by the logic to distinguish Main Story content
+            main: { ru: "Основной сюжет", en: "Main Story", zh: "主线故事", prefix: "main_" },
+            // 'extra_' prefix used to select all extra content
+            extra: { ru: "Дополнительный сюжет", en: "Extra Story", zh: "额外故事", prefix: "extra_" },
+            bosses: { ru: "Боссы", en: "Boss Fights", zh: "Boss 战", prefix: "boss_" },
+            vn: { ru: "Визуальная новелла", en: "Visual Novel", zh: "视觉小说", prefix: "vn_" },
+            romance: { ru: "Роман", en: "Romance", zh: "浪漫", prefix: "ln_" }
+        };
+        
+        const MAIN_STORY_ARCS = {
+            re: { ru: "Ретроспектр", en: "Retrospect", zh: "回溯" },
+            in: { ru: "Наследие", en: "Inheritance", zh: "继承" },
+            fm: { ru: "Огненный Мотылёк", en: "Firemoth", zh: "炎煌" },
+            nl: { ru: "Новая жизнь", en: "New Life", zh: "新生活" },
+            ah: { ru: "Академия Хоукая", en: "Honkai Academy", zh: "崩坏学园" }
+        };
 
-        // Элементы DOM
-        const dialogueTextEl = document.getElementById('dialogue-text');
-        const speakerNameEl = document.getElementById('speaker-name');
-        const nextButton = document.getElementById('next-button');
+        let currentDialogue = []; 
+        let currentDialogueIndex = 0;
+        let dialogueIsLoaded = false;
+        let currentBackgroundUrl = null; 
+        window.storyMetadata = null; 
+        let isHistoryVisible = false; 
+        let activeBgLayer = 1; // 1 or 2
+        
+        // Отслеживание текущих файлов спрайтов на каждой позиции
+        let currentLeftSpriteFile = null;
+        let currentRightSpriteFile = null;
+        
+        // НОВОЕ: Отслеживание активной стороны для затемнения при отсутствии position
+        let lastActiveSpeakerSide = null; // null, 'left', или 'right'
 
-        // --- Основная Логика Диалога ---
+        const i18n = {
+            ru: {
+                headerTitle: "Архив сюжета Houkai Gakuen 2", labelStoryType: "Тип сюжета", labelArc: "Арка", labelChapter: "Сюжет (Глава)",
+                loadText: "Загрузить", resetProgress: "Сброс", endOfStory: "История закончилась!",
+                startOfStory: "Это начало истории.", placeholderMetadata: "--- Метаданные не загружены ---",
+                errorFetchMetadataStrict: "Критическая ошибка: не удалось загрузить метаданные глав. Файл story/story_metadata.json отсутствует или недоступен.",
+                errorChapterNotFound: "Файл главы не найден.",
+                themeDark: "Тёмная", themeLight: "Светлая",
+                historyTitle: "История Диалогов", historyButton: "История", historyEmpty: "История пуста.",
+                noExtraChapters: "Главы дополнительного сюжета не найдены.",
+            },
+            en: {
+                headerTitle: "VN Story Archive", labelStoryType: "Story Type", labelArc: "Arc", labelChapter: "Chapter",
+                loadText: "Load", resetProgress: "Reset", endOfStory: "Story finished!",
+                startOfStory: "This is the start of the story.", placeholderMetadata: "--- Metadata not loaded ---",
+                errorFetchMetadataStrict: "Critical Error: Failed to load chapter metadata. The file story/story_metadata.json is missing or inaccessible.",
+                errorChapterNotFound: "Chapter file not found.",
+                themeDark: "Dark", themeLight: "Light",
+                historyTitle: "Dialogue History", historyButton: "History", historyEmpty: "History is empty.",
+                noExtraChapters: "No extra story chapters found.",
+            },
+            zh: {
+                headerTitle: "视觉小说故事档案", labelStoryType: "故事类型", labelArc: "篇章", labelChapter: "章节",
+                loadText: "加载", resetProgress: "重置", endOfStory: "故事结束了!",
+                startOfStory: "这是故事的开始。", placeholderMetadata: "--- 未加载元数据 ---",
+                errorFetchMetadataStrict: "致命错误：无法加载章节元数据。文件 story/story_metadata.json 缺失或无法访问。",
+                errorChapterNotFound: "未找到章节文件。",
+                themeDark: "深色", themeLight: "浅色",
+                historyTitle: "对话历史", historyButton: "History", historyEmpty: "历史为空。",
+                noExtraChapters: "未找到额外故事章节。",
+            }
+        };
 
-        /**
-         * Обновляет активного говорящего и отображает текущую реплику.
-         * Главное исправление бага: здесь мы явно сбрасываем всех и активируем только нужного персонажа.
-         */
-        function displayDialogue() {
-            if (currentSceneIndex >= dialogue.length) {
-                // Диалог завершен
-                nextButton.disabled = true;
-                nextButton.textContent = 'Диалог Завершен';
-                speakerNameEl.textContent = 'Сценарий завершен';
+        let elements = {};
+
+        // ====================================================================
+        // === УПРАВЛЕНИЕ ТЕМАМИ и ПРЕДУПРЕЖДЕНИЕМ (ОК) ===
+        // ====================================================================
+
+        function saveTheme(theme) {
+            localStorage.setItem(CONFIG.STORAGE.THEME_KEY, theme);
+            applyTheme(theme);
+        }
+
+        function applyTheme(theme) {
+            const lang = elements.languageSelect.value;
+            const isDark = theme === 'dark';
+            
+            document.body.classList.toggle('light-theme', !isDark);
+            document.body.classList.toggle('dark-theme', isDark);
+
+            if (elements.themeIcon && elements.themeText) {
+                elements.themeIcon.textContent = isDark ? '🌙' : '☀️';
+                elements.themeText.textContent = isDark ? i18n[lang].themeDark : i18n[lang].themeLight;
+            }
+            
+            // Обновление цвета карточки предупреждения при смене темы
+            const card = document.getElementById('warning-card');
+            if (card) {
+                const style = getComputedStyle(document.body);
+                const accentColor = style.getPropertyValue('--color-warning-accent').trim();
+                const bgColor = style.getPropertyValue('--color-warning-bg').trim();
+                const secondaryTextColor = style.getPropertyValue('--color-text-secondary').trim();
+                
+                card.style.backgroundColor = bgColor;
+                card.style.borderColor = accentColor;
+                
+                card.querySelector('h1').style.color = accentColor;
+                
+                card.querySelectorAll('p').forEach(p => p.style.color = secondaryTextColor);
+
+                const closeButton = card.querySelector('#close-warning-button');
+                closeButton.style.backgroundColor = accentColor;
+                closeButton.style.color = 'white'; 
+                
+                const overlay = document.getElementById('warning-overlay');
+                // Адаптивное затемнение для оверлея
+                overlay.style.backgroundColor = isDark ? 'rgba(15, 23, 42, 0.95)' : 'rgba(241, 245, 249, 0.95)';
+            }
+
+            // Обновление цвета дефолтного фона VN
+            if (currentBackgroundUrl === CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR) {
+                 const style = getComputedStyle(document.body);
+                 const themeBgColor = style.getPropertyValue('--color-bg-main').trim();
+                 
+                 const activeLayer = activeBgLayer === 1 ? elements.bgLayer1 : elements.bgLayer2;
+                 const inactiveLayer = activeBgLayer === 1 ? elements.bgLayer2 : elements.bgLayer1;
+
+                 activeLayer.style.backgroundColor = themeBgColor;
+                 inactiveLayer.style.backgroundColor = themeBgColor;
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            saveTheme(newTheme);
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem(CONFIG.STORAGE.THEME_KEY) || 'dark';
+            applyTheme(savedTheme);
+        }
+        
+        function handleWarningModalState() {
+            const { warningOverlay } = elements;
+            
+            const isDismissed = localStorage.getItem(CONFIG.STORAGE.WARNING_KEY) === 'true';
+
+            if (isDismissed) {
+                warningOverlay.style.display = 'none';
+                return;
+            }
+            // Кнопка обрабатывается через inline onclick="dismissWarningModal()" в HTML
+        }
+        
+        // Эта функция вызывается напрямую из HTML: onclick="dismissWarningModal()"
+        function dismissWarningModal() {
+            const overlay = elements.warningOverlay;
+            if (!overlay) return;
+            
+            localStorage.setItem(CONFIG.STORAGE.WARNING_KEY, 'true');
+            
+            overlay.style.opacity = '0';
+            
+            setTimeout(() => {
+                overlay.style.display = 'none';
+            }, 500); 
+        }
+
+
+        // ====================================================================
+        // === ИНИЦИАЛИЗАЦИЯ (ОК) ===
+        // ====================================================================
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Кэширование всех необходимых элементов DOM
+            elements.languageSelect = document.getElementById('languageSelect');
+            elements.storyTypeSelect = document.getElementById('storyTypeSelect');
+            elements.arcSelectContainer = document.getElementById('arcSelectContainer');
+            elements.arcSelect = document.getElementById('arcSelect');
+            elements.chapterSelect = document.getElementById('chapterSelect');
+            elements.loadButton = document.getElementById('loadButton');
+            elements.loadText = document.getElementById('loadText');
+            elements.vnViewerElement = document.getElementById('vnViewer');
+            elements.dialogueWrapper = document.getElementById('dialogueWrapper');
+            elements.spriteLeftContainer = document.getElementById('spriteLeftContainer');
+            elements.spriteRightContainer = document.getElementById('spriteRightContainer');
+            elements.spriteLeftElement = document.getElementById('spriteLeft');
+            elements.spriteRightElement = document.getElementById('spriteRight');
+            elements.currentSpeaker = document.getElementById('currentSpeaker');
+            elements.currentText = document.getElementById('currentText');
+            elements.speakerNameContainer = document.getElementById('speakerNameContainer');
+            elements.bgLayer1 = document.getElementById('bgLayer1');
+            elements.bgLayer2 = document.getElementById('bgLayer2');
+            elements.themeIcon = document.getElementById('themeIcon');
+            elements.themeText = document.getElementById('themeText');
+            elements.historyPanel = document.getElementById('historyPanel');
+            elements.historyContent = document.getElementById('historyContent');
+            elements.historyTitle = document.getElementById('historyTitle');
+            elements.historyButton = document.getElementById('historyToggle');
+            elements.historyText = document.getElementById('historyText');
+            elements.mainContent = document.getElementById('mainContent'); 
+            elements.warningOverlay = document.getElementById('warning-overlay');
+            elements.closeWarningButton = document.getElementById('close-warning-button');
+
+            // Установка дефолтного фона на активный слой (цвет)
+            elements.bgLayer1.style.backgroundColor = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR;
+            elements.bgLayer1.style.backgroundImage = 'none';
+            currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR; 
+            
+            loadTheme(); 
+            handleWarningModalState(); // Проверяет localStorage и показывает/скрывает
+            loadProgress(); 
+            
+            // Закрытие Истории по клику вне панели
+            document.addEventListener('click', (event) => {
+                const historyPanel = elements.historyPanel;
+                const historyToggle = elements.historyButton;
+                
+                if (isHistoryVisible) {
+                    if (!historyPanel.contains(event.target) && !historyToggle.contains(event.target)) {
+                        toggleHistory(); 
+                    }
+                }
+            });
+        });
+
+        // ====================================================================
+        // === CORE FUNCTIONS (Загрузка данных и Рендеринг) ===
+        // ====================================================================
+        
+        async function fetchChapterMetadata() {
+            try {
+                const response = await fetch(CONFIG.PATHS.METADATA_FILE); 
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                window.storyMetadata = await response.json();
+            } catch (error) {
+                console.error(`[Metadata] Критическая ошибка загрузки внешнего файла.`, error);
+                alertMessage(i18n[elements.languageSelect.value].errorFetchMetadataStrict); 
+                window.storyMetadata = null; 
+            }
+        }
+
+        function navigateDialogue(direction) {
+            if (isHistoryVisible) return;
+            
+            if (!dialogueIsLoaded || currentDialogue.length === 0) return;
+            
+            const newIndex = currentDialogueIndex + direction;
+            const lang = elements.languageSelect.value;
+
+            if (newIndex >= 0 && newIndex < currentDialogue.length) {
+                currentDialogueIndex = newIndex;
+                renderDialogueStep();
+                saveProgress();
+            } else if (newIndex >= currentDialogue.length) {
+                alertMessage(i18n[lang].endOfStory);
+                currentDialogueIndex = currentDialogue.length - 1;
+                saveProgress();
+            } else {
+                alertMessage(i18n[lang].startOfStory);
+            }
+        }
+        
+        const spritePath = (fileName) => {
+            if (!fileName) return null;
+            const encodedFileName = encodeURIComponent(fileName);
+            return CONFIG.PATHS.SPRITE_BASE + encodedFileName; 
+        };
+        
+        function loadSprite(url, element, container) {
+            if (!url) {
+                container.classList.add('hidden');
+                element.src = '';
+                return;
+            }
+            
+            const tempImg = new Image();
+            
+            tempImg.onload = () => {
+                element.src = tempImg.src; 
+                container.classList.remove('hidden'); 
+            };
+            
+            tempImg.onerror = () => {
+                container.classList.add('hidden');
+                console.warn(`[Sprite Load] Не удалось загрузить спрайт: ${url}.`);
+                element.src = '';
+            };
+
+            const finalUrl = `${url}?t=${Date.now()}`;
+            tempImg.src = finalUrl;
+        }
+
+        function crossFadeBackground(newBgFileName) {
+            const encodedBgFileName = encodeURIComponent(newBgFileName);
+            const finalBgUrl = CONFIG.PATHS.BACKGROUND_BASE + encodedBgFileName;
+            
+            if (finalBgUrl === currentBackgroundUrl) return; 
+
+            const { bgLayer1, bgLayer2 } = elements;
+            const nextLayer = activeBgLayer === 1 ? bgLayer2 : bgLayer1;
+            const currentLayer = activeBgLayer === 1 ? bgLayer1 : bgLayer2;
+            
+            const tempImg = new Image();
+            
+            tempImg.onload = () => {
+                nextLayer.style.backgroundImage = `url('${tempImg.src}')`;
+                nextLayer.style.backgroundColor = 'transparent'; 
+                
+                setTimeout(() => {
+                    currentLayer.style.opacity = '0';
+                    nextLayer.style.opacity = '1';
+                    
+                    activeBgLayer = activeBgLayer === 1 ? 2 : 1;
+                    currentBackgroundUrl = tempImg.src;
+                }, 10);
+            };
+            
+            tempImg.onerror = () => {
+                console.warn(`[BG Fade] Не удалось загрузить фон: ${finalBgUrl}. Применение цвета фона.`);
+                
+                 setTimeout(() => {
+                    nextLayer.style.backgroundImage = 'none';
+                    const themeBgColor = getComputedStyle(document.body).getPropertyValue('--color-bg-main').trim();
+
+                    nextLayer.style.backgroundColor = themeBgColor;
+
+                    currentLayer.style.opacity = '0';
+                    nextLayer.style.opacity = '1';
+
+                    activeBgLayer = activeBgLayer === 1 ? 2 : 1;
+                    currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR;
+                }, 10);
+            };
+
+            const finalUrl = `${finalBgUrl}?t=${Date.now()}`;
+            tempImg.src = finalUrl;
+        }
+
+
+        function renderDialogueStep() {
+            const { dialogueWrapper, spriteLeftContainer, spriteRightContainer, 
+                    spriteLeftElement, spriteRightElement, currentSpeaker, currentText, speakerNameContainer } = elements;
+
+            if (!dialogueIsLoaded || currentDialogue.length === 0) {
+                dialogueWrapper.classList.add('hidden');
                 return;
             }
 
-            const currentLine = dialogue[currentSceneIndex];
-            const speakerKey = currentLine.speaker;
-            const charData = CHARACTERS[speakerKey];
-
-            // 1. Сброс всех стилей активности
-            Object.values(CHARACTERS).forEach(char => {
-                if (char.spriteElement) {
-                    char.spriteElement.classList.remove('speaker-active', char.boxBorder);
-                }
-            });
-
-            // 2. Установка текста и имени говорящего
-            dialogueTextEl.textContent = currentLine.text;
-            speakerNameEl.textContent = charData.nameElement;
-            speakerNameEl.className = `text-2xl font-extrabold mb-2 uppercase ${charData.color}`;
+            const step = currentDialogue[currentDialogueIndex];
             
-            // 3. Установка активного спрайта (Исправление бага со спрайтом Кианы при появлении Мэй)
-            if (charData.spriteElement) {
-                charData.spriteElement.classList.add('speaker-active', charData.boxBorder);
+            // 1. Фон
+            if (step.background) { 
+                crossFadeBackground(step.background);
             }
 
-            currentSceneIndex++;
+            // 2. Определение активной стороны и стороны для подсветки
+            const newSpritePosition = step.position ? step.position.toLowerCase() : null;
+            let sideToHighlight = null;
+
+            // Если в текущем шаге явно указана позиция, это говорящий ИЛИ новый спрайт
+            if (newSpritePosition) {
+                sideToHighlight = newSpritePosition;
+                // Обновляем последнюю активную сторону
+                lastActiveSpeakerSide = newSpritePosition;
+            } 
+            // Если есть спикер, но нет position, используем последнюю известную активную сторону
+            else if (step.speaker && lastActiveSpeakerSide) {
+                sideToHighlight = lastActiveSpeakerSide;
+            }
+            // Если нет ни спикера, ни позиции
+            else {
+                sideToHighlight = null;
+            }
+
+            // 3. Загрузка/Обновление Спрайтов (требует step.sprite и newSpritePosition)
+            if (step.sprite && newSpritePosition) {
+                const isLeftSpeaker = newSpritePosition === 'left';
+                
+                const speakerElement = isLeftSpeaker ? spriteLeftElement : spriteRightElement;
+                const speakerContainer = isLeftSpeaker ? spriteLeftContainer : spriteRightContainer;
+                
+                let needsLoad = false;
+                
+                // Проверяем, нужно ли загружать новый файл спрайта
+                const currentFile = isLeftSpeaker ? currentLeftSpriteFile : currentRightSpriteFile;
+                if (currentFile !== step.sprite) {
+                    needsLoad = true;
+                    if (isLeftSpeaker) {
+                        currentLeftSpriteFile = step.sprite;
+                    } else {
+                        currentRightSpriteFile = step.sprite;
+                    }
+                }
+
+                if (needsLoad) {
+                    loadSprite(spritePath(step.sprite), speakerElement, speakerContainer);
+                } else {
+                    // Если спрайт уже загружен, просто показываем контейнер, если он был скрыт
+                    speakerContainer.classList.remove('hidden');
+                }
+            }
+            
+            // 4. Логика Затемнения (Критическая часть)
+            
+            // 4.1 Сброс Затемнения
+            spriteLeftElement.classList.remove('dimmed-sprite');
+            spriteRightElement.classList.remove('dimmed-sprite');
+
+            if (sideToHighlight === 'left') {
+                // Говорит левый: затемняем правый (если он виден)
+                if (!spriteRightContainer.classList.contains('hidden')) {
+                    spriteRightElement.classList.add('dimmed-sprite');
+                }
+            } else if (sideToHighlight === 'right') {
+                // Говорит правый: затемняем левый (если он виден)
+                if (!spriteLeftContainer.classList.contains('hidden')) {
+                    spriteLeftElement.classList.add('dimmed-sprite');
+                }
+            } else {
+                // Если нет активного спикера (narration), проверяем dim флаг
+                if (step.dim === true) {
+                    // Затемняем оба, если они видны
+                    if (!spriteLeftContainer.classList.contains('hidden')) {
+                        spriteLeftElement.classList.add('dimmed-sprite');
+                    }
+                    if (!spriteRightContainer.classList.contains('hidden')) {
+                        spriteRightElement.classList.add('dimmed-sprite');
+                    }
+                }
+            }
+            
+            // 5. Текст и Имя Спикера
+            dialogueWrapper.classList.remove('hidden');
+            
+            if (step.speaker) {
+                currentSpeaker.textContent = step.speaker;
+                speakerNameContainer.classList.remove('hidden');
+            } else {
+                currentSpeaker.textContent = "";
+                speakerNameContainer.classList.add('hidden');
+            }
+            
+            currentText.textContent = step.text || "";
+            
+            // 6. Обновление Истории
+            if (isHistoryVisible) {
+                renderHistory();
+            }
+        }
+        
+        async function updateStoryContent(startIndex = 0) {
+            const lang = elements.languageSelect.value; 
+            const fullStoryKey = elements.chapterSelect.value.trim(); 
+            const { loadButton, loadText } = elements;
+            
+            if (!fullStoryKey) return;
+
+            const expectedFilePath = `${CONFIG.PATHS.STORY_BASE}${lang}/${fullStoryKey}.json`;
+
+            console.log(`[Content Load] Попытка загрузить главу: ${expectedFilePath}`);
+            
+            const { INITIAL_DELAY_MS, MAX_DELAY_MS, MAX_ATTEMPTS } = CONFIG.BACKOFF;
+
+            loadButton.disabled = true;
+            loadText.textContent = "Загрузка...";
+            
+            const attemptLoad = async (attempt = 1) => {
+                let success = false;
+                let data = null;
+                let errorType = null;
+
+                try {
+                    const cacheBuster = `?t=${Date.now()}_${attempt}`;
+                    const response = await fetch(expectedFilePath + cacheBuster);
+                    
+                    if (response.status === 404) {
+                        errorType = "404 Not Found";
+                        throw new Error("404 Not Found");
+                    }
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    
+                    data = await response.json();
+                    success = true;
+                } catch (e) {
+                    if (e instanceof SyntaxError) {
+                        errorType = "SyntaxError";
+                        console.error(`[Content Load] Критическая ошибка JSON в файле ${expectedFilePath}:`, e);
+                    } else if (e.message !== "404 Not Found") {
+                       console.error(`[Content Load] Общая ошибка загрузки (Попытка ${attempt}).`, e);
+                    }
+                }
+
+                if (success && data) {
+                    currentDialogue = data.dialogue || [];
+                    currentDialogueIndex = Math.min(startIndex, currentDialogue.length - 1);
+                    currentDialogueIndex = Math.max(0, currentDialogueIndex); 
+                    dialogueIsLoaded = true;
+                    currentBackgroundUrl = null; 
+                    
+                    // Сброс состояния спрайтов при загрузке новой главы (КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ)
+                    currentLeftSpriteFile = null;
+                    currentRightSpriteFile = null;
+                    lastActiveSpeakerSide = null; // Сброс активной стороны
+
+                    elements.spriteLeftContainer.classList.add('hidden');
+                    elements.spriteRightContainer.classList.add('hidden');
+                    elements.spriteLeftElement.src = ''; 
+                    elements.spriteRightElement.src = '';
+                    
+                    loadText.textContent = "Загружено";
+                    renderDialogueStep();
+
+                    setTimeout(() => {
+                        loadText.textContent = i18n[lang].loadText;
+                        loadButton.disabled = false;
+                    }, 1500);
+
+                } else {
+                    if (errorType === "SyntaxError") {
+                        loadText.textContent = "Ошибка JSON";
+                        alertMessage("Ошибка: Синтаксическая ошибка в JSON-файле главы. Проверьте консоль.");
+                        loadButton.disabled = false;
+                        return;
+                    }
+                    
+                    if (attempt >= MAX_ATTEMPTS) {
+                        loadText.textContent = i18n[lang].errorChapterNotFound;
+                        loadButton.disabled = false;
+                        console.error(`[Content Load] Критическая ошибка: Не удалось загрузить главу "${fullStoryKey}" по пути "${expectedFilePath}" после ${MAX_ATTEMPTS} попыток.`);
+                        return;
+                    }
+                    
+                    const delay = Math.min(MAX_DELAY_MS, INITIAL_DELAY_MS * Math.pow(2, attempt - 1));
+                    loadText.textContent = `Повтор (${attempt})...`;
+
+                    setTimeout(() => attemptLoad(attempt + 1), delay);
+                }
+            };
+            
+            attemptLoad();
         }
 
-        /**
-         * Устанавливает слушатель событий для кнопки "Далее".
-         */
-        function setupListeners() {
-            nextButton.addEventListener('click', () => {
-                displayDialogue();
-            });
+        // ====================================================================
+        // === UI & I18N FUNCTIONS (ОК) ===
+        // ====================================================================
+
+        function alertMessage(message) {
+            const header = document.getElementById('header');
+            const msgBox = document.createElement('div');
+            msgBox.textContent = message;
+            msgBox.className = 'fixed top-1 right-1/2 translate-x-1/2 p-2 text-white rounded-lg shadow-xl z-50 text-sm transition-opacity duration-300 alert-message';
+            header.appendChild(msgBox);
+            
+            setTimeout(() => {
+                msgBox.style.opacity = '0';
+                setTimeout(() => msgBox.remove(), 300);
+            }, 5000);
         }
 
-        // --- Инициализация Приложения ---
-        window.onload = function() {
-            // Запуск первого диалога при загрузке страницы
-            displayDialogue(); 
-            setupListeners();
-        };
+        function updateI18nStrings() {
+            const lang = elements.languageSelect.value;
+            const text = i18n[lang] || i18n.ru;
+            
+            document.getElementById('headerTitle').textContent = text.headerTitle;
+            document.getElementById('labelStoryType').textContent = text.labelStoryType;
+            document.getElementById('labelArc').textContent = text.labelArc; 
+            document.getElementById('labelChapter').textContent = text.labelChapter;
+            elements.loadText.textContent = text.loadText;
+            document.getElementById('resetButton').textContent = text.resetProgress;
+            elements.historyText.textContent = text.historyButton;
+            elements.historyTitle.textContent = text.historyTitle;
 
+            const currentTheme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
+            elements.themeText.textContent = currentTheme === 'dark' ? text.themeDark : text.themeLight;
+
+            const typeSelect = elements.storyTypeSelect;
+            const currentType = typeSelect.value;
+            typeSelect.innerHTML = '';
+            
+            const defaultOption = document.createElement('option');
+            defaultOption.value = "";
+            defaultOption.textContent = "---";
+            typeSelect.appendChild(defaultOption);
+
+            for (const key in STORY_GROUPS) {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = STORY_GROUPS[key][lang] || STORY_GROUPS[key].ru; 
+                if (key === currentType) {
+                    option.selected = true;
+                }
+                typeSelect.appendChild(option);
+            }
+        }
+        
+        function updateArcSelect(skipChapterUpdate = false) {
+            const typeKey = elements.storyTypeSelect.value;
+            const select = elements.arcSelect;
+            const container = elements.arcSelectContainer;
+            const lang = elements.languageSelect.value;
+            const currentArcKey = select.value;
+
+            select.innerHTML = '';
+            select.disabled = true;
+            
+            if (typeKey === 'main') {
+                container.classList.remove('hidden');
+                
+                const defaultOption = document.createElement('option');
+                defaultOption.value = "";
+                defaultOption.textContent = "--- Выберите арку ---";
+                select.appendChild(defaultOption);
+                
+                let arcFound = false;
+                for (const key in MAIN_STORY_ARCS) {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = MAIN_STORY_ARCS[key][lang] || MAIN_STORY_ARCS[key].ru;
+                    if (key === currentArcKey) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                    arcFound = true;
+                }
+                
+                if (arcFound) {
+                    select.disabled = false;
+                }
+
+            } else {
+                // Если тип не 'main', скрываем арки и очищаем значение
+                container.classList.add('hidden');
+                select.value = ""; 
+            }
+
+            if (!skipChapterUpdate) {
+                updateChapterSelect(false); // Не пропускаем обновление глав
+            }
+        }
+
+        // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Явно сбрасываем arc и chapter при смене типа
+        function updateArcAndChapterUI(calledByUIEvent) {
+            updateI18nStrings();
+            
+            // Если пользователь вручную меняет тип сюжета, необходимо сбросить arc и chapter
+            // для предотвращения сохранения несовместимых старых значений.
+            if (calledByUIEvent) {
+                elements.arcSelect.value = "";
+                elements.chapterSelect.value = "";
+                // Важно: не вызываем saveProgress здесь, saveProgress будет вызвана в updateChapterSelect
+            }
+
+            updateArcSelect(!calledByUIEvent); 
+            // Если вызвано пользователем, updateArcSelect вызовет updateChapterSelect, 
+            // иначе, если вызвано loadProgress, мы позволяем updateArcSelect делать свое дело
+        }
+
+
+        function updateChapterSelect(skipSave = false) {
+            const typeKey = elements.storyTypeSelect.value;
+            const arcKey = elements.arcSelect.value; 
+            const select = elements.chapterSelect;
+            const lang = elements.languageSelect.value;
+            const currentChapterKey = select.value; 
+
+            select.innerHTML = '';
+            select.disabled = true; 
+            
+            if (!window.storyMetadata) {
+                select.innerHTML = `<option value="">${i18n[lang].placeholderMetadata}</option>`;
+                return;
+            }
+            
+            select.innerHTML = `<option value="">--- Выберите главу ---</option>`;
+            
+            if (!typeKey || !STORY_GROUPS[typeKey]) {
+                enableLoadButton();
+                if (!skipSave) saveProgress();
+                return;
+            }
+            
+            let requiredStartPrefix = STORY_GROUPS[typeKey].prefix;
+            let requiredInclusion = null;
+            let requiredExclusion = null;
+            
+            const mainStoryPrefix = STORY_GROUPS.main.prefix;
+
+            if (typeKey === 'main') {
+                // Для Основного сюжета
+                if (!arcKey) {
+                    enableLoadButton();
+                    if (!skipSave) saveProgress();
+                    return;
+                }
+                // Глава должна начинаться с префикса арки (re_, in_ и т.д.)
+                requiredStartPrefix = `${arcKey}_`; 
+                // И должна содержать 'main_'
+                requiredInclusion = mainStoryPrefix;
+                requiredExclusion = null; // Не исключаем ничего
+                
+            } else {
+                // Для всех остальных типов (Extra, Bosses и т.д.)
+                // Глава должна начинаться с префикса типа (extra_, boss_ и т.д.)
+                // И ГАРАНТИРОВАННО НЕ должна содержать 'main_' (для предотвращения утечки)
+                requiredStartPrefix = STORY_GROUPS[typeKey].prefix; 
+                requiredExclusion = mainStoryPrefix;
+                requiredInclusion = null;
+            }
+
+            let chapterFound = false;
+
+            for (const fullChapterKey in window.storyMetadata) {
+                
+                // 1. Проверка префикса начала
+                if (!fullChapterKey.startsWith(requiredStartPrefix)) {
+                    continue;
+                }
+
+                // 2. Проверка обязательного включения (только для main)
+                if (requiredInclusion && !fullChapterKey.includes(requiredInclusion)) {
+                    continue; 
+                }
+                
+                // 3. Проверка обязательного исключения (для всех кроме main)
+                if (requiredExclusion && fullChapterKey.includes(requiredExclusion)) {
+                    continue; 
+                }
+
+                // Глава прошла все проверки, добавляем её
+                const chapterData = window.storyMetadata[fullChapterKey];
+                const chapterName = chapterData[lang] || chapterData.ru; 
+                
+                if (chapterName) {
+                    const option = document.createElement('option');
+                    option.value = fullChapterKey; 
+                    option.textContent = chapterName; 
+                    
+                    if (fullChapterKey === currentChapterKey) {
+                         option.selected = true;
+                    }
+                    select.appendChild(option);
+                    chapterFound = true;
+                }
+            }
+            
+            if (chapterFound) {
+                 select.disabled = false;
+            } else if (typeKey === 'extra') {
+                 // Специальное сообщение, если Extra-главы не найдены
+                 select.innerHTML = `<option value="">--- ${i18n[lang].noExtraChapters} ---</option>`;
+            }
+            
+            enableLoadButton();
+            if (!skipSave) {
+                // Сохраняем прогресс только после полного обновления
+                saveProgress(); 
+            }
+        }
+        
+        function enableLoadButton() {
+            const storyId = elements.chapterSelect.value;
+            elements.loadButton.disabled = !storyId;
+        }
+
+        // ====================================================================
+        // === УПРАВЛЕНИЕ ИСТОРИЕЙ (ОК) ===
+        // ====================================================================
+
+        function toggleHistory() {
+            isHistoryVisible = !isHistoryVisible;
+            elements.historyPanel.classList.toggle('open', isHistoryVisible);
+            
+            if (isHistoryVisible) {
+                setTimeout(renderHistory, 300); 
+            }
+        }
+
+        function renderHistory() {
+            const { historyContent } = elements;
+            const lang = elements.languageSelect.value;
+            historyContent.innerHTML = '';
+            
+            if (!dialogueIsLoaded || currentDialogue.length === 0) {
+                historyContent.innerHTML = `<p class="text-center mt-8 p-3 rounded-lg" style="color: var(--color-text-secondary); background-color: var(--color-bg-medium);">${i18n[lang].historyEmpty}</p>`;
+                return;
+            }
+            
+            const fragment = document.createDocumentFragment();
+
+            for (let i = 0; i <= currentDialogueIndex; i++) {
+                const step = currentDialogue[i];
+                if (!step.text && i !== 0) continue; 
+                
+                const isCurrent = (i === currentDialogueIndex);
+
+                const historyItem = document.createElement('div');
+                
+                historyItem.className = `p-3 rounded-lg cursor-pointer transition duration-150 shadow-md border border-transparent`;
+                
+                if (isCurrent) {
+                    historyItem.classList.add('ring-2', 'ring-offset-2');
+                    historyItem.style.backgroundColor = 'var(--color-accent-primary)'; 
+                    historyItem.style.color = 'white';
+                    historyItem.style.borderColor = 'var(--color-accent-ring)';
+                    historyItem.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+                    historyItem.style.fontWeight = 'bold';
+                } else {
+                    historyItem.style.backgroundColor = 'var(--color-bg-medium)'; 
+                    historyItem.style.color = 'var(--color-text-primary)';
+                }
+                
+                historyItem.dataset.index = i; 
+                historyItem.onclick = () => {
+                    currentDialogueIndex = i;
+                    renderDialogueStep();
+                    saveProgress();
+                    toggleHistory(); 
+                };
+
+                if (step.speaker) {
+                    const speakerName = document.createElement('p');
+                    speakerName.className = 'font-bold mb-1';
+                    speakerName.style.color = isCurrent ? 'white' : 'var(--color-speaker-name)'; 
+                    speakerName.textContent = step.speaker;
+                    historyItem.appendChild(speakerName);
+                }
+
+                const textContent = document.createElement('p');
+                textContent.className = 'text-sm leading-snug';
+                textContent.textContent = step.text || `[${step.background ? 'Сцена: ' + step.background : 'Элемент Сюжета'}]`;
+                historyItem.appendChild(textContent);
+
+                fragment.appendChild(historyItem);
+            }
+            
+            historyContent.appendChild(fragment);
+            
+            const currentItem = historyContent.querySelector(`[data-index="${currentDialogueIndex}"]`);
+            if (currentItem) {
+                currentItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        // ====================================================================
+        // === УПРАВЛЕНИЕ ПРОГРЕССОМ ===
+        // ====================================================================
+        
+        function saveProgress() {
+            const progress = {
+                lang: elements.languageSelect.value,
+                type: elements.storyTypeSelect.value,
+                arc: elements.arcSelect.value, 
+                chapter: elements.chapterSelect.value, 
+                index: currentDialogueIndex,
+            };
+            localStorage.setItem(CONFIG.STORAGE.KEY, JSON.stringify(progress));
+        }
+
+        async function loadProgress() {
+            await fetchChapterMetadata(); 
+            
+            const savedProgress = localStorage.getItem(CONFIG.STORAGE.KEY);
+            
+            updateI18nStrings(); 
+
+            if (!savedProgress) {
+                updateArcAndChapterUI(false); 
+                enableLoadButton();
+                return; 
+            }
+
+            const progress = JSON.parse(savedProgress);
+            const { languageSelect, storyTypeSelect, arcSelect, chapterSelect } = elements;
+            
+            // 1. Восстановление языка
+            if (i18n[progress.lang]) {
+                languageSelect.value = progress.lang;
+            }
+            updateI18nStrings(); 
+            
+            let typeRestored = false;
+            // 2. Восстановление типа сюжета
+            if (progress.type && STORY_GROUPS[progress.type]) {
+                storyTypeSelect.value = progress.type;
+                typeRestored = true;
+            }
+            
+            // 3. Обновление списка арок (только UI)
+            updateArcSelect(true); // skipChapterUpdate = true, чтобы не вызывать updateChapterSelect дважды
+            
+            let arcRestored = false;
+            if (progress.type === 'main') {
+                if (progress.arc && MAIN_STORY_ARCS[progress.arc]) {
+                    arcSelect.value = progress.arc;
+                    arcRestored = true;
+                }
+            } else {
+                 arcSelect.value = ""; // Для не-main типов arc всегда пуст
+            }
+            
+            let chapterRestored = false;
+            if (window.storyMetadata && typeRestored && progress.chapter) {
+                // 4. Обновляем список глав с учетом восстановленных type/arc
+                updateChapterSelect(true); // skipSave = true
+                
+                // Проверяем, существует ли сохраненная глава в текущем отфильтрованном списке
+                if (Array.from(chapterSelect.options).some(opt => opt.value === progress.chapter)) {
+                    chapterSelect.value = progress.chapter;
+                    chapterRestored = true;
+                }
+            }
+            enableLoadButton();
+            
+            if (chapterRestored) {
+                 updateStoryContent(progress.index); 
+            }
+        }
+
+        function resetProgress() {
+            localStorage.removeItem(CONFIG.STORAGE.KEY);
+            dialogueIsLoaded = false;
+            currentDialogueIndex = 0;
+            currentDialogue = []; 
+            currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR; 
+            activeBgLayer = 1;
+            isHistoryVisible = false;
+            elements.historyPanel.classList.remove('open'); 
+
+            currentLeftSpriteFile = null;
+            currentRightSpriteFile = null;
+            lastActiveSpeakerSide = null; // Сброс активной стороны
+
+            elements.dialogueWrapper.classList.add('hidden');
+            elements.languageSelect.value = 'ru';
+            
+            elements.spriteLeftContainer.classList.add('hidden');
+            elements.spriteRightContainer.classList.add('hidden');
+            elements.spriteLeftElement.src = ''; 
+            elements.spriteRightElement.src = '';
+
+            const themeBgColor = getComputedStyle(document.body).getPropertyValue('--color-bg-main').trim();
+
+            elements.bgLayer1.style.backgroundImage = 'none';
+            elements.bgLayer1.style.backgroundColor = themeBgColor;
+            elements.bgLayer1.style.opacity = '1';
+            elements.bgLayer2.style.opacity = '0';
+            
+            loadProgress(); 
+            
+            alertMessage("Прогресс сброшен!");
+        }
     </script>
 </body>
 </html>
