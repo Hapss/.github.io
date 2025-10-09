@@ -809,9 +809,13 @@
                     dialogueIsLoaded = true;
                     currentBackgroundUrl = null; 
                     
-                    // Сброс состояния спрайтов при загрузке новой главы
+                    // ИСПРАВЛЕНИЕ: ЯВНЫЙ СБРОС СОСТОЯНИЯ СПРАЙТОВ при загрузке новой главы
                     currentLeftSpriteFile = null;
                     currentRightSpriteFile = null;
+                    elements.spriteLeftContainer.classList.add('hidden');
+                    elements.spriteRightContainer.classList.add('hidden');
+                    elements.spriteLeftElement.src = ''; 
+                    elements.spriteRightElement.src = '';
                     
                     loadText.textContent = "Загружено";
                     renderDialogueStep();
@@ -1132,13 +1136,19 @@
             elements.historyPanel.classList.remove('open'); // Скрыть историю
 
             
-            // Сброс состояния спрайтов
+            // ИСПРАВЛЕНИЕ: ЯВНЫЙ СБРОС СОСТОЯНИЯ СПРАЙТОВ при сбросе
             currentLeftSpriteFile = null;
             currentRightSpriteFile = null;
 
             elements.dialogueWrapper.classList.add('hidden');
             elements.languageSelect.value = 'ru';
             
+            // Очистка и скрытие спрайтов
+            elements.spriteLeftContainer.classList.add('hidden');
+            elements.spriteRightContainer.classList.add('hidden');
+            elements.spriteLeftElement.src = ''; 
+            elements.spriteRightElement.src = '';
+
             // Сброс фона на цвет, соответствующий текущей теме
             const themeBgColor = getComputedStyle(document.body).getPropertyValue('--color-bg-main').trim();
 
@@ -1146,9 +1156,6 @@
             elements.bgLayer1.style.backgroundColor = themeBgColor;
             elements.bgLayer1.style.opacity = '1';
             elements.bgLayer2.style.opacity = '0';
-            
-            elements.spriteLeftContainer.classList.add('hidden');
-            elements.spriteRightContainer.classList.add('hidden');
             
             loadProgress(); 
             
