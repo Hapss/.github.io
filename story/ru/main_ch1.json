@@ -31,7 +31,6 @@
             "sprite": "", 
             "position": "", 
             "text": "Щелчок!",
-            "background": "images/background/bg_stage1.png",
             "sprite_dimmed": "Kiana 1.png"
         },
         { "speaker": "Киана", "sprite": "Kiana 1.png", "position": "left", "text": "Проверка оружия завершена, боеприпасы на месте... Правда я не знаю, как долго продержится это старьё."},
