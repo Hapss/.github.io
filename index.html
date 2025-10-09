@@ -1,4 +1,4 @@
-<!-- Визуальный Просмотрщик Новелл с исправлением логики затемнения спрайтов и возможностью смены темы. -->
+<!-- Визуальный Просмотрщик Новелл с исправлением логики затемнения спрайтов, возможностью смены темы и поддержкой китайского языка. -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -96,7 +96,13 @@
         
         /* Кнопки и селекты */
         .control-panel { background-color: var(--color-bg-medium); }
-        .select-field { background-color: var(--color-bg-main); color: var(--color-text-primary); }
+        .select-field { 
+            /* Применяем цвет текста в зависимости от темы, перекрывая Tailwind */
+            color: var(--color-text-primary); 
+            background-color: var(--color-bg-main); 
+            -webkit-appearance: none; /* Сброс стандартного стиля для лучшего контроля */
+            appearance: none;
+        }
         .select-field:hover, .select-field:focus { 
             box-shadow: 0 0 0 2px var(--color-accent-ring);
             border-color: var(--color-accent-ring);
@@ -205,10 +211,11 @@
                 <!-- Кнопка сброса -->
                 <button id="resetButton" onclick="resetProgress()" class="px-3 py-1 reset-button rounded-full transition duration-150 text-sm">Сброс</button>
                 
-                <!-- Выбор языка -->
-                <select id="languageSelect" onchange="initializeOrUpdateUI(true)" class="select-field text-white rounded-lg p-2 cursor-pointer transition hover:ring-2" style="background-color: var(--color-bg-medium);">
+                <!-- Выбор языка (Удален класс text-white) -->
+                <select id="languageSelect" onchange="initializeOrUpdateUI(true)" class="select-field rounded-lg p-2 cursor-pointer transition hover:ring-2" style="background-color: var(--color-bg-medium);">
                     <option value="ru">Русский</option>
                     <option value="en">English</option>
+                    <option value="zh">中文 (Chinese)</option>
                 </select>
             </div>
         </div>
@@ -304,17 +311,17 @@
                 MAX_ATTEMPTS: 3,        
             },
             PLACEHOLDERS: {
-                // Это заполнитель, который используется, если CSS не загрузился, лучше оставить темный для совместимости
+                // Это заполнитель, который используется, если CSS не загрузился
                 DEFAULT_BG_COLOR: '#1f2937', 
             }
         };
 
         const STORY_GROUPS = {
-            main: { ru: "Основной сюжет", en: "Main Story", prefix: "main_" },
-            extra: { ru: "Дополнительный сюжет", en: "Extra Story", prefix: "extra_" },
-            bosses: { ru: "Боссы", en: "Boss Fights", prefix: "boss_" },
-            vn: { ru: "Визуальная новелла", en: "Visual Novel", prefix: "vn_" },
-            romance: { ru: "Роман", en: "Romance", prefix: "ln_" }
+            main: { ru: "Основной сюжет", en: "Main Story", zh: "主线故事", prefix: "main_" },
+            extra: { ru: "Дополнительный сюжет", en: "Extra Story", zh: "额外故事", prefix: "extra_" },
+            bosses: { ru: "Боссы", en: "Boss Fights", zh: "Boss 战", prefix: "boss_" },
+            vn: { ru: "Визуальная новелла", en: "Visual Novel", zh: "视觉小说", prefix: "vn_" },
+            romance: { ru: "Роман", en: "Romance", zh: "浪漫", prefix: "ln_" }
         };
         
         let currentDialogue = []; 
@@ -345,6 +352,14 @@
                 errorFetchMetadataStrict: "Critical Error: Failed to load chapter metadata. The file story/story_metadata.json is missing or inaccessible.",
                 errorChapterNotFound: "Chapter file not found.",
                 themeDark: "Dark", themeLight: "Light"
+            },
+            zh: {
+                headerTitle: "视觉小说故事档案", labelStoryType: "故事类型", labelChapter: "章节",
+                loadText: "加载", resetProgress: "重置", endOfStory: "故事结束了!",
+                startOfStory: "这是故事的开始。", placeholderMetadata: "--- 未加载元数据 ---",
+                errorFetchMetadataStrict: "致命错误：无法加载章节元数据。文件 story/story_metadata.json 缺失或无法访问。",
+                errorChapterNotFound: "未找到章节文件。",
+                themeDark: "深色", themeLight: "浅色"
             }
         };
 
@@ -374,7 +389,8 @@
             
             // Если фон сейчас цветной (не картинка), нужно обновить цвет, используя переменную
             if (currentBackgroundUrl === CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR) {
-                 const themeBgColor = isDark ? '#1f2937' : '#f3f4f6'; // Используем явные цвета, соответствующие CSS переменным
+                 // Получаем цвет фона из CSS-переменной
+                 const themeBgColor = getComputedStyle(document.body).getPropertyValue('--color-bg-main').trim();
                  
                  const activeLayer = activeBgLayer === 1 ? elements.bgLayer1 : elements.bgLayer2;
                  const inactiveLayer = activeBgLayer === 1 ? elements.bgLayer2 : elements.bgLayer1;
@@ -754,7 +770,8 @@
 
         function updateI18nStrings() {
             const lang = elements.languageSelect.value;
-            const text = i18n[lang];
+            const text = i18n[lang] || i18n.ru; // Fallback to Russian
+            const availableLangs = ['ru', 'en', 'zh'];
 
             document.getElementById('headerTitle').textContent = text.headerTitle;
             document.getElementById('labelStoryType').textContent = text.labelStoryType;
@@ -778,6 +795,7 @@
             for (const key in STORY_GROUPS) {
                 const option = document.createElement('option');
                 option.value = key;
+                // Использование текущего языка, если доступно, иначе fallback на RU
                 option.textContent = STORY_GROUPS[key][lang] || STORY_GROUPS[key].ru; 
                 if (key === currentType) {
                     option.selected = true;
@@ -815,10 +833,12 @@
                 for (const fullChapterKey in window.storyMetadata) {
                     if (fullChapterKey.startsWith(prefix)) {
                         const chapterData = window.storyMetadata[fullChapterKey];
-                        if (chapterData && chapterData[lang]) {
+                        // Проверяем наличие перевода для текущего языка, иначе fallback на RU
+                        const chapterName = chapterData[lang] || chapterData.ru; 
+                        if (chapterName) {
                             const option = document.createElement('option');
                             option.value = fullChapterKey; 
-                            option.textContent = chapterData[lang]; 
+                            option.textContent = chapterName; 
                             
                             if (fullChapterKey === currentChapterKey) {
                                  option.selected = true;
@@ -883,16 +903,19 @@
             const progress = JSON.parse(savedProgress);
             const { languageSelect, storyTypeSelect, chapterSelect } = elements;
             
+            // Восстановление языка
             if (i18n[progress.lang]) {
                 languageSelect.value = progress.lang;
             }
             updateI18nStrings(); 
             
+            // Восстановление типа сюжета
             if (progress.type && STORY_GROUPS[progress.type]) {
                 storyTypeSelect.value = progress.type;
                 updateChapterSelect(true); 
             }
             
+            // Восстановление главы
             let chapterRestored = false;
             if (window.storyMetadata && storyTypeSelect.value && progress.chapter) {
                 if (Array.from(chapterSelect.options).some(opt => opt.value === progress.chapter)) {
@@ -922,8 +945,11 @@
             elements.dialogueWrapper.classList.add('hidden');
             elements.languageSelect.value = 'ru';
             
+            // Сброс фона на цвет, соответствующий текущей теме
+            const themeBgColor = getComputedStyle(document.body).getPropertyValue('--color-bg-main').trim();
+
             elements.bgLayer1.style.backgroundImage = 'none';
-            elements.bgLayer1.style.backgroundColor = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR;
+            elements.bgLayer1.style.backgroundColor = themeBgColor;
             elements.bgLayer1.style.opacity = '1';
             elements.bgLayer2.style.opacity = '0';
             
