@@ -1,4 +1,4 @@
-<!-- Визуальный Просмотрщик Новелл с упрощенной логикой загрузки локальных файлов. -->
+<!-- Визуальный Просмотрщик Новелл с улучшенной, плавной загрузкой изображений. -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -10,14 +10,12 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
         
-        /* Глобальные правила для предотвращения выделения */
+        /* Глобальные правила */
         body, #vnViewer, .sprite-image {
-            /* Запрет выделения текста и изображений */
             user-select: none;
             -webkit-user-select: none; 
             -moz-user-select: none;
             -ms-user-select: none;
-            /* Запрет перетаскивания (для некоторых браузеров) */
             user-drag: none;
             -webkit-user-drag: none;
         }
@@ -26,8 +24,6 @@
             font-family: 'Inter', sans-serif;
             background-color: #5c5c5c; 
             color: #e5e7eb;
-            background-size: cover;
-            background-position: center;
         }
         .vn-overlay {
             background-color: rgba(0, 0, 0, 0.75);
@@ -43,12 +39,14 @@
             font-weight: bold;
             font-size: 1.25rem;
         }
+        
+        /* Спрайты */
         .sprite-position {
             position: absolute;
             bottom: 0;
             height: 95%; 
             width: 45%;
-            transition: opacity 0.3s ease, transform 0.3s ease;
+            transition: opacity 0.5s ease; /* Увеличенная длительность для плавности */
             z-index: 10;
             display: flex; 
             justify-content: center;
@@ -61,16 +59,23 @@
             width: auto;
             max-height: 100%; 
             object-fit: contain;
-            opacity: 1; 
             display: block; 
+            /* Стиль затемнения */
+            transition: opacity 0.3s ease; 
         }
         .dimmed-sprite {
-            opacity: 0.4;
+            opacity: 0.4 !important; /* !important, чтобы перебить встроенный transition на 1 */
+        }
+        
+        /* Фоновые слои для кросс-фейда */
+        .bg-layer {
+            transition: opacity 1.0s ease; /* Длительный переход для фона */
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: cover;
         }
         #vnViewer {
-            background-repeat: no-repeat;
             background-color: #1a1a1a; 
-            background-position: center;
         }
     </style>
 </head>
@@ -150,8 +155,14 @@
 
         <!-- 3. Visual Novel Viewer (Main View) -->
         <div id="vnViewer" class="relative w-full aspect-[16/9] bg-gray-900 rounded-xl shadow-2xl overflow-hidden flex flex-col justify-end transition-colors duration-500 cursor-pointer" 
-             style="min-height: 400px; background-size: cover; background-position: center;"
+             style="min-height: 400px;"
              onclick="navigateDialogue(1)"> 
+            
+            <!-- Background Layers Container (для кросс-фейда) -->
+            <div id="backgroundContainer" class="absolute inset-0 z-0">
+                <div id="bgLayer1" class="absolute inset-0 bg-layer opacity-100"></div>
+                <div id="bgLayer2" class="absolute inset-0 bg-layer opacity-0"></div>
+            </div>
 
             <!-- Sprite Container -->
             <div id="spriteContainer" class="absolute inset-0 z-10 pointer-events-none flex justify-center items-end p-4">
@@ -187,7 +198,6 @@
         // === КОНФИГУРАЦИЯ И ДАННЫЕ ===
         // ====================================================================
         
-        // Объект CONFIG для централизованного управления всеми настройками
         const CONFIG = {
             PATHS: {
                 SPRITE_BASE: 'images/sprites/',
@@ -196,19 +206,18 @@
                 STORY_BASE: 'story/', 
             },
             STORAGE: {
-                KEY: 'vn_story_progress_v4',
+                KEY: 'vn_story_progress_v5',
             },
-            // Настройки для загрузки JSON-файлов глав (с уменьшенной задержкой и числом попыток)
             BACKOFF: {
                 INITIAL_DELAY_MS: 750,  
                 MAX_DELAY_MS: 7500,     
                 MAX_ATTEMPTS: 3,        
             },
-            // Base64-кодированные SVG для мгновенных плейсхолдеров
             PLACEHOLDERS: {
-                KIANA_SPRITE: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjODAwMDgwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5LSUFOQTwvdGV4dD48L3N2Zz4=',
-                MEI_SPRITE: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRkY1NzMzIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5NRUk8L3RleHQ+PC9zdmc+',
-                DEFAULT_BG: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyMCIgaGVpZ2h0PSIxMDgwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMyYjJkM2EiLz48L3N2Zz4=',
+                // Добавлены стилизованные плейсхолдеры для визуализации
+                DEFAULT_BG: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyMCIgaGVpZ2h0PSIxMDgwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMzNDNmMzciLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9ImludGVyIiBmb250LXNpemU9IjcwcHgiIGZpbGw9IiNjY2NjY2MiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlZOOiBMb2FkaW5nPC90ZXh0Pjwvc3ZnPg==',
+                KIANA_SPRITE: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRDBFQUZGIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjMDAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5LSUFOQTwvdGV4dD48L3N2Zz4=',
+                MEI_SPRITE: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjVDM0I3Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSI0MHB4IiBmaWxsPSIjMDAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5NRUk8L3RleHQ+PC9zdmc+'
             }
         };
 
@@ -224,6 +233,7 @@
         let currentDialogueIndex = 0;
         let dialogueIsLoaded = false;
         let currentBackgroundUrl = null; 
+        let activeBgLayer = 1; // Текущий видимый слой фона (1 или 2)
         window.storyMetadata = null; 
         
         // Переводы UI
@@ -233,14 +243,14 @@
                 loadText: "Загрузить", resetProgress: "Сброс", endOfStory: "История закончилась!",
                 startOfStory: "Это начало истории.", placeholderMetadata: "--- Метаданные не загружены ---",
                 errorFetchMetadataStrict: "Критическая ошибка: не удалось загрузить метаданные глав. Файл story/story_metadata.json отсутствует или недоступен.",
-                errorChapterNotFound: "Файл главы не найден. Проверьте консоль для пути к файлу." // Обновленное сообщение
+                errorChapterNotFound: "Файл главы не найден."
             },
             en: {
                 headerTitle: "VN Story Archive", labelStoryType: "Story Type", labelChapter: "Chapter",
                 loadText: "Load", resetProgress: "Reset", endOfStory: "Story finished!",
                 startOfStory: "This is the start of the story.", placeholderMetadata: "--- Metadata not loaded ---",
                 errorFetchMetadataStrict: "Critical Error: Failed to load chapter metadata. The file story/story_metadata.json is missing or inaccessible.",
-                errorChapterNotFound: "Chapter file not found. Check console for file path." // Обновленное сообщение
+                errorChapterNotFound: "Chapter file not found."
             }
         };
 
@@ -268,8 +278,12 @@
             elements.currentText = document.getElementById('currentText');
             elements.speakerNameContainer = document.getElementById('speakerNameContainer');
             
-            // Установка дефолтного фона
-            elements.vnViewerElement.style.backgroundImage = `url('${CONFIG.PLACEHOLDERS.DEFAULT_BG}')`;
+            // НОВЫЕ СЛОИ ДЛЯ ФОНА
+            elements.bgLayer1 = document.getElementById('bgLayer1');
+            elements.bgLayer2 = document.getElementById('bgLayer2');
+            
+            // Установка дефолтного фона на активный слой
+            elements.bgLayer1.style.backgroundImage = `url('${CONFIG.PLACEHOLDERS.DEFAULT_BG}')`;
             currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG; 
             
             loadProgress(); 
@@ -279,7 +293,7 @@
         // === CORE FUNCTIONS ===
         // ====================================================================
         
-        /** * Асинхронно загружает метаданные глав. */
+        /** Асинхронно загружает метаданные глав. */
         async function fetchChapterMetadata() {
             try {
                 const response = await fetch(CONFIG.PATHS.METADATA_FILE); 
@@ -312,53 +326,104 @@
             }
         }
         
-        /** * Определяет путь/URL к спрайту (или Base64 плейсхолдер). */
+        /** Определяет путь/URL к спрайту (или Base64 плейсхолдер). */
         const spritePath = (fileName) => {
             if (!fileName) return null;
             
             const lowerCaseName = fileName.toLowerCase();
-
+            // Пример: если имя файла содержит "kiana", используем плейсхолдер
             if (lowerCaseName.includes('kiana')) return CONFIG.PLACEHOLDERS.KIANA_SPRITE;
             if (lowerCaseName.includes('mei')) return CONFIG.PLACEHOLDERS.MEI_SPRITE;
             
-            return fileName; 
+            // Для локальных файлов
+            return CONFIG.PATHS.SPRITE_BASE + fileName; 
         };
         
-        /** * * Загружает ЛОКАЛЬНОЕ изображение с агрессивным обходом кэша.
-         * * Включает обработку ошибок: скрывает спрайт, если файл не найден.
+        /**
+         * Загружает изображение спрайта и плавно его отображает.
          */
-        function loadLocalImage(url, element, isBackground = false) {
-            // Агрессивный обход кэша
-            const cacheBuster = `?t=${Date.now()}`;
-            const finalUrl = url + cacheBuster;
+        function loadSprite(url, element) {
+            const container = element.parentElement;
 
-            if (!isBackground) {
-                // Логика для спрайтов (<img>)
-                element.onerror = () => {
-                    // Скрываем контейнер, если спрайт не загрузился
-                    element.parentElement.classList.add('hidden');
-                    console.warn(`[Local Image Load] Не удалось загрузить спрайт: ${url}. Контейнер скрыт.`);
-                };
-                element.src = finalUrl; 
-            } else {
-                // Логика для фона (CSS background-image)
-                const tempImg = new Image();
-                tempImg.onload = () => {
-                    element.style.backgroundImage = `url('${finalUrl}')`;
-                    currentBackgroundUrl = finalUrl; 
-                };
-                
-                // Если фон не загрузился (например, 404), просто оставляем текущий.
-                tempImg.onerror = () => {
-                     console.warn(`[Local Image Load] Не удалось загрузить фон: ${url}. Используется текущий фон/плейсхолдер.`);
-                }; 
-                tempImg.src = finalUrl;
+            if (url.startsWith('data:')) {
+                // Если это Base64 плейсхолдер, немедленно устанавливаем и отображаем
+                element.src = url;
+                element.style.opacity = '1';
+                container.classList.remove('hidden');
+                return;
             }
+            
+            // Если это новый локальный файл:
+            // 1. Скрываем контейнер и устанавливаем прозрачность 0 (чтобы не было старого изображения)
+            container.classList.add('hidden');
+            element.style.opacity = '0';
+
+            const tempImg = new Image();
+            
+            tempImg.onload = () => {
+                // 2. После загрузки устанавливаем источник, показываем контейнер
+                element.src = tempImg.src; 
+                container.classList.remove('hidden'); 
+                
+                // 3. Плавно отображаем
+                setTimeout(() => {
+                    element.style.opacity = '1'; 
+                }, 50); 
+            };
+            
+            tempImg.onerror = () => {
+                container.classList.add('hidden');
+                console.warn(`[Sprite Load] Не удалось загрузить спрайт: ${url}.`);
+            };
+
+            // Используем агрессивный обход кэша для надежности
+            const finalUrl = `${url}?t=${Date.now()}`;
+            tempImg.src = finalUrl;
         }
+
+        /** * Переключает фон, используя технику кросс-фейда.
+         */
+        function crossFadeBackground(newBgFileName) {
+            const finalBgUrl = CONFIG.PATHS.BACKGROUND_BASE + newBgFileName;
+            
+            if (finalBgUrl === currentBackgroundUrl) return; 
+
+            const { bgLayer1, bgLayer2 } = elements;
+            const nextLayer = activeBgLayer === 1 ? bgLayer2 : bgLayer1;
+            const currentLayer = activeBgLayer === 1 ? bgLayer1 : bgLayer2;
+            
+            // 1. Preload image
+            const tempImg = new Image();
+            
+            tempImg.onload = () => {
+                // 2. Once loaded, apply the image to the next layer
+                nextLayer.style.backgroundImage = `url('${tempImg.src}')`;
+
+                // 3. Perform the fade: make next layer visible, current layer invisible
+                // Делаем это асинхронно, чтобы браузер успел отрисовать новый фон на невидимом слое
+                setTimeout(() => {
+                    currentLayer.style.opacity = '0';
+                    nextLayer.style.opacity = '1';
+                    
+                    // 4. Update state
+                    activeBgLayer = activeBgLayer === 1 ? 2 : 1;
+                    currentBackgroundUrl = tempImg.src;
+                }, 10);
+            };
+            
+            tempImg.onerror = () => {
+                console.warn(`[BG Fade] Не удалось загрузить фон: ${finalBgUrl}. Сохранение текущего фона.`);
+            };
+
+            // Агрессивный обход кэша
+            const finalUrl = `${finalBgUrl}?t=${Date.now()}`;
+            tempImg.src = finalUrl;
+        }
+
 
         /** Рендерит текущий шаг диалога и обновляет UI. */
         function renderDialogueStep() {
-            const { vnViewerElement, dialogueWrapper, spriteLeftContainer, spriteRightContainer, 
+            const { dialogueWrapper, spriteLeftContainer, spriteRightContainer, 
                     spriteLeftElement, spriteRightElement, currentSpeaker, currentText, speakerNameContainer } = elements;
 
             if (!dialogueIsLoaded || currentDialogue.length === 0) {
@@ -368,50 +433,30 @@
 
             const step = currentDialogue[currentDialogueIndex];
             
-            // 1. Фон (Персистентность)
-            const bgFileName = step.background; 
-
-            if (bgFileName) { 
-                if (!bgFileName.startsWith('data:')) {
-                    const finalBgUrl = CONFIG.PATHS.BACKGROUND_BASE + bgFileName; 
-                    loadLocalImage(finalBgUrl, vnViewerElement, true);
-                } else {
-                    vnViewerElement.style.backgroundImage = `url('${bgFileName}')`;
-                    currentBackgroundUrl = bgFileName; 
-                }
-            } else if (currentBackgroundUrl) { 
-                vnViewerElement.style.backgroundImage = `url('${currentBackgroundUrl}')`;
-            } else {
-                 vnViewerElement.style.backgroundImage = `url('${CONFIG.PLACEHOLDERS.DEFAULT_BG}')`;
-                 currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG;
+            // 1. Фон (Кросс-Фейд)
+            if (step.background) { 
+                crossFadeBackground(step.background);
             }
 
 
             // 2. Спрайты и Затемнение
+            const spriteFileName = step.sprite; 
             const activeSpeakerPosition = step.position ? step.position.toLowerCase() : null;
 
-            // Сброс и скрытие всех спрайтов
+            // Сбрасываем все спрайты в невидимость
             spriteLeftContainer.classList.add('hidden');
             spriteRightContainer.classList.add('hidden');
+
+            // Убираем затемнение
             spriteLeftElement.classList.remove('dimmed-sprite');
             spriteRightElement.classList.remove('dimmed-sprite');
-            
-            const spriteFileNameOrB64 = spritePath(step.sprite); 
-            
-            if (spriteFileNameOrB64 && step.position) {
-                const isLeft = step.position.toLowerCase() === 'left';
-                const container = isLeft ? spriteLeftContainer : spriteRightContainer;
+
+            if (spriteFileName && activeSpeakerPosition) {
+                const isLeft = activeSpeakerPosition === 'left';
                 const imageElement = isLeft ? spriteLeftElement : spriteRightElement;
                 
-                container.classList.remove('hidden'); 
-
-                if (spriteFileNameOrB64.startsWith('data:')) {
-                    imageElement.src = spriteFileNameOrB64;
-                } else {
-                    const finalSpriteUrl = CONFIG.PATHS.SPRITE_BASE + spriteFileNameOrB64; 
-                    imageElement.src = ""; // Сброс для принудительной перерисовки
-                    loadLocalImage(finalSpriteUrl, imageElement, false);
-                }
+                const spriteUrl = spritePath(spriteFileName); 
+                loadSprite(spriteUrl, imageElement);
             } 
             
             // Применение Затемнения
@@ -420,6 +465,7 @@
             } else if (activeSpeakerPosition === 'left' && !spriteRightContainer.classList.contains('hidden')) {
                 spriteRightElement.classList.add('dimmed-sprite');
             }
+
 
             // 3. Текст и Имя Спикера
             dialogueWrapper.classList.remove('hidden');
@@ -435,10 +481,10 @@
             currentText.textContent = step.text || "";
         }
         
-        /** * Асинхронно пытается загрузить выбранную главу, используя Exponential Backoff. */
+        /** Асинхронно пытается загрузить выбранную главу, используя Exponential Backoff. */
         async function updateStoryContent(startIndex = 0) {
             const lang = elements.languageSelect.value; 
-            // ИСПРАВЛЕНИЕ 1: Удаляем пробелы из ключа
+            // Удаляем пробелы из ключа
             const fullStoryKey = elements.chapterSelect.value.trim(); 
             const { loadButton, loadText } = elements;
             
@@ -447,7 +493,6 @@
             const expectedFilePath = `${CONFIG.PATHS.STORY_BASE}${lang}/${fullStoryKey}.json`;
             const { INITIAL_DELAY_MS, MAX_DELAY_MS, MAX_ATTEMPTS } = CONFIG.BACKOFF;
 
-            // ИСПРАВЛЕНИЕ 2: Логируем точный путь
             console.log(`[Content Load] Попытка загрузить главу: ${expectedFilePath}`);
 
             loadButton.disabled = true;
@@ -456,15 +501,14 @@
             const attemptLoad = async (attempt = 1) => {
                 let success = false;
                 let data = null;
+                let errorType = null;
 
                 try {
-                    // Используем агрессивный обход кэша
                     const cacheBuster = `?t=${Date.now()}_${attempt}`;
                     const response = await fetch(expectedFilePath + cacheBuster);
                     
                     if (response.status === 404) {
-                         // Специальная обработка 404, чтобы не логировать как общую ошибку
-                        console.warn(`[Content Load] Ошибка 404: Файл не найден по пути: ${expectedFilePath}. Попытка ${attempt}/${MAX_ATTEMPTS}.`);
+                        errorType = "404 Not Found";
                         throw new Error("404 Not Found");
                     }
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -472,8 +516,10 @@
                     data = await response.json();
                     success = true;
                 } catch (e) {
-                    // Не логируем, если это просто "404 Not Found" (уже обработано выше)
-                    if (e.message !== "404 Not Found") {
+                    if (e instanceof SyntaxError) {
+                        errorType = "SyntaxError";
+                        console.error(`[Content Load] Критическая ошибка JSON в файле ${expectedFilePath}:`, e);
+                    } else if (e.message !== "404 Not Found") {
                        console.error(`[Content Load] Общая ошибка загрузки (Попытка ${attempt}).`, e);
                     }
                 }
@@ -484,6 +530,7 @@
                     currentDialogueIndex = Math.min(startIndex, currentDialogue.length - 1);
                     currentDialogueIndex = Math.max(0, currentDialogueIndex); 
                     dialogueIsLoaded = true;
+                    // Сброс фона для принудительной загрузки первого фона главы
                     currentBackgroundUrl = null; 
                     
                     loadText.textContent = "Загружено";
@@ -495,11 +542,18 @@
                     }, 1500);
 
                 } else {
-                    // --- ПОВТОРНАЯ ПОПЫТКА (Exponential Backoff) ---
+                    // --- ПОВТОРНАЯ ПОПЫТКА ---
+                    if (errorType === "SyntaxError") {
+                        loadText.textContent = "Ошибка JSON";
+                        alertMessage("Ошибка: Синтаксическая ошибка в JSON-файле главы. Проверьте консоль.");
+                        loadButton.disabled = false;
+                        return;
+                    }
+                    
                     if (attempt >= MAX_ATTEMPTS) {
                         loadText.textContent = i18n[lang].errorChapterNotFound;
                         loadButton.disabled = false;
-                        console.error(`[Content Load] Критическая ошибка: Не удалось загрузить главу "${fullStoryKey}" после ${MAX_ATTEMPTS} попыток. Проверьте путь выше.`);
+                        console.error(`[Content Load] Критическая ошибка: Не удалось загрузить главу "${fullStoryKey}" после ${MAX_ATTEMPTS} попыток.`);
                         return;
                     }
                     
@@ -517,7 +571,7 @@
         // === UI & I18N FUNCTIONS ===
         // ====================================================================
 
-        /** * Показывает временное сообщение вверху экрана. */
+        /** Показывает временное сообщение вверху экрана. */
         function alertMessage(message) {
             const header = document.getElementById('header');
             const msgBox = document.createElement('div');
@@ -561,7 +615,7 @@
             }
         }
 
-        /** * Обновляет выпадающий список глав. */
+        /** Обновляет выпадающий список глав. */
         function updateChapterSelect(skipSideEffects = false) {
             const typeKey = elements.storyTypeSelect.value;
             const select = elements.chapterSelect;
@@ -643,7 +697,6 @@
         }
 
         async function loadProgress() {
-            // Загрузка метаданных главы до загрузки UI
             await fetchChapterMetadata(); 
             
             const savedProgress = localStorage.getItem(CONFIG.STORAGE.KEY);
@@ -663,7 +716,6 @@
             }
             updateI18nStrings(); 
             
-            // Восстановление типа сюжета и списка глав
             if (progress.type && STORY_GROUPS[progress.type]) {
                 storyTypeSelect.value = progress.type;
                 updateChapterSelect(true); 
@@ -671,7 +723,6 @@
             
             let chapterRestored = false;
             if (window.storyMetadata && storyTypeSelect.value && progress.chapter) {
-                // Проверяем, существует ли сохраненная глава
                 if (Array.from(chapterSelect.options).some(opt => opt.value === progress.chapter)) {
                     chapterSelect.value = progress.chapter;
                     chapterRestored = true;
@@ -679,7 +730,6 @@
             }
             enableLoadButton();
             
-            // АВТОЗАГРУЗКА: Продолжение игры с сохраненного индекса
             if (chapterRestored) {
                  updateStoryContent(progress.index); 
             }
@@ -691,16 +741,20 @@
             currentDialogueIndex = 0;
             currentDialogue = []; 
             currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG; 
+            activeBgLayer = 1;
 
             elements.dialogueWrapper.classList.add('hidden');
             elements.languageSelect.value = 'ru';
             
-            loadProgress(); 
-            
-            elements.vnViewerElement.style.backgroundImage = `url('${CONFIG.PLACEHOLDERS.DEFAULT_BG}')`;
+            // Сброс фоновых слоев
+            elements.bgLayer1.style.backgroundImage = `url('${CONFIG.PLACEHOLDERS.DEFAULT_BG}')`;
+            elements.bgLayer1.style.opacity = '1';
+            elements.bgLayer2.style.opacity = '0';
             
             elements.spriteLeftContainer.classList.add('hidden');
             elements.spriteRightContainer.classList.add('hidden');
+            
+            loadProgress(); 
             
             alertMessage("Прогресс сброшен!");
         }
