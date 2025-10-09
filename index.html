@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Архив Сюжета ВН</title>
+    <title>Архив сюжета Houkai Gakuen 2</title>
     <!-- Подключение Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         
         /* ==================================================================== */
         /* === Цветовые переменные (Dark Theme - по умолчанию) === */
@@ -124,7 +124,7 @@
         .sprite-position {
             position: absolute;
             bottom: 0; /* Привязан к самому низу #vnViewer */
-            height: 100%; 
+            height: 95%; 
             width: 45%;
             transition: opacity 0.5s ease; 
             z-index: 10;
@@ -146,8 +146,8 @@
             opacity: 1; /* По умолчанию полная видимость */
         }
         .dimmed-sprite {
-            opacity: 0.7 !important; /* Применяем затемнение */
-            filter: grayscale(80%); /* Опционально, для большего эффекта */
+            opacity: 0.5 !important; /* Применяем затемнение */
+            filter: grayscale(30%); /* Опционально, для большего эффекта */
         }
         
         .bg-layer {
@@ -160,22 +160,65 @@
             background-color: var(--color-bg-main); 
         }
 
-        /* История диалогов */
+        /* ==================================================================== */
+        /* === ИСТОРИЯ ДИАЛОГОВ (ОБНОВЛЕНИЕ: ВПРАВО, ШИРЕ, СКРОЛЛБАР) === */
+        /* ==================================================================== */
+        
         #historyPanel.open {
-            transform: translateX(0);
+            transform: translateX(0); /* Показать: вернуть на место */
         }
         #historyPanel {
-            /* Мобильный: на весь экран, Десктоп: 1/4 */
-            width: 100%; 
-            max-width: 320px; 
-            left: 0;
+            /* Позиционирование справа */
+            right: 0; 
+            left: auto; /* Отменяем левую привязку */
             top: 0;
+            
+            /* Скрыть: сдвинуть вправо за пределы экрана */
+            transform: translateX(100%); 
+            transition: transform 0.3s ease; 
+            z-index: 50; /* Должен быть поверх всего */
+            
+            /* Ширина */
+            width: 100%; 
+            max-width: 320px; /* Дефолт для мобильных */
+            
+            /* Flexbox для распределения контента */
+            display: flex;
+            flex-direction: column;
         }
         @media (min-width: 768px) {
             #historyPanel {
+                width: 400px; /* Шире на десктопе */
                 max-width: none;
-                width: 320px; 
             }
+        }
+        
+        /* Контейнер контента, занимающий оставшееся место */
+        #historyContent {
+            flex-grow: 1; /* Растягиваем, чтобы занять доступное пространство */
+            overflow-y: auto; /* Прокрутка только внутри контента */
+            padding-bottom: 2rem; /* Дополнительный отступ снизу */
+        }
+        
+        /* Кастомный Scrollbar */
+        #historyContent::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #historyContent::-webkit-scrollbar-track {
+            background: var(--color-bg-medium);
+            border-radius: 10px;
+        }
+
+        #historyContent::-webkit-scrollbar-thumb {
+            background: var(--color-accent-primary);
+            border-radius: 10px;
+            /* Обводка для лучшего контраста между ползунком и треком */
+            border: 2px solid var(--color-bg-darkest); 
+        }
+
+        #historyContent::-webkit-scrollbar-thumb:hover {
+            background: var(--color-accent-secondary);
         }
     </style>
 </head>
@@ -217,7 +260,7 @@
     <!-- 1. Header Bar: Использует var(--color-bg-darkest) -->
     <header id="header" class="fixed top-0 left-0 right-0 z-50 p-4 shadow-xl text-white transition-colors duration-300" style="background-color: var(--color-bg-darkest);">
         <div class="flex justify-between items-center max-w-7xl mx-auto">
-            <h1 id="headerTitle" class="text-xl font-bold tracking-wider" style="color: var(--color-text-primary);">Архив Сюжета ВН</h1>
+            <h1 id="headerTitle" class="text-xl font-bold tracking-wider" style="color: var(--color-text-primary);">Архив сюжета Houkai Gakuen 2</h1>
             
             <div class="flex items-center space-x-4">
                  <!-- Кнопка Истории -->
@@ -243,11 +286,12 @@
         </div>
     </header>
     
-    <!-- Панель Истории Диалогов -->
-    <div id="historyPanel" class="fixed top-0 h-full z-50 p-4 pt-20 shadow-2xl transition-transform duration-300 transform -translate-x-full" 
+    <!-- Панель Истории Диалогов (ПЕРЕМЕЩЕНА ВПРАВО) -->
+    <div id="historyPanel" class="fixed top-0 h-full z-50 p-4 pt-20 shadow-2xl transition-transform duration-300" 
          style="background-color: var(--color-bg-darkest); opacity: 0.95;">
         <h2 id="historyTitle" class="text-xl font-bold mb-4" style="color: var(--color-text-primary);">История Диалогов</h2>
-        <div id="historyContent" class="space-y-3 overflow-y-auto" style="height: calc(100% - 3.5rem);">
+        <!-- historyContent теперь flex-grow: 1 и отвечает за прокрутку -->
+        <div id="historyContent" class="space-y-3" style="height: calc(100% - 3.5rem);">
             <!-- History items here -->
         </div>
         <!-- Кнопка закрытия истории -->
@@ -367,14 +411,14 @@
         window.storyMetadata = null; 
         let isHistoryVisible = false; // Состояние видимости панели истории
         
-        // Глобальные переменные для отслеживания текущего спрайта (для исправления затемнения)
+        // Глобальные переменные для отслеживания текущего спрайтов (для исправления затемнения)
         let currentLeftSpriteFile = null;
         let currentRightSpriteFile = null;
         
         // Переводы UI
         const i18n = {
             ru: {
-                headerTitle: "Архив Сюжета ВН", labelStoryType: "Тип сюжета", labelChapter: "Сюжет (Глава)",
+                headerTitle: "Архив сюжета Houkai Gakuen 2", labelStoryType: "Тип сюжета", labelChapter: "Сюжет (Глава)",
                 loadText: "Загрузить", resetProgress: "Сброс", endOfStory: "История закончилась!",
                 startOfStory: "Это начало истории.", placeholderMetadata: "--- Метаданные не загружены ---",
                 errorFetchMetadataStrict: "Критическая ошибка: не удалось загрузить метаданные глав. Файл story/story_metadata.json отсутствует или недоступен.",
@@ -710,6 +754,7 @@
             
             // 4. Обновление Истории
             if (isHistoryVisible) {
+                // Если история открыта, обновляем ее, чтобы выделить текущий шаг
                 renderHistory();
             }
         }
@@ -928,16 +973,18 @@
         }
 
         // ====================================================================
-        // === УПРАВЛЕНИЕ ИСТОРИЕЙ ===
+        // === УПРАВЛЕНИЕ ИСТОРИЕЙ (ОБНОВЛЕННЫЙ TOGGLE) ===
         // ====================================================================
 
         function toggleHistory() {
             isHistoryVisible = !isHistoryVisible;
-            elements.historyPanel.classList.toggle('-translate-x-full', !isHistoryVisible);
+            // Теперь полагаемся только на класс 'open' для управления transform, 
+            // так как transform: translateX(100%) установлен по умолчанию в CSS
             elements.historyPanel.classList.toggle('open', isHistoryVisible);
             
             if (isHistoryVisible) {
-                renderHistory();
+                // Добавляем небольшой таймаут, чтобы прокрутка сработала после завершения анимации открытия
+                setTimeout(renderHistory, 300); 
             }
         }
 
@@ -1013,7 +1060,7 @@
             const currentItem = historyContent.querySelector(`[data-index="${currentDialogueIndex}"]`);
             if (currentItem) {
                 // Используем простой scrollIntoView, чтобы избежать проблем с iframe
-                currentItem.scrollIntoView({ behavior: 'auto', block: 'center' });
+                currentItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
 
@@ -1082,7 +1129,7 @@
             currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR; 
             activeBgLayer = 1;
             isHistoryVisible = false;
-            elements.historyPanel.classList.add('-translate-x-full'); // Скрыть историю
+            elements.historyPanel.classList.remove('open'); // Скрыть историю
 
             
             // Сброс состояния спрайтов
