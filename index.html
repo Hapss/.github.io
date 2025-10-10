@@ -45,6 +45,7 @@
             --color-accent-secondary: #115e59; 
             --color-accent-ring: #0d9488; 
             
+            /* Акцент для предупреждения */
             --color-warning-accent: #9333ea; 
             --color-warning-bg: #ede9fe; 
             
@@ -585,7 +586,7 @@
          * @param {number} index - Индекс шага в currentDialogue.
          * @returns {Promise<any[]>} - Promise, который разрешается, когда все активы загружены (или не загрузились).
          */
-        function preloadAssets(index) {
+        async function preloadAssets(index) {
             if (index >= currentDialogue.length) return Promise.resolve([]);
             
             const step = currentDialogue[index];
@@ -1262,6 +1263,7 @@
             const lang = elements.languageSelect.value;
             const currentArcKey = arcSelect.value;
             
+            // Очистка и установка заглушки
             arcSelect.innerHTML = '';
             arcSelect.disabled = true;
 
@@ -1278,6 +1280,7 @@
                     const option = document.createElement('option');
                     option.value = key;
                     option.textContent = MAIN_STORY_ARCS[key][lang] || MAIN_STORY_ARCS[key].ru;
+                    // Восстанавливаем выбранное значение, если оно было установлено в loadProgress
                     if (key === currentArcKey) {
                         option.selected = true;
                     }
@@ -1298,6 +1301,7 @@
 
         function updateChapterSelect(skipSideEffects = false) {
             const typeKey = elements.storyTypeSelect.value;
+            // !!! Читаем текущее значение arcKey из элемента, которое могло быть установлено loadProgress
             const arcKey = elements.arcSelect.value;       
             const select = elements.chapterSelect;
             const lang = elements.languageSelect.value;
@@ -1324,7 +1328,7 @@
                 }
                 
                 // Определяем префикс для фильтрации
-                let targetPrefix = typeKey === 'main' ? `${arcKey}_${prefix}` : prefix;
+                let targetPrefix = typeKey === 'main' ? `${prefix}${arcKey}_` : prefix;
                 
                 for (const fullChapterKey in window.storyMetadata) {
                     if (fullChapterKey.startsWith(targetPrefix)) {
@@ -1336,6 +1340,7 @@
                             option.value = fullChapterKey; 
                             option.textContent = chapterName; 
                             
+                            // Восстанавливаем выбранное значение, если оно было установлено в loadProgress
                             if (fullChapterKey === currentChapterKey) {
                                  option.selected = true;
                             }
@@ -1358,7 +1363,9 @@
         
         // Переименована для единообразия с onchange в HTML
         function initializeOrUpdateUI(isUserEvent) {
-             updateArcAndChapterUI(isUserEvent); 
+             // При пользовательском событии, мы сбрасываем состояние глав и арк, 
+             // чтобы они обновились на основе нового выбора.
+             updateArcAndChapterUI(!isUserEvent); 
         }
 
         function enableLoadButton() {
@@ -1446,7 +1453,7 @@
         }
 
         // ====================================================================
-        // === УПРАВЛЕНИЕ ПРОГРЕССОМ ===
+        // === УПРАВЛЕНИЕ ПРОГРЕССОМ (Обновленная версия) ===
         // ====================================================================
         
         function saveProgress() {
@@ -1463,61 +1470,63 @@
         async function loadProgress() {
             await fetchChapterMetadata(); 
             
-            // ==========================================================
-            // === НОВЫЙ ШАГ: АГРЕССИВНОЕ КЭШИРОВАНИЕ ПРИ ЗАГРУЗКЕ САЙТА ===
-            // ==========================================================
             if (window.storyMetadata) {
-                aggressivePreload(); // Начинаем загрузку всех активов в фоне
+                aggressivePreload(); // Начинаем загрузку всех ассетов в фоне
             }
 
             const savedProgress = localStorage.getItem(CONFIG.STORAGE.KEY);
+            const { languageSelect, storyTypeSelect, arcSelect, chapterSelect } = elements;
             
+            // 1. Сначала обновляем строки I18n для текущего языка
             updateI18nStrings(); 
 
             if (!savedProgress) {
-                updateArcAndChapterUI(false); // Вызываем унифицированную функцию
+                // Если прогресс не найден, просто инициализируем UI
+                updateArcAndChapterUI(false); 
                 enableLoadButton();
                 return; 
             }
 
             const progress = JSON.parse(savedProgress);
-            const { languageSelect, storyTypeSelect, arcSelect, chapterSelect } = elements;
             
+            // 2. Восстанавливаем Language
             if (i18n[progress.lang]) {
                 languageSelect.value = progress.lang;
             }
-            updateI18nStrings(); 
+            updateI18nStrings(); // Обновляем текст под восстановленный язык
             
+            // 3. Восстанавливаем Story Type и Arc
             let typeRestored = false;
             if (progress.type && STORY_GROUPS[progress.type]) {
                 storyTypeSelect.value = progress.type;
                 typeRestored = true;
+            } else {
+                 storyTypeSelect.value = "";
             }
             
-            // Устанавливаем значение арки *до* вызова updateArcAndChapterUI для восстановления
             if (typeRestored && progress.type === 'main' && progress.arc) {
                  arcSelect.value = progress.arc;
-            } else if (typeRestored && progress.type !== 'main') {
-                 // Если тип не основной, явно очищаем arcSelect.value, чтобы избежать ошибки.
+            } else {
                  arcSelect.value = "";
             }
 
-            // Эта функция теперь обновляет и Arc, и Chapter UI на основе сохраненного состояния
-            updateArcAndChapterUI(true); 
-
-            // После обновления UI проверяем, восстановлена ли глава
-            let chapterRestored = false;
-            if (window.storyMetadata && typeRestored && progress.chapter) {
+            // 4. Обновляем UI: это заполняет списки Арк и Глав на основе восстановленных значений.
+            // (skipSideEffects = false, чтобы в конце вызвать enableLoadButton/saveProgress)
+            updateArcAndChapterUI(false); 
+            
+            // 5. Восстанавливаем Chapter selection и АВТОМАТИЧЕСКИ ЗАГРУЖАЕМ контент
+            if (typeRestored && progress.chapter) {
+                // Проверяем, существует ли сохраненная глава в только что заполненном списке опций
                 if (Array.from(chapterSelect.options).some(opt => opt.value === progress.chapter)) {
                     chapterSelect.value = progress.chapter;
-                    chapterRestored = true;
+                    enableLoadButton(); 
+                    
+                    // !!! АВТОМАТИЧЕСКАЯ ЗАГРУЗКА СОХРАНЕННОГО ПРОГРЕССА
+                    updateStoryContent(progress.index); 
                 }
-            }
-            
-            enableLoadButton();
-            
-            if (chapterRestored) {
-                 updateStoryContent(progress.index); 
+            } else {
+                // Если глава не найдена или не была сохранена, просто включаем кнопку загрузки
+                enableLoadButton();
             }
         }
 
