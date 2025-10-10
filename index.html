@@ -497,24 +497,27 @@
         let currentLeftSpriteFile = null;
         let currentRightSpriteFile = null;
         
-        // --- НОВОЕ: Для предварительной загрузки (Preloading) ---
+        // --- Для предварительной загрузки (Preloading) ---
+        // Хранит Promise, которые разрешаются нативным объектом Image
         let preloadedAssets = {}; 
 
         const i18n = {
             ru: {
                 headerTitle: "Архив сюжета Houkai Gakuen 2", labelStoryType: "Тип сюжета", labelArc: "Арка", labelChapter: "Сюжет (Глава)",
-                loadText: "Загрузить", resetProgress: "Сброс", endOfStory: "История закончилась!",
+                loadText: "Загрузить", loadingText: "Загрузка...", loadedText: "Загружено", 
+                errorLoading: "Повтор", endOfStory: "История закончилась!",
                 startOfStory: "Это начало истории.", placeholderMetadata: "--- Метаданные не загружены ---",
                 errorFetchMetadataStrict: "Критическая ошибка: не удалось загрузить метаданные глав. Файл story/story_metadata.json отсутствует или недоступен.",
                 errorChapterNotFound: "Файл главы не найден.",
                 errorJsonSyntax: "КРИТИЧЕСКАЯ ОШИБКА JSON: Проверьте структуру файла JSON главы (лишние запятые/скобки)!",
-                errorRender: (msg) => `КРИТИЧЕСКАЯ ОШИБКА РЕНДЕРИНГА: ${msg}. Проверьте структуру данных!`, // Добавлено для рендеринга
+                errorRender: (msg) => `КРИТИЧЕСКАЯ ОШИБКА РЕНДЕРИНГА: ${msg}. Проверьте структуру данных!`, 
                 themeDark: "Тёмная", themeLight: "Светлая",
                 historyTitle: "История Диалогов", historyButton: "История", historyEmpty: "История пуста."
             },
             en: {
                 headerTitle: "VN Story Archive", labelStoryType: "Story Type", labelArc: "Arc", labelChapter: "Chapter",
-                loadText: "Load", resetProgress: "Reset", endOfStory: "Story finished!",
+                loadText: "Load", loadingText: "Loading...", loadedText: "Loaded", 
+                errorLoading: "Retry", endOfStory: "Story finished!",
                 startOfStory: "This is the start of the story.", placeholderMetadata: "--- Metadata not loaded ---",
                 errorFetchMetadataStrict: "Critical Error: Failed to load chapter metadata. The file story/story_metadata.json is missing or inaccessible.",
                 errorChapterNotFound: "Chapter file not found.",
@@ -525,7 +528,8 @@
             },
             zh: {
                 headerTitle: "视觉小说故事档案", labelStoryType: "故事类型", labelArc: "篇章", labelChapter: "章节",
-                loadText: "加载", resetProgress: "重置", endOfStory: "故事结束了!",
+                loadText: "加载", loadingText: "载入中...", loadedText: "已加载", 
+                errorLoading: "重试", endOfStory: "故事结束了!",
                 startOfStory: "这是故事的开始。", placeholderMetadata: "--- 未加载元数据 ---",
                 errorFetchMetadataStrict: "致命错误：无法加载章节元数据。文件 story/story_metadata.json 缺失或无法访问。",
                 errorChapterNotFound: "未找到章节文件。",
@@ -544,12 +548,12 @@
         
         /**
          * Загружает изображение и возвращает Promise, который разрешается объектом Image.
-         * Кэш-бастер удален для ускорения локальной загрузки.
+         * Используется для кэширования в памяти.
          * @param {string} url - URL изображения.
          * @returns {Promise<HTMLImageElement>}
          */
         function loadImage(url) {
-            // Если уже есть Promise в preloadedAssets, возвращаем его
+            // Если уже есть Promise в preloadedAssets, возвращаем его (используем кэш)
             if (preloadedAssets[url]) {
                 return preloadedAssets[url];
             }
@@ -558,16 +562,16 @@
                 const img = new Image();
                 
                 img.onload = () => {
-                    // console.log(`[Preload] Успешно загружено: ${url}`);
                     resolve(img);
                 };
                 
                 img.onerror = () => {
                     console.warn(`[Preload] Ошибка загрузки: ${url}`);
-                    reject(new Error(`Failed to load image: ${url}`));
+                    // Rejecting with the URL helps in debugging
+                    reject(new Error(`Failed to load image: ${url}`)); 
                 };
 
-                // ИСПРАВЛЕНИЕ: Удален кэш-бастер (?t=${Date.now()}) для использования кэша браузера
+                // CRITICAL FIX: No cache-buster is used, ensuring the browser cache is effective.
                 img.src = url; 
             });
 
@@ -579,29 +583,34 @@
         /**
          * Предварительно загружает фоны и спрайты для указанного шага диалога.
          * @param {number} index - Индекс шага в currentDialogue.
+         * @returns {Promise<any[]>} - Promise, который разрешается, когда все активы загружены (или не загрузились).
          */
         function preloadAssets(index) {
-            if (index >= currentDialogue.length) return;
+            if (index >= currentDialogue.length) return Promise.resolve([]);
             
             const step = currentDialogue[index];
+            const loadPromises = [];
             
             // 1. Фон
             if (step.background) {
                 const bgUrl = CONFIG.PATHS.BACKGROUND_BASE + encodeURIComponent(step.background);
-                loadImage(bgUrl).catch(() => {}); // Игнорируем ошибку прелоада
+                // Добавляем Promise, но игнорируем ошибку (catch)
+                loadPromises.push(loadImage(bgUrl).catch(() => null)); 
             }
             
             // 2. Левый Спрайт
             if (step.sprite_left) {
                 const spriteUrl = spritePath(step.sprite_left);
-                loadImage(spriteUrl).catch(() => {});
+                loadPromises.push(loadImage(spriteUrl).catch(() => null));
             }
             
             // 3. Правый Спрайт
             if (step.sprite_right) {
                 const spriteUrl = spritePath(step.sprite_right);
-                loadImage(spriteUrl).catch(() => {});
+                loadPromises.push(loadImage(spriteUrl).catch(() => null));
             }
+
+            return Promise.all(loadPromises);
         }
 
         // ====================================================================
@@ -682,7 +691,6 @@
                 warningOverlay.style.display = 'none';
                 return;
             }
-            // Кнопка обрабатывается через inline onclick="dismissWarningModal()" в HTML
         }
         
         // Эта функция вызывается напрямую из HTML: onclick="dismissWarningModal()"
@@ -788,7 +796,7 @@
                     renderDialogueStep();
                     saveProgress();
 
-                    // НОВОЕ: Предварительная загрузка следующего шага
+                    // Предварительная загрузка следующего шага
                     if (direction > 0) { 
                         preloadAssets(currentDialogueIndex + 1);
                     }
@@ -823,12 +831,12 @@
                 // Пытаемся получить изображение из кэша прелоадера (или загрузить, если не кэшировано)
                 const loadedImage = await loadImage(url); 
 
+                // Установка src из нативного объекта Image, который уже загружен
                 element.src = loadedImage.src; 
                 container.classList.remove('hidden');
 
             } catch (error) {
                 container.classList.add('hidden');
-                // Важно: здесь мы не alertMessage, т.к. это часто происходит и не критично для работы
                 console.warn(`[Sprite Load] Не удалось загрузить спрайт: ${url}.`, error);
                 element.src = ''; 
             }
@@ -848,6 +856,7 @@
                 // Пытаемся получить изображение из кэша прелоадера (или загрузить)
                 const loadedImage = await loadImage(finalBgUrl); 
 
+                // Установка фона из нативного объекта Image, который уже загружен
                 nextLayer.style.backgroundImage = `url('${loadedImage.src}')`;
                 nextLayer.style.backgroundColor = 'transparent'; 
                 
@@ -891,6 +900,7 @@
             
             // 1. Фон (Асинхронно, но с ожиданием прелоада/загрузки)
             if (step.background) { 
+                // crossFadeBackground автоматически использует кэш/preloadedAssets
                 crossFadeBackground(step.background);
             }
 
@@ -998,16 +1008,16 @@
             const { INITIAL_DELAY_MS, MAX_DELAY_MS, MAX_ATTEMPTS } = CONFIG.BACKOFF;
 
             loadButton.disabled = true;
-            loadText.textContent = "Загрузка...";
+            loadText.textContent = i18n[lang].loadingText; // "Загрузка..."
             
             const attemptLoad = async (attempt = 1) => {
                 let success = false;
                 let data = null;
                 let errorType = null;
                 let errorMessage = null;
+                let chapterData;
 
                 try {
-                    // Удаление кэш-бастера: Оставляем только file path
                     const response = await fetch(expectedFilePath);
                     
                     if (response.status === 404) {
@@ -1016,19 +1026,17 @@
                     }
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     
-                    // --- КРИТИЧЕСКИЙ БЛОК ДЛЯ ОБРАБОТКИ JSON ---
                     try {
-                        data = await response.json(); 
+                        chapterData = await response.json(); 
                         success = true;
                     } catch (e) {
                         if (e instanceof SyntaxError) {
                             errorType = "SyntaxError";
                             errorMessage = e.message;
-                            throw e; // Выбрасываем, чтобы попасть в внешний catch
+                            throw e; 
                         }
                         throw e;
                     }
-                    // ------------------------------------------
 
                 } catch (e) {
                     if (e instanceof SyntaxError) {
@@ -1038,61 +1046,60 @@
                     }
                 }
 
-                if (success && data) {
-                    // ==========================================================
-                    // === НОВЫЙ БЛОК: Защита от тихих ошибок рендеринга ===
-                    // ==========================================================
+                if (success && chapterData) {
                     try {
-                        currentDialogue = data.dialogue;
+                        currentDialogue = chapterData.dialogue;
 
-                        // Проверка на корректную структуру (массив 'dialogue' должен существовать)
                         if (!Array.isArray(currentDialogue)) {
                             throw new Error("Файл не содержит массив 'dialogue'. Проверьте структуру JSON.");
                         }
 
-                        // Проверка на пустоту (для главы, которая загрузилась, но пуста)
                         if (currentDialogue.length === 0) {
                              console.warn(`[Content Load] Файл главы загружен, но массив 'dialogue' пуст.`);
-                             alertMessage("Предупреждение: Файл главы загружен, но не содержит диалогов (массив 'dialogue' пуст).");
                         }
                         
                         currentDialogueIndex = Math.min(startIndex, currentDialogue.length - 1);
                         currentDialogueIndex = Math.max(0, currentDialogueIndex); 
                         dialogueIsLoaded = true;
-                        currentBackgroundUrl = null; 
                         
-                        // Сброс файлов спрайтов при загрузке новой главы
+                        // Сброс состояния для чистой загрузки
+                        currentBackgroundUrl = null; 
                         currentLeftSpriteFile = null;
                         currentRightSpriteFile = null;
                         elements.spriteLeftContainer.classList.add('hidden');
                         elements.spriteRightContainer.classList.add('hidden');
                         elements.spriteLeftElement.src = ''; 
                         elements.spriteRightElement.src = '';
-                        
-                        // Очищаем кэш прелоадера при загрузке новой главы
                         preloadedAssets = {}; 
 
-                        // Вызываем рендеринг, который может вызвать тихую ошибку
+                        // ==========================================================
+                        // === CRITICAL SPEED OPTIMIZATION: AWAIT INITIAL ASSETS ===
+                        // ==========================================================
+                        const initialStep = currentDialogue[currentDialogueIndex];
+                        if (initialStep) {
+                            // Ожидаем загрузки всех активов для первой отображаемой сцены
+                            await preloadAssets(currentDialogueIndex); 
+                            
+                            // Предварительная загрузка следующего шага сразу после первого
+                            preloadAssets(currentDialogueIndex + 1); 
+                        }
+
+                        // Рендеринг вызывается только после того, как активы первой сцены загружены
                         renderDialogueStep(); 
 
-                        // Предварительная загрузка первого следующего шага
-                        preloadAssets(currentDialogueIndex + 1);
-
-                        loadText.textContent = "Загружено";
+                        loadText.textContent = i18n[lang].loadedText; // "Загружено"
                         setTimeout(() => {
                             loadText.textContent = i18n[lang].loadText;
                             loadButton.disabled = false;
                         }, 1500);
                         
                     } catch (renderError) {
-                         // Перехват любой ошибки во время обработки данных или рендеринга
                          console.error("[Content Load] КРИТИЧЕСКАЯ ОШИБКА РЕНДЕРИНГА/ОБРАБОТКИ:", renderError);
                          alertMessage(i18n[lang].errorRender(renderError.message));
                          loadButton.disabled = false;
                          loadText.textContent = i18n[lang].loadText;
-                         return; // Выходим из attemptLoad
+                         return; 
                     }
-                    // ==========================================================
 
                 } else {
                     if (errorType === "SyntaxError") {
@@ -1105,12 +1112,12 @@
                     if (attempt >= MAX_ATTEMPTS) {
                         loadText.textContent = i18n[lang].errorChapterNotFound;
                         loadButton.disabled = false;
-                        console.error(`[Content Load] Критическая ошибка: Не удалось загрузить главу "${fullStoryKey}" по пути "${expectedFilePath}" после ${MAX_ATTACK_ATTEMPTS} попыток.`);
+                        console.error(`[Content Load] Критическая ошибка: Не удалось загрузить главу "${fullStoryKey}" по пути "${expectedFilePath}" после ${MAX_ATTEMPTS} попыток.`);
                         return;
                     }
                     
                     const delay = Math.min(MAX_DELAY_MS, INITIAL_DELAY_MS * Math.pow(2, attempt - 1));
-                    loadText.textContent = `Повтор (${attempt})...`;
+                    loadText.textContent = `${i18n[lang].errorLoading} (${attempt})...`; // "Повтор..."
 
                     setTimeout(() => attemptLoad(attempt + 1), delay);
                 }
@@ -1173,7 +1180,7 @@
         }
         
         /**
-         * ИСПРАВЛЕНИЕ: Объединенная функция для обновления Арки и Глав.
+         * Объединенная функция для обновления Арки и Глав.
          * Вызывается при смене языка или типа сюжета.
          * @param {boolean} skipSideEffects - Пропускать ли вызов enableLoadButton/saveProgress.
          */
@@ -1223,7 +1230,6 @@
 
         function updateChapterSelect(skipSideEffects = false) {
             const typeKey = elements.storyTypeSelect.value;
-            // CRITICAL: Получаем arcKey после обновления arcSelect в updateArcAndChapterUI
             const arcKey = elements.arcSelect.value;       
             const select = elements.chapterSelect;
             const lang = elements.languageSelect.value;
@@ -1252,10 +1258,6 @@
                 // Определяем префикс для фильтрации
                 let targetPrefix = typeKey === 'main' ? `${arcKey}_${prefix}` : prefix;
                 
-                // >>> ДОБАВЛЕНО ЛОГИРОВАНИЕ ДЛЯ ОТЛАДКИ ФИЛЬТРАЦИИ <<<
-                // console.log(`[UI Update] Фильтрация глав для: Тип='${typeKey}', Арка='${arcKey}', Префикс='${targetPrefix}'`);
-
-
                 for (const fullChapterKey in window.storyMetadata) {
                     if (fullChapterKey.startsWith(targetPrefix)) {
                         const chapterData = window.storyMetadata[fullChapterKey];
@@ -1271,8 +1273,6 @@
                             }
                             select.appendChild(option);
                             chapterFound = true;
-                            // >>> ДОБАВЛЕНО ЛОГИРОВАНИЕ НАЙДЕННЫХ ГЛАВ <<<
-                            // console.log(`[UI Update] Найдена глава: ${fullChapterKey} -> ${chapterName}`);
                         }
                     }
                 }
@@ -1459,7 +1459,7 @@
             currentLeftSpriteFile = null;
             currentRightSpriteFile = null;
 
-            // НОВОЕ: Сброс кэша прелоадера
+            // Сброс кэша прелоадера
             preloadedAssets = {}; 
 
             elements.dialogueWrapper.classList.add('hidden');
