@@ -404,7 +404,7 @@
     <div id="warning-overlay" class="fixed inset-0 z-[100] bg-gray-900/95 flex items-center justify-center p-4 md:p-8 transition-opacity duration-500 opacity-100">
         
         <!-- Карточка предупреждения -->
-        <div id="warning-card" class="p-8 md:p-12 rounded-3xl shadow-2xl max-w-sm md:max-w-xl w-full text-center 
+        <div id="warning-card" class="p-8 md:p-12 rounded-3xl shadow-2xl max-w-sm md:max-xl w-full text-center 
                     transform scale-100 transition-transform duration-300 border-2" 
                     style="background-color: var(--color-warning-bg); border-color: var(--color-warning-accent); color: var(--color-text-primary);">
 
@@ -507,6 +507,8 @@
                 startOfStory: "Это начало истории.", placeholderMetadata: "--- Метаданные не загружены ---",
                 errorFetchMetadataStrict: "Критическая ошибка: не удалось загрузить метаданные глав. Файл story/story_metadata.json отсутствует или недоступен.",
                 errorChapterNotFound: "Файл главы не найден.",
+                errorJsonSyntax: "КРИТИЧЕСКАЯ ОШИБКА JSON: Проверьте структуру файла JSON главы (лишние запятые/скобки)!",
+                errorRender: (msg) => `КРИТИЧЕСКАЯ ОШИБКА РЕНДЕРИНГА: ${msg}. Проверьте структуру данных!`, // Добавлено для рендеринга
                 themeDark: "Тёмная", themeLight: "Светлая",
                 historyTitle: "История Диалогов", historyButton: "История", historyEmpty: "История пуста."
             },
@@ -516,6 +518,8 @@
                 startOfStory: "This is the start of the story.", placeholderMetadata: "--- Metadata not loaded ---",
                 errorFetchMetadataStrict: "Critical Error: Failed to load chapter metadata. The file story/story_metadata.json is missing or inaccessible.",
                 errorChapterNotFound: "Chapter file not found.",
+                errorJsonSyntax: "CRITICAL JSON ERROR: Check chapter JSON file structure (trailing commas/brackets)!",
+                errorRender: (msg) => `CRITICAL RENDER ERROR: ${msg}. Check data structure!`,
                 themeDark: "Dark", themeLight: "Light",
                 historyTitle: "Dialogue History", historyButton: "History", historyEmpty: "History is empty."
             },
@@ -525,6 +529,8 @@
                 startOfStory: "这是故事的开始。", placeholderMetadata: "--- 未加载元数据 ---",
                 errorFetchMetadataStrict: "致命错误：无法加载章节元数据。文件 story/story_metadata.json 缺失或无法访问。",
                 errorChapterNotFound: "未找到章节文件。",
+                errorJsonSyntax: "JSON 致命错误：检查章节 JSON 文件结构（末尾逗号/括号）!",
+                errorRender: (msg) => `关键渲染错误：${msg}. 检查数据结构!`,
                 themeDark: "深色", themeLight: "浅色",
                 historyTitle: "对话历史", historyButton: "History", historyEmpty: "历史为空。"
             }
@@ -769,27 +775,33 @@
         function navigateDialogue(direction) {
             if (isHistoryVisible) return;
             
-            if (!dialogueIsLoaded || currentDialogue.length === 0) return;
-            
-            const newIndex = currentDialogueIndex + direction;
-            const lang = elements.languageSelect.value;
+            // Обертка try/catch, чтобы любые ошибки во время навигации были видны
+            try { 
+                if (!dialogueIsLoaded || currentDialogue.length === 0) return;
+                
+                const newIndex = currentDialogueIndex + direction;
+                const lang = elements.languageSelect.value;
 
-            if (newIndex >= 0 && newIndex < currentDialogue.length) {
-                currentDialogueIndex = newIndex;
-                renderDialogueStep();
-                saveProgress();
+                if (newIndex >= 0 && newIndex < currentDialogue.length) {
+                    currentDialogueIndex = newIndex;
+                    renderDialogueStep();
+                    saveProgress();
 
-                // НОВОЕ: Предварительная загрузка следующего шага
-                if (direction > 0) { 
-                    preloadAssets(currentDialogueIndex + 1);
+                    // НОВОЕ: Предварительная загрузка следующего шага
+                    if (direction > 0) { 
+                        preloadAssets(currentDialogueIndex + 1);
+                    }
+
+                } else if (newIndex >= currentDialogue.length) {
+                    alertMessage(i18n[lang].endOfStory);
+                    currentDialogueIndex = currentDialogue.length - 1;
+                    saveProgress();
+                } else {
+                    alertMessage(i18n[lang].startOfStory);
                 }
-
-            } else if (newIndex >= currentDialogue.length) {
-                alertMessage(i18n[lang].endOfStory);
-                currentDialogueIndex = currentDialogue.length - 1;
-                saveProgress();
-            } else {
-                alertMessage(i18n[lang].startOfStory);
+            } catch (e) {
+                 console.error("[Dialogue Navigation] Ошибка при переходе:", e);
+                 alertMessage(i18n[elements.languageSelect.value].errorRender(e.message));
             }
         }
         
@@ -815,6 +827,7 @@
 
             } catch (error) {
                 container.classList.add('hidden');
+                // Важно: здесь мы не alertMessage, т.к. это часто происходит и не критично для работы
                 console.warn(`[Sprite Load] Не удалось загрузить спрайт: ${url}.`, error);
                 element.src = ''; 
             }
@@ -896,7 +909,9 @@
                     spriteLeftContainer.classList.remove('hidden');
                 }
             } else {
+                // ИСПРАВЛЕНИЕ: Если спрайт не указан, скрываем контейнер и очищаем src
                 spriteLeftContainer.classList.add('hidden');
+                spriteLeftElement.src = ''; 
                 currentLeftSpriteFile = null;
             }
 
@@ -910,7 +925,9 @@
                     spriteRightContainer.classList.remove('hidden');
                 }
             } else {
+                // ИСПРАВЛЕНИЕ: Если спрайт не указан, скрываем контейнер и очищаем src
                 spriteRightContainer.classList.add('hidden');
+                spriteRightElement.src = ''; 
                 currentRightSpriteFile = null;
             }
             
@@ -975,7 +992,6 @@
 
             const expectedFilePath = `${CONFIG.PATHS.STORY_BASE}${lang}/${fullStoryKey}.json`;
 
-            // >>> ДОБАВЛЕНО ЛОГИРОВАНИЕ ДЛЯ ОТЛАДКИ ЗАГРУЗКИ <<<
             console.log(`[Content Load] Попытка загрузить главу: ${expectedFilePath} (Ключ: ${fullStoryKey})`);
             
             const { INITIAL_DELAY_MS, MAX_DELAY_MS, MAX_ATTEMPTS } = CONFIG.BACKOFF;
@@ -987,6 +1003,7 @@
                 let success = false;
                 let data = null;
                 let errorType = null;
+                let errorMessage = null;
 
                 try {
                     const cacheBuster = `?t=${Date.now()}_${attempt}`;
@@ -998,50 +1015,88 @@
                     }
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     
-                    data = await response.json();
-                    success = true;
+                    // --- КРИТИЧЕСКИЙ БЛОК ДЛЯ ОБРАБОТКИ JSON ---
+                    try {
+                        data = await response.json(); 
+                        success = true;
+                    } catch (e) {
+                        if (e instanceof SyntaxError) {
+                            errorType = "SyntaxError";
+                            errorMessage = e.message;
+                            throw e; // Выбрасываем, чтобы попасть в внешний catch
+                        }
+                        throw e;
+                    }
+                    // ------------------------------------------
+
                 } catch (e) {
                     if (e instanceof SyntaxError) {
-                        errorType = "SyntaxError";
-                        console.error(`[Content Load] Критическая ошибка JSON в файле ${expectedFilePath}:`, e);
+                       console.error(`[Content Load] Критическая ошибка JSON в файле ${expectedFilePath}:`, e);
                     } else if (e.message !== "404 Not Found") {
                        console.error(`[Content Load] Общая ошибка загрузки (Попытка ${attempt}).`, e);
                     }
                 }
 
                 if (success && data) {
-                    currentDialogue = data.dialogue || [];
-                    currentDialogueIndex = Math.min(startIndex, currentDialogue.length - 1);
-                    currentDialogueIndex = Math.max(0, currentDialogueIndex); 
-                    dialogueIsLoaded = true;
-                    currentBackgroundUrl = null; 
-                    
-                    // Сброс файлов спрайтов при загрузке новой главы
-                    currentLeftSpriteFile = null;
-                    currentRightSpriteFile = null;
-                    elements.spriteLeftContainer.classList.add('hidden');
-                    elements.spriteRightContainer.classList.add('hidden');
-                    elements.spriteLeftElement.src = ''; 
-                    elements.spriteRightElement.src = '';
-                    
-                    // НОВОЕ: Очищаем кэш прелоадера при загрузке новой главы
-                    preloadedAssets = {}; 
+                    // ==========================================================
+                    // === НОВЫЙ БЛОК: Защита от тихих ошибок рендеринга ===
+                    // ==========================================================
+                    try {
+                        currentDialogue = data.dialogue;
 
-                    loadText.textContent = "Загружено";
-                    renderDialogueStep();
+                        // Проверка на корректную структуру (массив 'dialogue' должен существовать)
+                        if (!Array.isArray(currentDialogue)) {
+                            throw new Error("Файл не содержит массив 'dialogue'. Проверьте структуру JSON.");
+                        }
 
-                    // НОВОЕ: Предварительная загрузка первого следующего шага после загрузки главы
-                    preloadAssets(currentDialogueIndex + 1);
+                        // Проверка на пустоту (для главы, которая загрузилась, но пуста)
+                        if (currentDialogue.length === 0) {
+                             console.warn(`[Content Load] Файл главы загружен, но массив 'dialogue' пуст.`);
+                             alertMessage("Предупреждение: Файл главы загружен, но не содержит диалогов (массив 'dialogue' пуст).");
+                        }
+                        
+                        currentDialogueIndex = Math.min(startIndex, currentDialogue.length - 1);
+                        currentDialogueIndex = Math.max(0, currentDialogueIndex); 
+                        dialogueIsLoaded = true;
+                        currentBackgroundUrl = null; 
+                        
+                        // Сброс файлов спрайтов при загрузке новой главы
+                        currentLeftSpriteFile = null;
+                        currentRightSpriteFile = null;
+                        elements.spriteLeftContainer.classList.add('hidden');
+                        elements.spriteRightContainer.classList.add('hidden');
+                        elements.spriteLeftElement.src = ''; 
+                        elements.spriteRightElement.src = '';
+                        
+                        // Очищаем кэш прелоадера при загрузке новой главы
+                        preloadedAssets = {}; 
 
-                    setTimeout(() => {
-                        loadText.textContent = i18n[lang].loadText;
-                        loadButton.disabled = false;
-                    }, 1500);
+                        // Вызываем рендеринг, который может вызвать тихую ошибку
+                        renderDialogueStep(); 
+
+                        // Предварительная загрузка первого следующего шага
+                        preloadAssets(currentDialogueIndex + 1);
+
+                        loadText.textContent = "Загружено";
+                        setTimeout(() => {
+                            loadText.textContent = i18n[lang].loadText;
+                            loadButton.disabled = false;
+                        }, 1500);
+                        
+                    } catch (renderError) {
+                         // Перехват любой ошибки во время обработки данных или рендеринга
+                         console.error("[Content Load] КРИТИЧЕСКАЯ ОШИБКА РЕНДЕРИНГА/ОБРАБОТКИ:", renderError);
+                         alertMessage(i18n[lang].errorRender(renderError.message));
+                         loadButton.disabled = false;
+                         loadText.textContent = i18n[lang].loadText;
+                         return; // Выходим из attemptLoad
+                    }
+                    // ==========================================================
 
                 } else {
                     if (errorType === "SyntaxError") {
                         loadText.textContent = "Ошибка JSON";
-                        alertMessage("Ошибка: Синтаксическая ошибка в JSON-файле главы. Проверьте консоль.");
+                        alertMessage(i18n[lang].errorJsonSyntax); 
                         loadButton.disabled = false;
                         return;
                     }
@@ -1197,7 +1252,7 @@
                 let targetPrefix = typeKey === 'main' ? `${arcKey}_${prefix}` : prefix;
                 
                 // >>> ДОБАВЛЕНО ЛОГИРОВАНИЕ ДЛЯ ОТЛАДКИ ФИЛЬТРАЦИИ <<<
-                console.log(`[UI Update] Фильтрация глав для: Тип='${typeKey}', Арка='${arcKey}', Префикс='${targetPrefix}'`);
+                // console.log(`[UI Update] Фильтрация глав для: Тип='${typeKey}', Арка='${arcKey}', Префикс='${targetPrefix}'`);
 
 
                 for (const fullChapterKey in window.storyMetadata) {
@@ -1216,7 +1271,7 @@
                             select.appendChild(option);
                             chapterFound = true;
                             // >>> ДОБАВЛЕНО ЛОГИРОВАНИЕ НАЙДЕННЫХ ГЛАВ <<<
-                            console.log(`[UI Update] Найдена глава: ${fullChapterKey} -> ${chapterName}`);
+                            // console.log(`[UI Update] Найдена глава: ${fullChapterKey} -> ${chapterName}`);
                         }
                     }
                 }
