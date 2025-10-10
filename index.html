@@ -323,7 +323,7 @@
     <main id="mainContent" class="pt-[6rem] md:pt-20 pb-4 px-2 md:px-4 max-w-7xl mx-auto min-h-screen">
         
         <!-- Controls Panel: Использует flex-wrap для мобильных -->
-        <div class="control-panel p-4 rounded-xl shadow-lg mb-6 flex flex-wrap gap-3 md:gap-4 items-end transition-colors duration-300">
+        <div class="control-panel p-4 rounded-xl shadow-lg mb-6 flex flex-wrap gap-3 md:gap-4 items-end transition-colors duration-300" style="background-color: var(--color-bg-medium);">
             <!-- Выбор Типа Сюжета -->
             <div class="flex-1 min-w-[45%] md:min-w-[180px]">
                 <label for="storyTypeSelect" id="labelStoryType" class="block text-sm font-medium mb-1" style="color: var(--color-text-secondary);">Тип сюжета</label>
@@ -502,6 +502,7 @@
                 loadText: "Загрузить", loadingText: "Загрузка...", loadedText: "Загружено", 
                 errorLoading: "Повтор", endOfStory: "История закончилась!",
                 startOfStory: "Это начало истории.", placeholderMetadata: "--- Метаданные не загружены ---",
+                placeholderSelectArc: "--- Выберите арку сначала ---", // НОВЫЙ ТЕКСТ
                 errorFetchMetadataStrict: "Критическая ошибка: не удалось загрузить метаданные глав. Файл story/story_metadata.json отсутствует или недоступен.",
                 errorChapterNotFound: "Файл главы не найден.",
                 errorJsonSyntax: "КРИТИЧЕСКАЯ ОШИБКА JSON: Проверьте структуру файла JSON главы (лишние запятые/скобки)!",
@@ -514,6 +515,7 @@
                 loadText: "Load", loadingText: "Loading...", loadedText: "Loaded", 
                 errorLoading: "Retry", endOfStory: "Story finished!",
                 startOfStory: "This is the start of the story.", placeholderMetadata: "--- Metadata not loaded ---",
+                placeholderSelectArc: "--- Select an arc first ---", // НОВЫЙ ТЕКСТ
                 errorFetchMetadataStrict: "Critical Error: Failed to load chapter metadata. The file story/story_metadata.json is missing or inaccessible.",
                 errorChapterNotFound: "Chapter file not found.",
                 errorJsonSyntax: "CRITICAL JSON ERROR: Check chapter JSON file structure (trailing commas/brackets)!",
@@ -526,6 +528,7 @@
                 loadText: "加载", loadingText: "载入中...", loadedText: "已加载", 
                 errorLoading: "重试", endOfStory: "故事结束了!",
                 startOfStory: "这是故事的开始。", placeholderMetadata: "--- 未加载元数据 ---",
+                placeholderSelectArc: "--- 请先选择篇章 ---", // НОВЫЙ ТЕКСТ
                 errorFetchMetadataStrict: "致命错误：无法加载章节元数据。文件 story/story_metadata.json 缺失或无法访问。",
                 errorChapterNotFound: "未找到章节文件。",
                 errorJsonSyntax: "JSON 致命错误：检查章节 JSON 文件结构（末尾逗号/括号）!",
@@ -718,14 +721,15 @@
         }
 
         function loadTheme() {
-            const savedTheme = localStorage.getItem(CONFIG.STORAGE.THEME_KEY) || 'dark';
+            // Локальное хранилище для темы оставлено, так как это не игровой прогресс
+            const savedTheme = localStorage.getItem(CONFIG.STORAGE.THEME_KEY) || 'dark'; 
             applyTheme(savedTheme);
         }
         
         function handleWarningModalState() {
             const { warningOverlay } = elements;
             
-            // Прогресс предупреждения сохраняется в localStorage, так как это не прогресс игры
+            // Прогресс предупреждения сохраняется в localStorage
             const isDismissed = localStorage.getItem(CONFIG.STORAGE.WARNING_KEY) === 'true';
 
             if (isDismissed) {
@@ -822,10 +826,20 @@
                 sprites: ["kiana_happy.png", "mei_serious.png", "bronya_sad.png", "fuhua_calm.png"],
             };
             
+            // ДОПОЛНИТЕЛЬНЫЕ МЕТАДАННЫЕ ДЛЯ ТЕСТИРОВАНИЯ ФИЛЬТРАЦИИ
             const chapterPlaceholders = {
+                // Main Story - Retrospect (re)
                 "main_re_01": { ru: "Пролог: Начало", en: "Prologue: The Start" },
                 "main_re_02": { ru: "Глава 2: Поиск", en: "Chapter 2: Search" },
+                "main_re_03": { ru: "Глава 3: Возвращение", en: "Chapter 3: Return" },
+                // Main Story - Inheritance (in)
+                "main_in_01": { ru: "Арка Наследия 1", en: "Inheritance Arc 1" },
+                "main_in_02": { ru: "Арка Наследия 2", en: "Inheritance Arc 2" },
+                // Extra Story
                 "extra_01": { ru: "Событие: Пляж", en: "Event: Beach Day" },
+                "extra_02": { ru: "Событие: Зимний Бал", en: "Event: Winter Ball" },
+                // Boss
+                "boss_01": { ru: "Босс: Зомби Королева", en: "Boss: Zombie Queen" },
             };
             
             try {
@@ -1243,8 +1257,7 @@
         }
         
         /**
-         * Объединенная функция для обновления Арки и Глав.
-         * Вызывается при смене языка или типа сюжета.
+         * Обновление UI при смене языка или типа сюжета.
          */
         function updateArcAndChapterUI() {
             updateI18nStrings(); 
@@ -1255,12 +1268,14 @@
             const arcContainer = elements.arcSelectContainer;
             const lang = elements.languageSelect.value;
             
-            const currentArcKey = arcSelect.value; // Сохраняем текущее выбранное значение
+            const currentArcKey = arcSelect.value; 
             
-            // Очистка и установка заглушки
             arcSelect.innerHTML = '';
             arcSelect.disabled = true;
-            arcSelect.value = ""; // Сбрасываем значение
+            // Устанавливаем arcSelect.value = "" ТОЛЬКО если typeKey изменился
+            if (typeKey !== 'main') {
+                 arcSelect.value = ""; 
+            }
 
             if (typeKey === 'main') {
                 arcContainer.classList.remove('hidden');
@@ -1294,21 +1309,32 @@
             updateChapterSelect();
         }
 
+        /**
+         * Функция, которая заполняет список Глав в зависимости от выбранного Типа и Арки.
+         * Здесь была основная проблема с блокировкой Глав, когда Арка не выбрана.
+         */
         function updateChapterSelect() {
             const typeKey = elements.storyTypeSelect.value;
             const arcKey = elements.arcSelect.value;       
             const select = elements.chapterSelect;
             const lang = elements.languageSelect.value;
             
-            const currentChapterKey = select.value; // Сохраняем текущее выбранное значение
+            const currentChapterKey = select.value;
 
             select.innerHTML = '';
             select.disabled = true; 
-            select.value = ""; // Сбрасываем значение
+            select.value = ""; 
             
             if (!window.storyMetadata) {
                 select.innerHTML = `<option value="">${i18n[lang].placeholderMetadata}</option>`;
                 enableLoadButton();
+                return;
+            }
+            
+            // Блокировка, если выбран основной сюжет, но не выбрана арка.
+            if (typeKey === 'main' && !arcKey) { 
+                select.innerHTML = `<option value="">${i18n[lang].placeholderSelectArc}</option>`;
+                enableLoadButton(); // Отключит кнопку "Загрузить"
                 return;
             }
             
@@ -1318,14 +1344,10 @@
                 const prefix = STORY_GROUPS[typeKey].prefix; 
                 let chapterFound = false;
                 
-                // Блокируем загрузку, если выбран основной сюжет, но не выбрана арка.
-                if (typeKey === 'main' && !arcKey) { 
-                    enableLoadButton(); 
-                    return;
-                }
-                
                 // Определяем префикс для фильтрации
                 let targetPrefix = typeKey === 'main' ? `${prefix}${arcKey}_` : prefix;
+                
+                console.log(`[Chapter Select] Фильтрующий префикс: ${targetPrefix}`); // DEBUGGING
                 
                 for (const fullChapterKey in window.storyMetadata) {
                     if (fullChapterKey.startsWith(targetPrefix)) {
@@ -1349,20 +1371,22 @@
                 
                 if (chapterFound) {
                      select.disabled = false;
+                } else {
+                     select.innerHTML = `<option value="">--- Главы не найдены ---</option>`;
                 }
             } 
             
             enableLoadButton();
         }
         
-        // Переименована для единообразия, теперь просто обновляет UI
         function initializeOrUpdateUI() {
              updateArcAndChapterUI(); 
         }
 
         function enableLoadButton() {
             const storyId = elements.chapterSelect.value;
-            elements.loadButton.disabled = !storyId;
+            // Кнопка включена, только если storyId не пустой
+            elements.loadButton.disabled = !storyId; 
         }
 
         // ====================================================================
