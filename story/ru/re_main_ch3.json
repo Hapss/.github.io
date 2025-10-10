@@ -346,10 +346,9 @@
             "dim_override": "left"
         },
         {
-            "speaker": "",
             "text": "Бац! Бах!",
             "sprite_left": "Kiana 1.png",
-            "sprite_left": "Herrscher Mei.png",
+            "sprite_right": "Herrscher Mei.png",
             "dim_override": "both"
         },
         {
