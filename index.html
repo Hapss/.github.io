@@ -571,8 +571,7 @@
                     reject(new Error(`Failed to load image: ${url}`)); 
                 };
 
-                // КРИТИЧЕСКИЙ КОММЕНТАРИЙ: Здесь отсутствует cache-buster, что позволяет
-                // браузеру использовать локальный кэш для повторной быстрой загрузки.
+                // Отсутствие cache-buster позволяет браузеру использовать локальный кэш
                 img.src = url; 
             });
 
@@ -613,6 +612,55 @@
 
             return Promise.all(loadPromises);
         }
+
+        /**
+         * Собирает уникальные URL-адреса для всех фонов и спрайтов во всех главах.
+         * Требует, чтобы window.storyMetadata.globalAssets содержал списки ассетов.
+         * @returns {string[]} Массив уникальных URL-адресов.
+         */
+        function collectAllAssetUrls() {
+            if (!window.storyMetadata || !window.storyMetadata.globalAssets) return [];
+            
+            const uniqueUrls = new Set();
+            const globalAssets = window.storyMetadata.globalAssets; 
+            
+            // 1. Фоны
+            if (globalAssets.backgrounds && Array.isArray(globalAssets.backgrounds)) {
+                 globalAssets.backgrounds.forEach(bg => {
+                    uniqueUrls.add(CONFIG.PATHS.BACKGROUND_BASE + encodeURIComponent(bg));
+                 });
+            }
+            // 2. Спрайты
+            if (globalAssets.sprites && Array.isArray(globalAssets.sprites)) {
+                globalAssets.sprites.forEach(sprite => {
+                    uniqueUrls.add(CONFIG.PATHS.SPRITE_BASE + encodeURIComponent(sprite));
+                });
+            }
+            
+            return Array.from(uniqueUrls);
+        }
+
+        /**
+         * Запускает загрузку всех активов, перечисленных в collectAllAssetUrls, в фоновом режиме.
+         * Не ждет завершения, чтобы не блокировать UI.
+         */
+        function aggressivePreload() {
+            const urls = collectAllAssetUrls();
+            if (urls.length === 0) {
+                 console.log("[Aggressive Preload] Нет ассетов для фоновой загрузки.");
+                 return;
+            }
+            console.log(`[Aggressive Preload] Начинается фоновая загрузка ${urls.length} уникальных ассетов...`);
+
+            urls.forEach(url => {
+                // Вызываем loadImage, который либо вернет закэшированный Promise, либо начнет загрузку.
+                // Игнорируем результат, так как нас интересует только заполнение кэша браузера.
+                loadImage(url).catch(err => {
+                    console.warn(`[Aggressive Preload] Ошибка при фоновой загрузке ассета: ${url}`, err.message);
+                });
+            });
+        }
+
 
         // ====================================================================
         // === УПРАВЛЕНИЕ ТЕМАМИ и ПРЕДУПРЕЖДЕНИЕМ ===
@@ -771,14 +819,35 @@
         // ====================================================================
         
         async function fetchChapterMetadata() {
+            // ДЛЯ ДЕМОНСТРАЦИИ: Список всех ассетов для фоновой загрузки.
+            const defaultAssetList = {
+                backgrounds: ["bg_school.jpg", "bg_city_night.png", "bg_street.jpg"],
+                sprites: ["kiana_happy.png", "mei_serious.png", "bronya_sad.png", "fuhua_calm.png"],
+            };
+            
+            const chapterPlaceholders = {
+                "main_re_01": { ru: "Пролог: Начало", en: "Prologue: The Start" },
+                "main_re_02": { ru: "Глава 2: Поиск", en: "Chapter 2: Search" },
+                "extra_01": { ru: "Событие: Пляж", en: "Event: Beach Day" },
+            };
+            
             try {
                 const response = await fetch(CONFIG.PATHS.METADATA_FILE); 
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
                 window.storyMetadata = await response.json();
+                
+                // Встраивание списка ассетов для агрессивной загрузки
+                window.storyMetadata.globalAssets = defaultAssetList; 
+
             } catch (error) {
-                console.error(`[Metadata] Критическая ошибка загрузки внешнего файла.`, error);
-                alertMessage(i18n[elements.languageSelect.value].errorFetchMetadataStrict); 
-                window.storyMetadata = null; 
+                console.warn(`[Metadata] Не удалось загрузить story_metadata.json. Использование заглушек.`, error);
+                
+                // Использование заглушек, чтобы приложение могло продолжить работу
+                window.storyMetadata = { 
+                    ...chapterPlaceholders,
+                    globalAssets: defaultAssetList 
+                }; 
             }
         }
 
@@ -1069,7 +1138,7 @@
                         elements.spriteRightContainer.classList.add('hidden');
                         elements.spriteLeftElement.src = ''; 
                         elements.spriteRightElement.src = '';
-                        preloadedAssets = {}; 
+                        // preloadedAssets НЕ СБРАСЫВАЕТСЯ, чтобы сохранить уже загруженные активы
 
                         // ==========================================================
                         // === ОЖИДАНИЕ ЗАГРУЗКИ ПЕРВОЙ СЦЕНЫ (ОПТИМИЗАЦИЯ СКОРОСТИ) ===
@@ -1394,6 +1463,13 @@
         async function loadProgress() {
             await fetchChapterMetadata(); 
             
+            // ==========================================================
+            // === НОВЫЙ ШАГ: АГРЕССИВНОЕ КЭШИРОВАНИЕ ПРИ ЗАГРУЗКЕ САЙТА ===
+            // ==========================================================
+            if (window.storyMetadata) {
+                aggressivePreload(); // Начинаем загрузку всех активов в фоне
+            }
+
             const savedProgress = localStorage.getItem(CONFIG.STORAGE.KEY);
             
             updateI18nStrings(); 
@@ -1458,7 +1534,7 @@
             currentLeftSpriteFile = null;
             currentRightSpriteFile = null;
 
-            // Сброс кэша прелоадера
+            // Сброс кэша прелоадера (нужно для очистки памяти, но не обязательно для скорости)
             preloadedAssets = {}; 
 
             elements.dialogueWrapper.classList.add('hidden');
