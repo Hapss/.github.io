@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0">
-    <title>Архив сюжета Houkai Gakuen 2</title>
+    <title>Guns Girl Z: Архив Сюжета</title>
     <!-- Подключение Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -437,6 +437,7 @@
                 <!-- Dialogue Text Content Box (height and padding are adaptive in CSS) -->
                 <div id="dialogueContentBox" 
                     class="vn-overlay rounded-xl shadow-2xl overflow-hidden flex items-start justify-start text-left"> 
+                    <!-- Изменено: теперь используется innerHTML для поддержки <br> -->
                     <p id="currentText" class="leading-tight transition-opacity duration-300">Текст диалога...</p>
                 </div>
             </div>
@@ -445,6 +446,7 @@
             <div id="fullDialogueBox" class="hidden">
                 <!-- Inner content to handle flex alignment -->
                 <div id="fullDialogueContent" class="h-full w-full flex flex-col p-4 md:p-8">
+                    <!-- Изменено: теперь используется innerHTML для поддержки <br> -->
                     <p id="fullCurrentText" class="leading-relaxed transition-opacity duration-300"></p>
                 </div>
             </div>
@@ -531,11 +533,11 @@
         };
         
         const MAIN_STORY_ARCS = {
-            re: { zh: "追忆篇", ru: "Ретроспектр" },
-            in: { zh: "遗愿篇", ru: "Наследие" },
-            fm: { zh: "蛾火篇", ru: "Огненный Мотылёк" },
-            nl: { zh: "新生篇", ru: "Возрождение" },
-            ah: { zh: "崩坏学园篇", ru: "Академия Хоукая" }
+            re: { zh: "追忆篇", ru: "Глава Воспоминаний" },
+            in: { zh: "遗愿篇", ru: "Глава Завещания" },
+            fm: { zh: "蛾火篇", ru: "Глава Мотылька и Огня" },
+            nl: { zh: "新生篇", ru: "Глава Возрождения" },
+            ah: { zh: "崩坏学园篇", ru: "Глава Honkai Academy" }
         };
 
         let currentLang = localStorage.getItem(CONFIG.STORAGE.LANG_KEY) || 'ru'; // Русский по умолчанию
@@ -942,6 +944,14 @@
                 }, 10);
             }
         }
+        
+        // --- НОВАЯ ФУНКЦИЯ: Обработка переносов строк ---
+        function processTextForBreaks(text) {
+            if (!text) return "";
+            // Заменяем символ новой строки (\n) на HTML тег разрыва строки (<br>)
+            return text.replace(/\n/g, '<br>');
+        }
+        // ----------------------------------------------
 
 
         function renderDialogueStep() {
@@ -1041,8 +1051,8 @@
             if (isFullText) {
                 // --- Рендеринг Большого Диалогового Окна ---
                 
-                // 1. Текст
-                fullCurrentText.textContent = step.text || "";
+                // 1. Текст (Используем innerHTML и обработку переносов)
+                fullCurrentText.innerHTML = processTextForBreaks(step.text);
                 
                 // 2. Размер текста (по умолчанию 'md')
                 const size = step.full_text_size || 'md';
@@ -1074,7 +1084,8 @@
                     speakerNameContainer.classList.add('hidden');
                 }
                 
-                currentText.textContent = step.text || "";
+                // Текст (Используем innerHTML и обработку переносов)
+                currentText.innerHTML = processTextForBreaks(step.text);
             }
             
             // 6. Обновление Истории
@@ -1499,6 +1510,7 @@
                     displayText = i18n[lang].startOfStory;
                 }
                 
+                // В истории перенос строки не нужен, поэтому используем textContent
                 textContent.textContent = displayText || ''; 
                 historyItem.appendChild(textContent);
 
