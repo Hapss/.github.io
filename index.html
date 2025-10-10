@@ -497,6 +497,9 @@
         let currentLeftSpriteFile = null;
         let currentRightSpriteFile = null;
         
+        // --- НОВОЕ: Для предварительной загрузки (Preloading) ---
+        let preloadedAssets = {}; 
+
         const i18n = {
             ru: {
                 headerTitle: "Архив сюжета Houkai Gakuen 2", labelStoryType: "Тип сюжета", labelArc: "Арка", labelChapter: "Сюжет (Глава)",
@@ -528,6 +531,71 @@
         };
 
         let elements = {};
+
+        // ====================================================================
+        // === УТИЛИТЫ ДЛЯ ПРЕДВАРИТЕЛЬНОЙ ЗАГРУЗКИ (PRELOADING UTILITIES) ===
+        // ====================================================================
+        
+        /**
+         * Загружает изображение и возвращает Promise, который разрешается объектом Image.
+         * @param {string} url - URL изображения.
+         * @returns {Promise<HTMLImageElement>}
+         */
+        function loadImage(url) {
+            // Если уже есть Promise в preloadedAssets, возвращаем его
+            if (preloadedAssets[url]) {
+                return preloadedAssets[url];
+            }
+
+            const promise = new Promise((resolve, reject) => {
+                const img = new Image();
+                
+                img.onload = () => {
+                    // console.log(`[Preload] Успешно загружено: ${url}`);
+                    resolve(img);
+                };
+                
+                img.onerror = () => {
+                    console.warn(`[Preload] Ошибка загрузки: ${url}`);
+                    reject(new Error(`Failed to load image: ${url}`));
+                };
+
+                // Добавляем cache-buster, чтобы избежать старого кэша
+                img.src = `${url}?t=${Date.now()}`;
+            });
+
+            // Кэшируем Promise
+            preloadedAssets[url] = promise;
+            return promise;
+        }
+
+        /**
+         * Предварительно загружает фоны и спрайты для указанного шага диалога.
+         * @param {number} index - Индекс шага в currentDialogue.
+         */
+        function preloadAssets(index) {
+            if (index >= currentDialogue.length) return;
+            
+            const step = currentDialogue[index];
+            
+            // 1. Фон
+            if (step.background) {
+                const bgUrl = CONFIG.PATHS.BACKGROUND_BASE + encodeURIComponent(step.background);
+                loadImage(bgUrl).catch(() => {}); // Игнорируем ошибку прелоада
+            }
+            
+            // 2. Левый Спрайт
+            if (step.sprite_left) {
+                const spriteUrl = spritePath(step.sprite_left);
+                loadImage(spriteUrl).catch(() => {});
+            }
+            
+            // 3. Правый Спрайт
+            if (step.sprite_right) {
+                const spriteUrl = spritePath(step.sprite_right);
+                loadImage(spriteUrl).catch(() => {});
+            }
+        }
 
         // ====================================================================
         // === УПРАВЛЕНИЕ ТЕМАМИ и ПРЕДУПРЕЖДЕНИЕМ ===
@@ -710,6 +778,12 @@
                 currentDialogueIndex = newIndex;
                 renderDialogueStep();
                 saveProgress();
+
+                // НОВОЕ: Предварительная загрузка следующего шага
+                if (direction > 0) { 
+                    preloadAssets(currentDialogueIndex + 1);
+                }
+
             } else if (newIndex >= currentDialogue.length) {
                 alertMessage(i18n[lang].endOfStory);
                 currentDialogueIndex = currentDialogue.length - 1;
@@ -725,37 +799,28 @@
             return CONFIG.PATHS.SPRITE_BASE + encodedFileName; 
         };
         
-        function loadSprite(url, element, container) {
+        async function loadSprite(url, element, container) {
             if (!url) {
                 container.classList.add('hidden');
                 element.src = '';
                 return;
             }
             
-            // Сбрасываем src сразу, чтобы браузер начал загрузку
-            element.src = url;
-            container.classList.add('hidden'); // Скрываем контейнер пока идет загрузка
-            
-            // Использование `element.onload` и `element.onerror` вместо создания нового Image()
-            element.onload = () => {
-                // Показываем, только если src успешно загружен
-                container.classList.remove('hidden'); 
-                element.onload = null; // Удаляем обработчик, чтобы избежать повторных вызовов
-            };
-            
-            element.onerror = () => {
-                container.classList.add('hidden');
-                console.warn(`[Sprite Load] Не удалось загрузить спрайт: ${url}.`);
-                element.src = ''; // Сброс src при ошибке
-                element.onerror = null; // Удаляем обработчик
-            };
+            try {
+                // Пытаемся получить изображение из кэша прелоадера (или загрузить, если не кэшировано)
+                const loadedImage = await loadImage(url); 
 
-            // Применяем cache-buster к URL
-            const finalUrl = `${url}?t=${Date.now()}`;
-            element.src = finalUrl;
+                element.src = loadedImage.src; 
+                container.classList.remove('hidden');
+
+            } catch (error) {
+                container.classList.add('hidden');
+                console.warn(`[Sprite Load] Не удалось загрузить спрайт: ${url}.`, error);
+                element.src = ''; 
+            }
         }
 
-        function crossFadeBackground(newBgFileName) {
+        async function crossFadeBackground(newBgFileName) {
             const encodedBgFileName = encodeURIComponent(newBgFileName);
             const finalBgUrl = CONFIG.PATHS.BACKGROUND_BASE + encodedBgFileName;
             
@@ -765,10 +830,11 @@
             const nextLayer = activeBgLayer === 1 ? bgLayer2 : bgLayer1;
             const currentLayer = activeBgLayer === 1 ? bgLayer1 : bgLayer2;
             
-            const tempImg = new Image();
-            
-            tempImg.onload = () => {
-                nextLayer.style.backgroundImage = `url('${tempImg.src}')`;
+            try {
+                // Пытаемся получить изображение из кэша прелоадера (или загрузить)
+                const loadedImage = await loadImage(finalBgUrl); 
+
+                nextLayer.style.backgroundImage = `url('${loadedImage.src}')`;
                 nextLayer.style.backgroundColor = 'transparent'; 
                 
                 setTimeout(() => {
@@ -776,11 +842,10 @@
                     nextLayer.style.opacity = '1';
                     
                     activeBgLayer = activeBgLayer === 1 ? 2 : 1;
-                    currentBackgroundUrl = tempImg.src;
+                    currentBackgroundUrl = loadedImage.src;
                 }, 10);
-            };
-            
-            tempImg.onerror = () => {
+                
+            } catch (error) {
                 console.warn(`[BG Fade] Не удалось загрузить фон: ${finalBgUrl}. Применение цвета фона.`);
                 
                  setTimeout(() => {
@@ -795,10 +860,7 @@
                     activeBgLayer = activeBgLayer === 1 ? 2 : 1;
                     currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR;
                 }, 10);
-            };
-
-            const finalUrl = `${finalBgUrl}?t=${Date.now()}`;
-            tempImg.src = finalUrl;
+            }
         }
 
 
@@ -813,7 +875,7 @@
 
             const step = currentDialogue[currentDialogueIndex];
             
-            // 1. Фон
+            // 1. Фон (Асинхронно, но с ожиданием прелоада/загрузки)
             if (step.background) { 
                 crossFadeBackground(step.background);
             }
@@ -826,53 +888,47 @@
 
             // --- A. Левый Спрайт ---
             if (newLeftSpriteFile) {
+                const url = spritePath(newLeftSpriteFile);
                 if (currentLeftSpriteFile !== newLeftSpriteFile) {
-                    loadSprite(spritePath(newLeftSpriteFile), spriteLeftElement, spriteLeftContainer);
+                    loadSprite(url, spriteLeftElement, spriteLeftContainer);
                     currentLeftSpriteFile = newLeftSpriteFile;
                 } else {
-                    // Если файл тот же, просто убеждаемся, что контейнер показан (если он был скрыт)
                     spriteLeftContainer.classList.remove('hidden');
                 }
             } else {
-                // Если нет файла, скрываем спрайт и сбрасываем состояние
                 spriteLeftContainer.classList.add('hidden');
                 currentLeftSpriteFile = null;
             }
 
             // --- B. Правый Спрайт ---
             if (newRightSpriteFile) {
+                 const url = spritePath(newRightSpriteFile);
                 if (currentRightSpriteFile !== newRightSpriteFile) {
-                    loadSprite(spritePath(newRightSpriteFile), spriteRightElement, spriteRightContainer);
+                    loadSprite(url, spriteRightElement, spriteRightContainer);
                     currentRightSpriteFile = newRightSpriteFile;
                 } else {
-                    // Если файл тот же, просто убеждаемся, что контейнер показан
                     spriteRightContainer.classList.remove('hidden');
                 }
             } else {
-                // Если нет файла, скрываем спрайт и сбрасываем состояние
                 spriteRightContainer.classList.add('hidden');
                 currentRightSpriteFile = null;
             }
             
-            // --- C. ИСПРАВЛЕННАЯ Логика Затемнения (с учетом dim_override) ---
+            // --- C. Логика Затемнения ---
             
-            // 1. Сброс затемнения для ВСЕХ спрайтов перед обновлением
+            // 1. Сброс затемнения
             spriteLeftElement.classList.remove('dimmed-sprite');
             spriteRightElement.classList.remove('dimmed-sprite');
 
-            let dimTarget = 'none'; // По умолчанию Затемнение неактивно, согласно правилу
+            let dimTarget = 'none'; 
 
-            // Согласно правилу: Затемнение применяется ТОЛЬКО, если dim_override задан.
-            // dim_override может быть: 'left', 'right', 'both', 'none', 'auto'
             if (step.dim_override) {
                 const overrideValue = step.dim_override.toLowerCase();
 
                 if (overrideValue === 'auto' && step.speaker && step.position) {
-                    // Если явно задано 'auto', включаем автоматическое затемнение не-спикера
                     const isLeftSpeaker = step.position.toLowerCase() === 'left';
                     dimTarget = isLeftSpeaker ? 'right' : 'left';
                 } else if (overrideValue === 'left' || overrideValue === 'right' || overrideValue === 'both' || overrideValue === 'none') {
-                    // Используем явное переопределение
                     dimTarget = overrideValue;
                 }
             }
@@ -891,8 +947,6 @@
                 spriteRightElement.classList.add('dimmed-sprite');
             }
             
-            // --- КОНЕЦ ИСПРАВЛЕННОЙ ЛОГИКИ СПРАЙТОВ ---
-
             // 3. Текст и Имя Спикера
             dialogueWrapper.classList.remove('hidden');
             
@@ -970,8 +1024,14 @@
                     elements.spriteLeftElement.src = ''; 
                     elements.spriteRightElement.src = '';
                     
+                    // НОВОЕ: Очищаем кэш прелоадера при загрузке новой главы
+                    preloadedAssets = {}; 
+
                     loadText.textContent = "Загружено";
                     renderDialogueStep();
+
+                    // НОВОЕ: Предварительная загрузка первого следующего шага после загрузки главы
+                    preloadAssets(currentDialogueIndex + 1);
 
                     setTimeout(() => {
                         loadText.textContent = i18n[lang].loadText;
@@ -1004,7 +1064,7 @@
         }
 
         // ====================================================================
-        // === UI & I18N FUNCTIONS (ИСПРАВЛЕНИЕ: Объединение логики обновления выборов) ===
+        // === UI & I18N FUNCTIONS ===
         // ====================================================================
 
         function alertMessage(message) {
@@ -1342,6 +1402,9 @@
 
             currentLeftSpriteFile = null;
             currentRightSpriteFile = null;
+
+            // НОВОЕ: Сброс кэша прелоадера
+            preloadedAssets = {}; 
 
             elements.dialogueWrapper.classList.add('hidden');
             elements.languageSelect.value = 'ru';
