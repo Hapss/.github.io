@@ -1,5 +1,12 @@
 {
   "dialogue": [
+    { 
+            "text": "Впервые я осознала насколько прекрасно звёздное небо.",
+           "text_style": "full",
+           "full_text_size": "lg",
+           "full_text_align": "center",
+            "background": "bg_stage1.png"
+        },
     {
       "text": "Тззтч!!!",
       "background": "bg_stage4.png"
