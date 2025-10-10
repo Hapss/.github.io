@@ -1,12 +1,15 @@
 {
-    "chapter_title": "Глава 1: Выброс Хоукая",
     "dialogue": [
+       { 
+            "text": "Даже в этой, казалось бы, тихой библиотеке нет никакой гарантии безопасности.",
+           "text_style": "full",
+           "full_text_size": "lg",
+           "full_text_align": "center",
+            "background": "bg_stage1.png"
+        },
         { 
             "speaker": "", 
-            "text": "В ночь до выброса Хоукая я не могла уснуть...", 
-            "background": "bg_stage1.png",
-            "sprite_left": "",
-            "sprite_right": ""
+            "text": "В ночь до выброса Хоукая я не могла уснуть..."
         },
         { 
             "speaker": "", 
