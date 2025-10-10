@@ -1,6 +1,13 @@
 {
   "background": "bg_stage8.png",
   "dialogue": [
+    { 
+            "text": "Мы не можем просто наблюдать, как она \nпогружается в бесконечное отчаяние, поэтому...",
+           "text_style": "full",
+           "full_text_size": "lg",
+           "full_text_align": "center",
+            "background": "bg_stage1.png"
+        },
     {
       "speaker": "Киана",
       "text": "Фуф~ Наконец сбежали из того ангара. Как же хорошо вдохнуть свежий воздух~",
