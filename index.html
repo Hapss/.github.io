@@ -544,6 +544,7 @@
         
         /**
          * Загружает изображение и возвращает Promise, который разрешается объектом Image.
+         * Кэш-бастер удален для ускорения локальной загрузки.
          * @param {string} url - URL изображения.
          * @returns {Promise<HTMLImageElement>}
          */
@@ -566,8 +567,8 @@
                     reject(new Error(`Failed to load image: ${url}`));
                 };
 
-                // Добавляем cache-buster, чтобы избежать старого кэша
-                img.src = `${url}?t=${Date.now()}`;
+                // ИСПРАВЛЕНИЕ: Удален кэш-бастер (?t=${Date.now()}) для использования кэша браузера
+                img.src = url; 
             });
 
             // Кэшируем Promise
@@ -909,7 +910,7 @@
                     spriteLeftContainer.classList.remove('hidden');
                 }
             } else {
-                // ИСПРАВЛЕНИЕ: Если спрайт не указан, скрываем контейнер и очищаем src
+                // Если спрайт не указан, скрываем контейнер и очищаем src
                 spriteLeftContainer.classList.add('hidden');
                 spriteLeftElement.src = ''; 
                 currentLeftSpriteFile = null;
@@ -925,7 +926,7 @@
                     spriteRightContainer.classList.remove('hidden');
                 }
             } else {
-                // ИСПРАВЛЕНИЕ: Если спрайт не указан, скрываем контейнер и очищаем src
+                // Если спрайт не указан, скрываем контейнер и очищаем src
                 spriteRightContainer.classList.add('hidden');
                 spriteRightElement.src = ''; 
                 currentRightSpriteFile = null;
@@ -1006,8 +1007,8 @@
                 let errorMessage = null;
 
                 try {
-                    const cacheBuster = `?t=${Date.now()}_${attempt}`;
-                    const response = await fetch(expectedFilePath + cacheBuster);
+                    // Удаление кэш-бастера: Оставляем только file path
+                    const response = await fetch(expectedFilePath);
                     
                     if (response.status === 404) {
                         errorType = "404 Not Found";
@@ -1104,7 +1105,7 @@
                     if (attempt >= MAX_ATTEMPTS) {
                         loadText.textContent = i18n[lang].errorChapterNotFound;
                         loadButton.disabled = false;
-                        console.error(`[Content Load] Критическая ошибка: Не удалось загрузить главу "${fullStoryKey}" по пути "${expectedFilePath}" после ${MAX_ATTEMPTS} попыток.`);
+                        console.error(`[Content Load] Критическая ошибка: Не удалось загрузить главу "${fullStoryKey}" по пути "${expectedFilePath}" после ${MAX_ATTACK_ATTEMPTS} попыток.`);
                         return;
                     }
                     
