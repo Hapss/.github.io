@@ -921,7 +921,8 @@
 
             const expectedFilePath = `${CONFIG.PATHS.STORY_BASE}${lang}/${fullStoryKey}.json`;
 
-            console.log(`[Content Load] Попытка загрузить главу: ${expectedFilePath}`);
+            // >>> ДОБАВЛЕНО ЛОГИРОВАНИЕ ДЛЯ ОТЛАДКИ ЗАГРУЗКИ <<<
+            console.log(`[Content Load] Попытка загрузить главу: ${expectedFilePath} (Ключ: ${fullStoryKey})`);
             
             const { INITIAL_DELAY_MS, MAX_DELAY_MS, MAX_ATTEMPTS } = CONFIG.BACKOFF;
 
@@ -1096,14 +1097,11 @@
 
             } else {
                 // Если тип сюжета не основной, сбрасываем арку и скрываем контейнер.
-                // Это исправляет Bug 1 (загрузка глав основной истории при смене типа).
                 arcContainer.classList.add('hidden');
                 arcSelect.value = ""; 
             }
             
             // === 2. Обновление Глав ===
-            // Вызов updateChapterSelect гарантирует, что список глав будет обновлен 
-            // для всех типов сюжета, исправляя Bug 2.
             updateChapterSelect(skipSideEffects);
         }
 
@@ -1137,6 +1135,10 @@
                 
                 // Определяем префикс для фильтрации
                 let targetPrefix = typeKey === 'main' ? `${arcKey}_${prefix}` : prefix;
+                
+                // >>> ДОБАВЛЕНО ЛОГИРОВАНИЕ ДЛЯ ОТЛАДКИ ФИЛЬТРАЦИИ <<<
+                console.log(`[UI Update] Фильтрация глав для: Тип='${typeKey}', Арка='${arcKey}', Префикс='${targetPrefix}'`);
+
 
                 for (const fullChapterKey in window.storyMetadata) {
                     if (fullChapterKey.startsWith(targetPrefix)) {
@@ -1153,6 +1155,8 @@
                             }
                             select.appendChild(option);
                             chapterFound = true;
+                            // >>> ДОБАВЛЕНО ЛОГИРОВАНИЕ НАЙДЕННЫХ ГЛАВ <<<
+                            console.log(`[UI Update] Найдена глава: ${fullChapterKey} -> ${chapterName}`);
                         }
                     }
                 }
