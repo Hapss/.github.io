@@ -502,7 +502,7 @@
                 loadText: "Загрузить", loadingText: "Загрузка...", loadedText: "Загружено", 
                 errorLoading: "Повтор", endOfStory: "История закончилась!",
                 startOfStory: "Это начало истории.", placeholderMetadata: "--- Метаданные не загружены ---",
-                placeholderSelectArc: "--- Выберите арку сначала ---", // НОВЫЙ ТЕКСТ
+                placeholderSelectArc: "--- Выберите арку сначала ---", 
                 errorFetchMetadataStrict: "Критическая ошибка: не удалось загрузить метаданные глав. Файл story/story_metadata.json отсутствует или недоступен.",
                 errorChapterNotFound: "Файл главы не найден.",
                 errorJsonSyntax: "КРИТИЧЕСКАЯ ОШИБКА JSON: Проверьте структуру файла JSON главы (лишние запятые/скобки)!",
@@ -515,7 +515,7 @@
                 loadText: "Load", loadingText: "Loading...", loadedText: "Loaded", 
                 errorLoading: "Retry", endOfStory: "Story finished!",
                 startOfStory: "This is the start of the story.", placeholderMetadata: "--- Metadata not loaded ---",
-                placeholderSelectArc: "--- Select an arc first ---", // НОВЫЙ ТЕКСТ
+                placeholderSelectArc: "--- Select an arc first ---", 
                 errorFetchMetadataStrict: "Critical Error: Failed to load chapter metadata. The file story/story_metadata.json is missing or inaccessible.",
                 errorChapterNotFound: "Chapter file not found.",
                 errorJsonSyntax: "CRITICAL JSON ERROR: Check chapter JSON file structure (trailing commas/brackets)!",
@@ -528,7 +528,7 @@
                 loadText: "加载", loadingText: "载入中...", loadedText: "已加载", 
                 errorLoading: "重试", endOfStory: "故事结束了!",
                 startOfStory: "这是故事的开始。", placeholderMetadata: "--- 未加载元数据 ---",
-                placeholderSelectArc: "--- 请先选择篇章 ---", // НОВЫЙ ТЕКСТ
+                placeholderSelectArc: "--- 请先选择篇章 ---", 
                 errorFetchMetadataStrict: "致命错误：无法加载章节元数据。文件 story/story_metadata.json 缺失或无法访问。",
                 errorChapterNotFound: "未找到章节文件。",
                 errorJsonSyntax: "JSON 致命错误：检查章节 JSON 文件结构（末尾逗号/括号）!",
@@ -826,19 +826,19 @@
                 sprites: ["kiana_happy.png", "mei_serious.png", "bronya_sad.png", "fuhua_calm.png"],
             };
             
-            // ДОПОЛНИТЕЛЬНЫЕ МЕТАДАННЫЕ ДЛЯ ТЕСТИРОВАНИЯ ФИЛЬТРАЦИИ
+            // ОБНОВЛЕННЫЕ МЕТАДАННЫЕ ДЛЯ ТЕСТИРОВАНИЯ ФИЛЬТРАЦИИ (Формат: [arc]_main_ch[N])
             const chapterPlaceholders = {
                 // Main Story - Retrospect (re)
-                "main_re_01": { ru: "Пролог: Начало", en: "Prologue: The Start" },
-                "main_re_02": { ru: "Глава 2: Поиск", en: "Chapter 2: Search" },
-                "main_re_03": { ru: "Глава 3: Возвращение", en: "Chapter 3: Return" },
+                "re_main_ch1": { ru: "Пролог: Начало", en: "Prologue: The Start" },
+                "re_main_ch2": { ru: "Глава 2: Поиск", en: "Chapter 2: Search" },
+                "re_main_ch3": { ru: "Глава 3: Возвращение", en: "Chapter 3: Return" },
                 // Main Story - Inheritance (in)
-                "main_in_01": { ru: "Арка Наследия 1", en: "Inheritance Arc 1" },
-                "main_in_02": { ru: "Арка Наследия 2", en: "Inheritance Arc 2" },
-                // Extra Story
+                "in_main_ch1": { ru: "Арка Наследия 1", en: "Inheritance Arc 1" },
+                "in_main_ch2": { ru: "Арка Наследия 2", en: "Inheritance Arc 2" },
+                // Extra Story (использует префикс 'extra_')
                 "extra_01": { ru: "Событие: Пляж", en: "Event: Beach Day" },
                 "extra_02": { ru: "Событие: Зимний Бал", en: "Event: Winter Ball" },
-                // Boss
+                // Boss (использует префикс 'boss_')
                 "boss_01": { ru: "Босс: Зомби Королева", en: "Boss: Zombie Queen" },
             };
             
@@ -1084,6 +1084,7 @@
             // Сбрасываем индекс, поскольку мы начинаем с нуля после загрузки главы
             currentDialogueIndex = 0; 
             
+            // NOTE: Предполагаем, что файл называется [fullStoryKey].json
             const expectedFilePath = `${CONFIG.PATHS.STORY_BASE}${lang}/${fullStoryKey}.json`;
 
             console.log(`[Content Load] Попытка загрузить главу: ${expectedFilePath} (Ключ: ${fullStoryKey})`);
@@ -1272,7 +1273,7 @@
             
             arcSelect.innerHTML = '';
             arcSelect.disabled = true;
-            // Устанавливаем arcSelect.value = "" ТОЛЬКО если typeKey изменился
+            // Сбрасываем значение Арки, если мы переключаемся с "main" на что-то другое
             if (typeKey !== 'main') {
                  arcSelect.value = ""; 
             }
@@ -1311,7 +1312,7 @@
 
         /**
          * Функция, которая заполняет список Глав в зависимости от выбранного Типа и Арки.
-         * Здесь была основная проблема с блокировкой Глав, когда Арка не выбрана.
+         * ИСПРАВЛЕНА ЛОГИКА ФИЛЬТРАЦИИ И ДЕБАГ.
          */
         function updateChapterSelect() {
             const typeKey = elements.storyTypeSelect.value;
@@ -1331,50 +1332,71 @@
                 return;
             }
             
-            // Блокировка, если выбран основной сюжет, но не выбрана арка.
+            // 1. Блокировка: Если выбран основной сюжет, но не выбрана арка.
             if (typeKey === 'main' && !arcKey) { 
                 select.innerHTML = `<option value="">${i18n[lang].placeholderSelectArc}</option>`;
-                enableLoadButton(); // Отключит кнопку "Загрузить"
+                enableLoadButton();
                 return;
             }
             
+            // 2. Определение префикса
+            const storyGroup = STORY_GROUPS[typeKey];
+            if (!storyGroup) {
+                 select.innerHTML = `<option value="">--- Выберите тип сюжета ---</option>`;
+                 enableLoadButton();
+                 return;
+            }
+            
+            let targetPrefix = '';
+            
+            if (typeKey === 'main') {
+                // *** ИСПРАВЛЕНИЕ ДЛЯ ФОРМАТА: [arcKey]_main_ ***
+                // Например, для arcKey='re' получаем 're_main_'
+                targetPrefix = `${arcKey}_main_`; 
+            } else {
+                // Для всех остальных типов используется префикс из STORY_GROUPS
+                // Например, для 'extra' получаем 'extra_'
+                targetPrefix = storyGroup.prefix; 
+            }
+            
+            console.log(`[Chapter Filter] Тип: ${typeKey}, Арка: ${arcKey}. Целевой префикс для фильтрации: "${targetPrefix}"`);
+
+
             select.innerHTML = `<option value="">--- Выберите главу ---</option>`;
 
-            if (typeKey && STORY_GROUPS[typeKey]) {
-                const prefix = STORY_GROUPS[typeKey].prefix; 
-                let chapterFound = false;
-                
-                // Определяем префикс для фильтрации
-                let targetPrefix = typeKey === 'main' ? `${prefix}${arcKey}_` : prefix;
-                
-                console.log(`[Chapter Select] Фильтрующий префикс: ${targetPrefix}`); // DEBUGGING
-                
-                for (const fullChapterKey in window.storyMetadata) {
-                    if (fullChapterKey.startsWith(targetPrefix)) {
-                        const chapterData = window.storyMetadata[fullChapterKey];
-                        const chapterName = chapterData[lang] || chapterData.ru; 
+            let chapterFound = false;
+            
+            // 3. Фильтрация метаданных
+            for (const fullChapterKey in window.storyMetadata) {
+                // Проверяем, начинается ли ключ главы с требуемого префикса
+                if (fullChapterKey.startsWith(targetPrefix)) {
+                    
+                    const chapterData = window.storyMetadata[fullChapterKey];
+                    // Получаем название на текущем языке или на русском как резервный вариант
+                    const chapterName = chapterData[lang] || chapterData.ru; 
+                    
+                    if (chapterName) {
+                        const option = document.createElement('option');
+                        option.value = fullChapterKey; 
+                        option.textContent = chapterName; 
                         
-                        if (chapterName) {
-                            const option = document.createElement('option');
-                            option.value = fullChapterKey; 
-                            option.textContent = chapterName; 
-                            
-                            // Пытаемся восстановить, если ключ совпадает
-                            if (fullChapterKey === currentChapterKey) {
-                                 option.selected = true;
-                            }
-                            select.appendChild(option);
-                            chapterFound = true;
+                        // Пытаемся восстановить выбранный ключ
+                        if (fullChapterKey === currentChapterKey) {
+                             option.selected = true;
                         }
+                        select.appendChild(option);
+                        chapterFound = true;
+                        // console.log(`[Chapter Filter] Найдена глава, соответствующая префиксу: ${fullChapterKey}`);
                     }
                 }
-                
-                if (chapterFound) {
-                     select.disabled = false;
-                } else {
-                     select.innerHTML = `<option value="">--- Главы не найдены ---</option>`;
-                }
-            } 
+            }
+            
+            // 4. Завершение
+            if (chapterFound) {
+                 select.disabled = false;
+            } else {
+                 select.innerHTML = `<option value="">--- Главы не найдены ---</option>`;
+            }
             
             enableLoadButton();
         }
