@@ -333,7 +333,7 @@
             <div class="flex-1 min-w-[45%] md:min-w-[180px]">
                 <label for="storyTypeSelect" id="labelStoryType" class="block text-sm font-medium mb-1" style="color: var(--color-text-secondary);">Тип сюжета</label>
                 <!-- Использование обновленной функции для обработки изменений типа -->
-                <select id="storyTypeSelect" onchange="updateArcAndChapterUI(true)" class="select-field w-full rounded-lg p-2.5 cursor-pointer focus:ring-4 transition text-sm" style="background-color: var(--color-bg-main);">
+                <select id="storyTypeSelect" onchange="updateArcAndChapterUI(false)" class="select-field w-full rounded-lg p-2.5 cursor-pointer focus:ring-4 transition text-sm" style="background-color: var(--color-bg-main);">
                     <!-- Options populated by JS -->
                 </select>
             </div>
@@ -342,7 +342,7 @@
             <div id="arcSelectContainer" class="flex-1 min-w-[45%] md:min-w-[180px] hidden">
                 <label for="arcSelect" id="labelArc" class="block text-sm font-medium mb-1" style="color: var(--color-text-secondary);">Арка</label>
                  <!-- Вызов обновления глав при изменении арки -->
-                <select id="arcSelect" onchange="updateChapterSelect(true); saveProgress()" class="select-field w-full rounded-lg p-2.5 cursor-pointer focus:ring-4 transition text-sm" style="background-color: var(--color-bg-main);">
+                <select id="arcSelect" onchange="updateChapterSelect(false); saveProgress()" class="select-field w-full rounded-lg p-2.5 cursor-pointer focus:ring-4 transition text-sm" style="background-color: var(--color-bg-main);">
                     <!-- Options populated by JS -->
                 </select>
             </div>
@@ -1363,8 +1363,8 @@
         
         // Переименована для единообразия с onchange в HTML
         function initializeOrUpdateUI(isUserEvent) {
-             // При пользовательском событии, мы сбрасываем состояние глав и арк, 
-             // чтобы они обновились на основе нового выбора.
+             // При пользовательском событии (isUserEvent = true), мы хотим обновить UI и сохранить прогресс.
+             // При вызове из loadProgress (isUserEvent = false), мы хотим только обновить UI.
              updateArcAndChapterUI(!isUserEvent); 
         }
 
@@ -1481,9 +1481,8 @@
             updateI18nStrings(); 
 
             if (!savedProgress) {
-                // Если прогресс не найден, просто инициализируем UI
+                // Если прогресс не найден, просто инициализируем UI и выходим
                 updateArcAndChapterUI(false); 
-                enableLoadButton();
                 return; 
             }
 
@@ -1495,7 +1494,7 @@
             }
             updateI18nStrings(); // Обновляем текст под восстановленный язык
             
-            // 3. Восстанавливаем Story Type и Arc
+            // 3. Восстанавливаем Story Type и Arc, присваивая значения элементам DOM напрямую
             let typeRestored = false;
             if (progress.type && STORY_GROUPS[progress.type]) {
                 storyTypeSelect.value = progress.type;
@@ -1510,23 +1509,31 @@
                  arcSelect.value = "";
             }
 
-            // 4. Обновляем UI: это заполняет списки Арк и Глав на основе восстановленных значений.
-            // (skipSideEffects = false, чтобы в конце вызвать enableLoadButton/saveProgress)
-            updateArcAndChapterUI(false); 
+            // 4. Обновляем UI: это заполняет списки Глав на основе восстановленных type/arc.
+            // Передаем TRUE, чтобы updateChapterSelect НЕ вызывал enableLoadButton/saveProgress.
+            updateArcAndChapterUI(true); 
             
             // 5. Восстанавливаем Chapter selection и АВТОМАТИЧЕСКИ ЗАГРУЖАЕМ контент
+            let chapterRestored = false;
+
             if (typeRestored && progress.chapter) {
                 // Проверяем, существует ли сохраненная глава в только что заполненном списке опций
                 if (Array.from(chapterSelect.options).some(opt => opt.value === progress.chapter)) {
                     chapterSelect.value = progress.chapter;
-                    enableLoadButton(); 
-                    
-                    // !!! АВТОМАТИЧЕСКАЯ ЗАГРУЗКА СОХРАНЕННОГО ПРОГРЕССА
-                    updateStoryContent(progress.index); 
+                    chapterRestored = true;
                 }
+            } 
+            
+            // 6. Финализация состояния UI (Включение кнопки загрузки и сохранение прогресса)
+            enableLoadButton();
+            saveProgress(); 
+
+            // 7. Если глава успешно восстановлена, запускаем автоматическую загрузку
+            if (chapterRestored) {
+                console.log(`[Progress] Автоматическая загрузка главы: ${progress.chapter} на шаге ${progress.index}`);
+                updateStoryContent(progress.index); 
             } else {
-                // Если глава не найдена или не была сохранена, просто включаем кнопку загрузки
-                enableLoadButton();
+                console.log("[Progress] Прогресс найден, но сохраненная глава недействительна. Автозагрузка отменена.");
             }
         }
 
