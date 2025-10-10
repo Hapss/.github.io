@@ -822,24 +822,8 @@
         async function fetchChapterMetadata() {
             // ДЛЯ ДЕМОНСТРАЦИИ: Список всех ассетов для фоновой загрузки.
             const defaultAssetList = {
-                backgrounds: ["bg_school.jpg", "bg_city_night.png", "bg_street.jpg"],
-                sprites: ["kiana_happy.png", "mei_serious.png", "bronya_sad.png", "fuhua_calm.png"],
-            };
-            
-            // ОБНОВЛЕННЫЕ МЕТАДАННЫЕ ДЛЯ ТЕСТИРОВАНИЯ ФИЛЬТРАЦИИ (Формат: [arc]_main_ch[N])
-            const chapterPlaceholders = {
-                // Main Story - Retrospect (re)
-                "re_main_ch1": { ru: "Пролог: Начало", en: "Prologue: The Start" },
-                "re_main_ch2": { ru: "Глава 2: Поиск", en: "Chapter 2: Search" },
-                "re_main_ch3": { ru: "Глава 3: Возвращение", en: "Chapter 3: Return" },
-                // Main Story - Inheritance (in)
-                "in_main_ch1": { ru: "Арка Наследия 1", en: "Inheritance Arc 1" },
-                "in_main_ch2": { ru: "Арка Наследия 2", en: "Inheritance Arc 2" },
-                // Extra Story (использует префикс 'extra_')
-                "extra_01": { ru: "Событие: Пляж", en: "Event: Beach Day" },
-                "extra_02": { ru: "Событие: Зимний Бал", en: "Event: Winter Ball" },
-                // Boss (использует префикс 'boss_')
-                "boss_01": { ru: "Босс: Зомби Королева", en: "Boss: Zombie Queen" },
+                backgrounds: ["bg_stage1.png", "bg_stage2.png", "bg_stage3.png"],
+                sprites: ["Kiana 1.png", "Mei 1.png", "Bronya 1.png", "Himeko 1.png"],
             };
             
             try {
