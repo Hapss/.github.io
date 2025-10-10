@@ -571,7 +571,8 @@
                     reject(new Error(`Failed to load image: ${url}`)); 
                 };
 
-                // CRITICAL FIX: No cache-buster is used, ensuring the browser cache is effective.
+                // КРИТИЧЕСКИЙ КОММЕНТАРИЙ: Здесь отсутствует cache-buster, что позволяет
+                // браузеру использовать локальный кэш для повторной быстрой загрузки.
                 img.src = url; 
             });
 
@@ -817,6 +818,7 @@
         const spritePath = (fileName) => {
             if (!fileName) return null;
             const encodedFileName = encodeURIComponent(fileName);
+            // Применяем encodeURIComponent для безопасности URL, если имена файлов содержат пробелы.
             return CONFIG.PATHS.SPRITE_BASE + encodedFileName; 
         };
         
@@ -1012,9 +1014,7 @@
             
             const attemptLoad = async (attempt = 1) => {
                 let success = false;
-                let data = null;
                 let errorType = null;
-                let errorMessage = null;
                 let chapterData;
 
                 try {
@@ -1032,7 +1032,6 @@
                     } catch (e) {
                         if (e instanceof SyntaxError) {
                             errorType = "SyntaxError";
-                            errorMessage = e.message;
                             throw e; 
                         }
                         throw e;
@@ -1073,14 +1072,14 @@
                         preloadedAssets = {}; 
 
                         // ==========================================================
-                        // === CRITICAL SPEED OPTIMIZATION: AWAIT INITIAL ASSETS ===
+                        // === ОЖИДАНИЕ ЗАГРУЗКИ ПЕРВОЙ СЦЕНЫ (ОПТИМИЗАЦИЯ СКОРОСТИ) ===
                         // ==========================================================
                         const initialStep = currentDialogue[currentDialogueIndex];
                         if (initialStep) {
-                            // Ожидаем загрузки всех активов для первой отображаемой сцены
+                            // !!! КРИТИЧНО: Ждем, пока все активы первой сцены будут загружены.
                             await preloadAssets(currentDialogueIndex); 
                             
-                            // Предварительная загрузка следующего шага сразу после первого
+                            // Запускаем предварительную загрузку следующего шага в фоне
                             preloadAssets(currentDialogueIndex + 1); 
                         }
 
