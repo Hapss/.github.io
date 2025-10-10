@@ -1,5 +1,12 @@
 {
   "dialogue": [
+    { 
+            "text": "Станут ли руины этого мира \nбожественными реликвиями следующего?",
+           "text_style": "full",
+           "full_text_size": "lg",
+           "full_text_align": "center",
+            "background": "bg_stage1.png"
+        },
     {
       "speaker": "Киана",
       "text": "Кажется, остались только мы вдвоём во всей академии~ Это похоже на сцену из кино~",
