@@ -3,7 +3,8 @@
     {
       "speaker": "Киана",
       "text": "Кажется, остались только мы вдвоём во всей академии~ Это похоже на сцену из кино~",
-      "sprite_left": "Kiana 1.png"
+      "sprite_left": "Kiana 1.png",
+      "background": "bg_stage5.png"
     },
     {
       "speaker": "Мэй",
