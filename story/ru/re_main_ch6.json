@@ -333,7 +333,7 @@
     {
       "speaker": "Броня",
       "text": "Я интегрированная универсальная последняя боевая оружейница, носитель переделанного Проекта Зайка 19c, Броня.",
-      "sprite_left": "Bronya 1.png",
+      "sprite_right": "Bronya 1.png",
       "sprite_left": "Mei 2.png",
       "dim_override": "left"
     },
@@ -367,7 +367,7 @@
     {
       "speaker": "Броня",
       "text": "Цель оказывает сопротивление, запрос на снятие боевых ограничений... Принято. Переход Проекта Зайка в боевой режим.",
-      "sprite_left": "Bronya 1.png",
+      "sprite_right": "Bronya 1.png",
       "sprite_left": "Kiana 4.png",
       "dim_override": "left"
     },
@@ -400,7 +400,7 @@
     {
       "speaker": "Броня",
       "text": "Завершен анализ боевой мощи. Шансы на успешный захват на 24,36% ниже, чем прогнозировалось. План изменился. Начать эвакуацию.",
-      "sprite_left": "Bronya 1.png",
+      "sprite_right": "Bronya 1.png",
       "sprite_left": "Mei.png",
       "dim_override": "left"
     },

@@ -204,7 +204,6 @@
     },
     {
       "text": "БУМ!!!",
-      "dim_override": "both",
       "sprite_left": "Bronya 2.png",
       "dim_override": "left"
     },
