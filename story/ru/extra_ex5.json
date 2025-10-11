@@ -1,5 +1,12 @@
 {
   "dialogue": [
+    { 
+            "text": "Наблюдая, как она исчезает в лучах восходящего\nсолнца, я внезапно поверила в завтрашний день..",
+           "text_style": "full",
+           "full_text_size": "lg",
+           "full_text_align": "center",
+            "background": "bg_stage1.png"
+        },
         {
           "speaker": "Мэй",
           "sprite_left": "Mei 3.png",
@@ -120,7 +127,7 @@
           "sprite_left": "Mei 1.png",
           "text": "Киана, сейчас!",
           "sprite_right": "Palefox.png",
-          "dim_override": "right",
+          "dim_override": "right"
         },
         {
           "speaker": "Киана",
