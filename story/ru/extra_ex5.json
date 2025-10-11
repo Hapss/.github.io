@@ -1,0 +1,240 @@
+```json
+{
+  "dialogue": [
+        {
+          "speaker": "Мэй",
+          "sprite_left": "Mei 3.png",
+          "background": "bg_stageS5.png",
+          "text": "Киана, что случилось с мисс Бледной Лисой?.."
+        },
+        {
+          "speaker": "Киана",
+          "sprite_left": "Kiana 1.png",
+          "text": "Мэй-сэмпай, ты помнишь личность Хоукая, которая пыталась захватить контроль над твоим телом?"
+        },
+        {
+          "speaker": "Мэй",
+          "sprite_left": "Mei 1.png",
+          "text": "Неужели она теперь заражает сознание мисс Бледной Лисы?"
+        },
+        {
+          "speaker": "Киана",
+          "sprite_left": "Kiana 1.png",
+          "text": "Ну, должно быть в тот момент, когда Бледная Лиса почувствовала облегчение, энергия источника Хоукая вторглась в её сознание."
+        },
+        {
+          "speaker": "Мэй",
+          "sprite_left": "Mei 1.png",
+          "text": "Неудивительно, что мисс Бледная Лиса стала такой странной, когда хотела вспомнить прошлое. Видимо, в то время она боролась с сознанием источника Хоукая......"
+        },
+        {
+          "speaker": "Киана",
+          "sprite_left": "Kiana 1.png",
+          "text": "Сейчас немного сложнее: эта сила стала сильнее, чем когда она была в твоём теле......"
+        },
+        {
+          "speaker": "Киана",
+          "sprite_left": "Kiana 1.png",
+          "text": "Но, к счастью, это не большая проблема, но мне может понадобиться помощь Мэй-сэмпай."
+        },
+        {
+          "speaker": "Мэй",
+          "sprite_left": "Mei 3.png",
+          "text": "Моя?"
+        },
+        {
+          "speaker": "Киана",
+          "sprite_left": "Kiana 1.png",
+          "text": "Да, точно так же, как в тот раз, воспользуйся шансом и победи её!"
+        },
+        {
+          "speaker": "Мэй",
+          "sprite_left": "Mei 1.png",
+          "text": "Не знаю смогу ли, но я попробую!"
+        },
+        {
+          "speaker": "Бледная Лиса",
+          "sprite_right": "Palefox.png",
+          "text": "Вы уже здесь? Я ждала вас довольно долго!"
+        },
+        {
+          "speaker": "Бледная Лиса",
+          "sprite_right": "Palefox.png",
+          "text": "Отдайте мне ваш источник Хоукая, а заодно и самих себя~ Глупые люди, прекратите пытаться делать глупости~ Хоукай станет вашим концом, используйте ваше последнее время, чтобы покаяться во всех своих грехах."
+        },
+        {
+          "speaker": "Киана",
+          "sprite_left": "Kiana 1.png",
+          "sprite_right": "Palefox.png",
+          "dim_override": "right",
+          "text": "Мэй-сэмпай, ты готова?"
+        },
+        {
+          "speaker": "Мэй",
+          "sprite_left": "Mei 1.png",
+          "sprite_right": "Palefox.png",
+          "dim_override": "right",
+          "text": "...Да!"
+        },
+        {
+          "speaker": "Мэй",
+          "sprite_left": "Mei 1.png",
+          "sprite_right": "Palefox.png",
+          "dim_override": "right",
+          "text": "Мисс Бледная Лиса! Я не знаю слышишь ли ты меня, но мне всё равно есть что сказать тебе!"
+        },
+        {
+          "speaker": "Бледная Лиса",
+          "sprite_right": "Palefox.png",
+          "text": "Бесполезно.... Её сознание было полностью подавлено мною, она не слышит тебя!"
+        },
+        {
+          "speaker": "Мэй",
+          "sprite_left": "Mei 1.png",
+          "sprite_right": "Palefox.png",
+          "dim_override": "right",
+          "text": "Мисс Бледная Лиса, не важно каким стал мир, не важно какими стали люди, что были с тобой, прошу, не забывай то, какая ты на самом деле!"
+        },
+        {
+          "speaker": "Бледная Лиса",
+          "sprite_left": "Mei 1.png",
+          "sprite_right": "Palefox.png",
+          "dim_override": "left",
+          "text": "Говорю же, это бесполезно! Прекращай это и будь хороший девочкой, стань моим вместилищем!"
+        },
+        {
+          "speaker": "Мэй",
+          "sprite_left": "Mei 1.png",
+          "sprite_right": "Palefox.png",
+          "dim_override": "right",
+          "text": "В этом безумном мире, ты действительно хочешь оставить эту девочку в том холодном месте? Разве ты не хотела её защитить?!"
+        },
+        {
+          "speaker": "Бледная Лиса",
+          "sprite_left": "Mei 1.png",
+          "sprite_right": "Palefox.png",
+          "dim_override": "left",
+          "text": "Ха-ха-ха, глупые детские слова... Аа!"
+        },
+        {
+          "speaker": "Мэй",
+          "sprite_left": "Mei 1.png",
+          "text": "Киана, сейчас!",
+          "sprite_right": "Palefox.png",
+          "dim_override": "right",
+        },
+        {
+          "speaker": "Киана",
+          "sprite_right": "Palefox.png",
+          "dim_override": "right",
+          "sprite_left": "Kiana 1.png",
+          "text": "Предоставь это мне!"
+        },
+        {
+          "speaker": "Бледная Лиса",
+          "sprite_right": "Palefox.png",
+          "text": "Бесполезно... Этот мир в конечном счёте будет разрушен, ты не можешь... остановить это..."
+        },
+        {
+          "speaker": "Киана",
+          "sprite_left": "Kiana 4.png",
+          "sprite_right": "Palefox.png",
+          "dim_override": "right",
+          "text": "...Хмпф, а это решать уже не тебе!"
+        },
+        {
+          "speaker": "Бледная Лиса",
+          "sprite_left": "Kiana 4.png",
+          "sprite_right": "Palefox.png",
+          "dim_override": "left",
+          "text": "......"
+        },
+        {
+          "speaker": "Мэй",
+          "sprite_right": "Palefox.png",
+          "dim_override": "right",
+          "sprite_left": "Mei 3.png",
+          "text": "Кажется она... вернулась к своему лисьему облику."
+        },
+        {
+          "speaker": "Киана",
+          "sprite_left": "Kiana 1.png",
+          "text": "Поскольку она больше не под контролем энергии Хоукая, она больше не может удерживать её человеческую форму."
+        },
+        {
+          "sprite_left": "Kiana 1.png",
+          "sprite_right": "Palefox.png",
+          "dim_override": "both",
+          "text": "Уу~уу~"
+        },
+        {
+          "speaker": "Мэй",
+          "sprite_left": "Mei 3.png",
+          "text": "Мисс Бледная Лиса?"
+        },
+        {
+          "speaker": "Киана",
+          "sprite_left": "Kiana 1.png",
+          "text": "Мэй-сэмпай, она снова стала лисой, она больше не понимает что ты говоришь."
+        },
+        {
+          "sprite_left": "Kiana 1.png",
+          "sprite_right": "Palefox.png",
+          "dim_override": "both",
+          "text": "Гу~ки~"
+        },
+        {
+          "speaker": "Мэй",
+          "sprite_right": "Palefox.png",
+          "dim_override": "right",
+          "sprite_left": "Mei 1.png",
+          "text": "Ну, поняла, тогда беги~"
+        },
+        {
+          "speaker": "Киана",
+          "sprite_right": "Palefox.png",
+          "dim_override": "right",
+          "sprite_left": "Kiana 3.png",
+          "text": "Э!? Ты понимаешь что она говорит?"
+        },
+        {
+          "speaker": "Мэй",
+          "sprite_right": "Palefox.png",
+          "dim_override": "right",
+          "sprite_left": "Mei 1.png",
+          "text": "Да, она сказала, что отправиться защищать ту девочку и не позволит зомби подобраться к ней, пока сама не умрёт."
+        },
+        {
+          "speaker": "Киана",
+          "sprite_left": "Kiana 1.png",
+          "sprite_right": "Palefox.png",
+          "dim_override": "right",
+          "text": "Даже животные такие чувствительные, так почему люди столь бессердечны..."
+        },
+        {
+          "speaker": "Мэй",
+          "sprite_left": "Mei 1.png",
+          "sprite_right": "Palefox.png",
+          "dim_override": "right",
+          "text": "Только лишь «некоторые» люди. Я верю, что большинство людей глубоко в сердце хранят свои истинные чувства."
+        },
+        {
+          "speaker": "Киана",
+          "sprite_left": "Kiana 3.png",
+          "text": "Может быть... И всё же, Мэй, почему ты умеешь понимать язык животных?"
+        },
+        {
+          "speaker": "Мэй",
+          "sprite_left": "Mei 2.png",
+          "text": "Ничего особенного~"
+        },
+        {
+          "speaker": "Мэй",
+          "sprite_left": "Mei 2.png",
+          "text": "Просто раньше я была более одинока, чем кто-либо другой, поэтому у меня более нежное и чувствительное сердце, чем у кого-либо другого......"
+        }
+      ]
+    }
+  ]
+}
+```
