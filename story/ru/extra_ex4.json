@@ -1,0 +1,382 @@
+{
+  "dialogue": [
+    {
+      "background": "bg_stageS4.png",
+      "speaker": "Мэй",
+      "text": "Киана......",
+      "sprite_left": "Mei 1.png",
+      "sprite_right": ""
+    },
+    {
+      "speaker": "Киана",
+      "text": "Что такое, Мэй?",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": ""
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Ничего, я просто думаю, найдем ли мы мисс Бледную Лису? Мы пробыли здесь долгое время...",
+      "sprite_left": "Mei 1.png",
+      "sprite_right": ""
+    },
+    {
+      "speaker": "Киана",
+      "text": "Не волнуйся~ Этот телефон может иногда не работать, но он довольно полезный~",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": ""
+    },
+    {
+      "text": "Бжжж......",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "",
+      "dim_override": "both"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Видишь? Я же говорила.",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": ""
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Это действительно замечательное устройство. Человек, который изобрел его, должно быть, очень могущественный......",
+      "sprite_left": "Mei 3.png",
+      "sprite_right": ""
+    },
+    {
+      "speaker": "Киана",
+      "text": "Я не знаю, хорош ли он или нет, но он, должно быть, из тех, кто любит побегать.",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": ""
+    },
+    {
+      "speaker": "Мэй",
+      "text": "О? Киана, ты знаешь его?",
+      "sprite_left": "Mei 3.png",
+      "sprite_right": ""
+    },
+    {
+      "speaker": "Киана",
+      "text": "На самом деле мы с ним не так уж близки, хотя он мой... Забудь об этом, я не хочу говорить о нём. Давай найдём эту лису и избавимся от источника Хоукая.",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": ""
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Что ж, Киана, если ты не хочешь говорить об этом, забудь тогда.",
+      "sprite_left": "Mei 1.png",
+      "sprite_right": ""
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Пошли, Киана. Недалеко отсюда должно быть святилище. Это и есть то святилище, о котором упоминала мисс Бледная Лиса?",
+      "sprite_left": "Mei 1.png",
+      "sprite_right": ""
+    },
+    {
+      "speaker": "Киана",
+      "text": "А? Мэй-сэмпай, тебе известно это место?",
+      "sprite_left": "Kiana 3.png",
+      "sprite_right": ""
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Ну, я уже была здесь раньше... Я думаю, что приезжала сюда со своим отцом, когда была совсем маленькой...",
+      "sprite_left": "Mei 3.png",
+      "sprite_right": ""
+    },
+    {
+      "speaker": "Киана",
+      "text": "Вот как... Эй, сэмпай, что за человек твой отец? Хотя я видела воспоминания сэмпай, это были всего лишь фрагменты...",
+      "sprite_left": "Kiana 3.png",
+      "sprite_right": ""
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Отец... Был строгим человеком, как со мной, так и с самим собой.",
+      "sprite_left": "Mei 1.png",
+      "sprite_right": ""
+    },
+    {
+      "speaker": "Киана",
+      "text": "И всё же даже такой серьёзный человек, как он, привел Мэй-сэмпай в это место. Так что я думаю, что он на самом деле любит сэмпай. Верно, может быть, он просто плохо умеет выражать свои чувства.",
+      "sprite_left": "Kiana 3.png",
+      "sprite_right": ""
+    },
+    {
+      "speaker": "Мэй",
+      "text": "А что насчёт Кианы? Что за человек твой отец? Если я не ошибаюсь, этот телефон был сделан им, верно?",
+      "sprite_left": "Mei 3.png",
+      "sprite_right": ""
+    },
+    {
+      "speaker": "Киана",
+      "text": "Ну... что касается моего отца, то на самом деле я почти ничего о нём не знаю. Я знаю только, что он забрал меня из \"Шиксала\", а затем лично научил меня некоторым боевым искусствам семьи Каслана и рассказал о Хонкае. Но теперь я не знаю, куда он делся, он оставил только этот сломанный телефон...",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": ""
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Шиксал? Что это за место?",
+      "sprite_left": "Mei 3.png",
+      "sprite_right": ""
+    },
+    {
+      "speaker": "Киана",
+      "text": "А... Я рассказала лишнего...",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": ""
+    },
+    {
+      "speaker": "Киана",
+      "text": "Ничего страшного, сэмпай, тебя это не должно волновать~ ты сказала, что здесь есть святилище, верно? Давай отправимся туда и исследуем его, может быть, мы найдём какие-нибудь подсказки!",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": ""
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Оу... Хорошо...",
+      "sprite_left": "Mei 3.png",
+      "sprite_right": ""
+    },
+    {
+      "speaker": "Бледная Лиса",
+      "text": "Вы ведь специально нашли это место, да? Зачем вы преследуете меня?",
+      "sprite_right": "Palefox.png"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Потому что, если ты не будешь действовать быстро, ты... Зачем ты меня дёргаешь?",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Прошу, дай мне поговорить с ней.",
+      "sprite_left": "Mei 1.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Вуу...",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Мы просто пытаемся помочь тебе.",
+      "sprite_left": "Mei 1.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Бледная Лиса",
+      "text": "Помочь с чем?",
+      "sprite_left": "Mei 1.png",
+      "sprite_right": "Palefox.png"
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Найти ответ, который ты ищешь.",
+      "sprite_left": "Mei 1.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Мэй-сэмпай~ Нам ещё многое нужно сделать, как мы поможем с этим?",
+      "sprite_left": "Kiana 3.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Киана, дай мне немного времени. Я вижу, что на самом деле она всё понимает, но отказывается это признавать, поэтому она так одержима. Верно, мисс Бледная Лиса?",
+      "sprite_left": "Mei 3.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Бледная Лиса",
+      "text": "Ты! О чём ты?!",
+      "sprite_left": "Mei 3.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Ты знаешь что случилось с той девушкой лучше, чем кто-либо, верно?",
+      "sprite_left": "Mei 3.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Бледная Лиса",
+      "text": "Я не знаю...",
+      "sprite_left": "Mei 3.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Бледная Лиса",
+      "text": "Я не знаю... Это были вы... это были вы, это были вы... не пытайтесь манипулировать мной!",
+      "sprite_left": "Mei 3.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Берегись! Её дыхание стало странным!",
+      "sprite_left": "Kiana 4.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Бледная Лиса",
+      "text": "Почему это происходит? Если бы я могла понять то, что она сказала раньше, всё было бы иначе, верно?..",
+      "sprite_right": "Palefox.png"
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Ты помнишь что она тебе сказала?",
+      "sprite_left": "Mei 3.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Бледная Лиса",
+      "text": "Нет, я помню лишь часть.",
+      "sprite_left": "Mei 3.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Бледная Лиса",
+      "text": "До того, как случился выброс Хоукая, я была обычной белой лисой, которая долгое время тихо жила в этом святилище.",
+      "sprite_left": "Mei 3.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Бледная Лиса",
+      "text": "В то время я не была способна понимать человеческий язык, но слова, которые она мне сказала, звук, который слетел с её губ, я не забыла. И только сейчас я поняла их значение.",
+      "sprite_left": "Mei 3.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Бледная Лиса",
+      "text": "Её родители работали за границей, и она проводила много времени в академии. Будучи интровертом, у неё было не так много друзей.",
+      "sprite_left": "Mei 3.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Бледная Лиса",
+      "text": "Когда ей было грустно, она приходила в это святилище, чтобы загадать желание, и приносила много еды, чтобы накормить мелких животных по соседству.",
+      "sprite_left": "Mei 3.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Бледная Лиса",
+      "text": "Я часто сидела с ней под карнизом и смотрела, как она расчёсывает мои волосы, изливая мне душу. Например, грустно, когда ты получаешь плохую оценку, например, когда парень, в которого ты была влюблена долгое время, на самом деле влюбляется в другую девушку.",
+      "sprite_left": "Mei 3.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Бледная Лиса",
+      "text": "Это её очень печалило, она не хотела такой жизни и хотела перевернуть всё с ног на голову.",
+      "sprite_left": "Mei 3.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Бледная Лиса",
+      "text": "До тех пор, пока однажды, не так давно, девушка перестала сюда приходить. Я прождала здесь весь день, но она больше так и не появилась.",
+      "sprite_left": "Mei 3.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Бледная Лиса",
+      "text": "Она что-то сказала мне в слезах перед тем, как уйти в последний раз, но в то время я просто не поняла. Она закончила академию? Уехала ли она из страны и вернулась ли к своим родителям? Или она отправилась в то долгое путешествие, о котором говорила, что отправится?",
+      "sprite_left": "Mei 3.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Бледная Лиса",
+      "text": "Только после того, как случился выброс Хоукая, пока я не стала такой, как сейчас, я внезапно поняла, что она имела в виду, и поняла её последние слова, обращённые ко мне.",
+      "sprite_left": "Mei 3.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Бледная Лиса",
+      "text": "Она сказала... Если мы проснёмся завтра и мир внезапно рухнет, как было бы здорово, если бы больше не было этих правил и ограничений, чтобы каждый мог вернуться к своему истинному \"я\"......",
+      "sprite_left": "Mei 3.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Что с ней не так?..",
+      "sprite_left": "Kiana 3.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Бледная Лиса",
+      "text": "Теперь, когда я полностью поняла её и мне больше не нужно оставаться в этой человеческой форме, ты можешь помочь мне снова стать самой собой.",
+      "sprite_left": "Kiana 3.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Правда?",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Бледная Лиса",
+      "text": "Мгм.",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "left"
+    },
+    {
+      "text": "......",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "both"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Эй! Ты правда думаешь, что я куплюсь на это?",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Бледная Лиса",
+      "text": "Ты! Это снова ты, девчушка! Говорю тебе, этот маленькая лисичка уже моя, не пытайся снова остановить меня! Тогда я избавлюсь от вас всех!",
+      "sprite_left": "Kiana 1.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Не убегай!",
+      "sprite_left": "Kiana 4.png",
+      "sprite_right": "Palefox.png",
+      "dim_override": "right"
+    }
+  ]
+}

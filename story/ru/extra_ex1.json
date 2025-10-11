@@ -1,10 +1,12 @@
 {
-  "metadata": {
-    "ru": "Вход запрещён",
-    "en": "No entrance",
-    "zh": "禁止入内"
-  },
   "dialogue": [
+    { 
+            "text": "В этом разрушенном месте надежда\nподобна слуху, разносимому ветром..",
+           "text_style": "full",
+           "full_text_size": "lg",
+           "full_text_align": "center",
+            "background": "bg_stage1.png"
+        },
     {
       "speaker": "Киана",
       "text": "Впереди грозовые тучи, она, должно быть, там...",

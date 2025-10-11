@@ -1,41 +1,36 @@
 {
-  "background": "bg_stageS3.png",
+  
   "dialogue": [
     {
+      "background": "bg_stageS3.png",
       "speaker": "Мэй",
       "text": "......",
-      "sprite_left": "Mei 1.png",
-      "dim_override": "none"
+      "sprite_left": "Mei 3.png"
     },
     {
       "speaker": "Киана",
       "text": "Мэй..?",
-      "sprite_left": "Kiana 1.png",
-      "dim_override": "none"
+      "sprite_left": "Kiana 1.png"
     },
     {
       "speaker": "Мэй",
       "text": "Киана, я просто хорошенько поразмыслила над тем инцидентом, который произошёл ранее. Я думаю, что мы, возможно, во что-то вляпались...",
-      "sprite_left": "Mei 1.png",
-      "dim_override": "none"
+      "sprite_left": "Mei 3.png"
     },
     {
       "speaker": "Киана",
       "text": "Даже так, мы не можем вернуться!",
-      "sprite_left": "Kiana 1.png",
-      "dim_override": "none"
+      "sprite_left": "Kiana 1.png"
     },
     {
       "speaker": "Мэй",
       "text": "Почему? Киана, разве тебе не хочется узнать что произошло с той девушкой?",
-      "sprite_left": "Mei 1.png",
-      "dim_override": "none"
+      "sprite_left": "Mei 1.png"
     },
     {
       "speaker": "Киана",
       "text": "Не в этом дело... Просто мы не можем по-настоящему оценить, насколько опасным может быть этот источник Хоукая. Если...",
-      "sprite_left": "Kiana 1.png",
-      "dim_override": "none"
+      "sprite_left": "Kiana 1.png"
     },
     {
       "text": "Бжжж......",
@@ -45,32 +40,27 @@
     {
       "speaker": "Киана",
       "text": "......",
-      "sprite_left": "Kiana 1.png",
-      "dim_override": "none"
+      "sprite_left": "Kiana 1.png"
     },
     {
       "speaker": "Мэй",
       "text": "Что такое, Киана?",
-      "sprite_left": "Mei 1.png",
-      "dim_override": "none"
+      "sprite_left": "Mei 3.png"
     },
     {
       "speaker": "Киана",
-      "text": "Перед нами реакция источника Хоукая, и, судя по интенсивности этой реакции, это тот самый 'человек', которого мы видели ранее. Похоже, ты была права, Мэй, мы вовлечены в какой-то инцидент.",
-      "sprite_left": "Kiana 1.png",
-      "dim_override": "none"
+      "text": "Перед нами реакция источника Хоукая, и, судя по интенсивности этой реакции, это тот самый «человек», которого мы видели ранее. Похоже, ты была права, Мэй, мы вовлечены в какой-то инцидент.",
+      "sprite_left": "Kiana 1.png"
     },
     {
       "speaker": "Мэй",
       "text": "Могло ли быть, что эта девушка знала, что мы пытаемся уйти, и ждала нас у бокового входа?",
-      "sprite_left": "Mei 1.png",
-      "dim_override": "none"
+      "sprite_left": "Mei 3.png"
     },
     {
       "speaker": "Киана",
       "text": "Независимо от того, думает так другая сторона или нет, в любом случае, наш план побега из академии должен быть отложен на некоторое время.",
-      "sprite_left": "Kiana 1.png",
-      "dim_override": "none"
+      "sprite_left": "Kiana 1.png"
     },
     {
       "text": "Бжжж......",
@@ -79,105 +69,96 @@
     },
     {
       "speaker": "Киана",
-      "text": "Нехорошо! Нас заметили! Она приближается к нам! Мы должны убираться отсюда! И где мы теперь?",
-      "sprite_left": "Kiana 1.png",
-      "dim_override": "none"
+      "text": "И где мы теперь?",
+      "sprite_left": "Kiana 1.png"
+    },
+    {
+      "speaker": "Киана",
+      "text": "И где мы теперь?",
+      "sprite_left": "Kiana 3.png"
     },
     {
       "speaker": "Мэй",
       "text": "Кажется... Я знаю, это одна из запретных зон академии. Похоже, что это заброшенное здание. Я слышала, что время от времени здесь бывают призраки...",
-      "sprite_left": "Mei 1.png",
-      "dim_override": "none"
+      "sprite_left": "Mei 3.png"
     },
     {
       "speaker": "Киана",
       "text": "Хмпф, в этом мире не существует ни призраков, ни богов. Но раз уж эта запретная зона, то здесь не должно быть много зомби. Здесь будет безопасно.",
-      "sprite_left": "Kiana 1.png",
-      "dim_override": "none"
+      "sprite_left": "Kiana 1.png"
     },
     {
       "speaker": "Мэй",
       "text": "В запретной зоне меньше зомби?",
-      "sprite_left": "Mei 1.png",
-      "dim_override": "none"
+      "sprite_left": "Mei 3.png"
     },
     {
       "speaker": "Киана",
       "text": "Да, разве это не так?",
-      "sprite_left": "Kiana 1.png",
-      "dim_override": "none"
+      "sprite_left": "Kiana 1.png"
     },
     {
       "speaker": "Мэй",
       "text": "Давай представим, что ты права... Но всё это время мне казалось, что кто-то следит за нами.",
-      "sprite_left": "Mei 1.png",
-      "dim_override": "none"
+      "sprite_left": "Mei 3.png"
     },
     {
       "speaker": "Киана",
       "text": "О нет, это то существо!",
-      "sprite_left": "Kiana 1.png",
-      "dim_override": "none"
+      "sprite_left": "Kiana 1.png"
     },
     {
       "speaker": "Мэй",
       "text": "Киана, разве ты не говорила, что здесь будет меньше зомби? Так почему мы ими окружены?!",
-      "sprite_left": "Mei 1.png",
-      "dim_override": "none"
+      "sprite_left": "Mei 1.png"
     },
     {
       "speaker": "Киана",
       "text": "Я думаю, она привлекает зомби.",
-      "sprite_left": "Kiana 1.png",
-      "dim_override": "none"
+      "sprite_left": "Kiana 3.png"
     },
     {
       "speaker": "Мэй",
       "text": "Она... Ты имеешь в виду ту девушку с хвостами?",
-      "sprite_left": "Mei 1.png",
-      "dim_override": "none"
+      "sprite_left": "Mei 1.png"
     },
     {
       "speaker": "Киана",
       "text": "Да! От этой девушки исходит сильная реакция на источник Хоукая, а источник Хоукая обладает свойством собирать энергию Хоукая. Эти зомби приближаются, потому что они почувствовали это. Чем больше проходит времени, тем больше энергии Хоукая поглощает источник Хоукая и тем мощнее он становится.",
-      "sprite_left": "Kiana 1.png",
-      "dim_override": "none"
+      "sprite_left": "Kiana 1.png"
     },
     {
       "speaker": "Мэй",
       "text": "Тогда не было бы очень плохо для нас продолжать убегать подобным образом?",
-      "sprite_left": "Mei 1.png",
-      "dim_override": "none"
+      "sprite_left": "Mei 1.png"
     },
     {
       "speaker": "Киана",
       "text": "Я хотела покинуть Академгородок, прежде чем строить какие-либо планы... Но теперь, когда мы вернулись сюда, я думаю, мы больше не можем просто игнорировать её. Мы должны проявить инициативу и поговорить друг с другом! И ещё мне немного интересно, что случилось с той девушкой~",
-      "sprite_left": "Kiana 1.png",
-      "dim_override": "none"
+      "sprite_left": "Kiana 1.png"
     },
     {
       "speaker": "Мэй",
       "text": "Киана теперь похожа на рыцаря~",
-      "sprite_left": "Mei 1.png",
-      "dim_override": "none"
+      "sprite_left": "Mei 2.png"
     },
     {
       "speaker": "Киана",
       "text": "И что ещё более важно - расход наших боеприпасов превзошел ожидания. Я боюсь, что это долго не продлится.",
-      "sprite_left": "Kiana 1.png",
-      "dim_override": "none"
+      "sprite_left": "Kiana 1.png"
     },
     {
       "speaker": "Мэй",
       "text": "Кхм... Я забираю свои слова назад...",
-      "sprite_left": "Mei 1.png",
-      "dim_override": "none"
+      "sprite_left": "Mei 3.png"
+    },
+    {
+      "text": "......"
     },
     {
       "speaker": "Бледная Лиса",
       "text": "Это вы её убили?",
-      "sprite_right": "Palefox.png",
-      "dim_override": "left"
+      "sprite_right": "Palefox.png"
     },
     {
       "speaker": "Киана",
@@ -188,57 +169,57 @@
     },
     {
       "speaker": "Мэй",
-      "text": "Под ней Вы подразумеваете девушку, которая лежала перед вами в лабораторном корпусе?",
-      "sprite_left": "Mei 1.png",
+      "text": "Под ней Вы подразумеваете девушку, которая лежала перед Вами в лабораторном корпусе?",
+      "sprite_left": "Mei 3.png",
       "sprite_right": "Palefox.png",
       "dim_override": "right"
     },
     {
       "speaker": "Бледная Лиса",
       "text": "Так вы знаете её?",
-      "sprite_left": "Mei 1.png",
+      "sprite_left": "Mei 3.png",
       "sprite_right": "Palefox.png",
       "dim_override": "left"
     },
     {
       "speaker": "Мэй",
       "text": "...",
-      "sprite_left": "Mei 1.png",
+      "sprite_left": "Mei 3.png",
       "sprite_right": "Palefox.png",
       "dim_override": "right"
     },
     {
       "speaker": "Бледная Лиса",
       "text": "Если ты не знаешь, нам не о чём говорить. Я не хочу причинять ещё больше неприятностей.",
-      "sprite_left": "Mei 1.png",
+      "sprite_left": "Mei 3.png",
       "sprite_right": "Palefox.png",
       "dim_override": "left"
     },
     {
       "speaker": "Киана",
       "text": "Вонючая лиса, не ускользай так быстро, просто скажи, почему ты преследуешь нас? Ты человек или демон? Кроме того, ты ли привлекла этих зомби?",
-      "sprite_left": "Kiana 1.png",
+      "sprite_left": "Kiana 4.png",
       "sprite_right": "Palefox.png",
       "dim_override": "right"
     },
     {
       "speaker": "Бледная Лиса",
       "text": "Демон или человек? Хм, я и сама не знаю. Думаю, я та, за кого ты меня принимаешь. У меня нет намерения причинять вам вред. Вы были единственными выжившими людьми, которых я встретила здесь, и вы тайно шпионили за мной, конечно, я должна была догнать вас и расспросить.",
-      "sprite_left": "Kiana 1.png",
+      "sprite_left": "Kiana 4.png",
       "sprite_right": "Palefox.png",
       "dim_override": "left"
     },
     {
       "speaker": "Мэй",
       "text": "Кажется, у Вас какая-то особая одержимость этой девушкой?",
-      "sprite_left": "Mei 1.png",
+      "sprite_left": "Mei 3.png",
       "sprite_right": "Palefox.png",
       "dim_override": "right"
     },
     {
       "speaker": "Бледная Лиса",
       "text": "Одержимость? Может быть, так оно и есть, в конце концов, мы с ней всё равно спим вместе.",
-      "sprite_left": "Mei 1.png",
+      "sprite_left": "Mei 3.png",
       "sprite_right": "Palefox.png",
       "dim_override": "left"
     },
