@@ -5,146 +5,122 @@
            "text_style": "full",
            "full_text_size": "lg",
            "full_text_align": "center",
-            "background": "bg_stage1.png"
+            "background": "bg_stageS4.png"
         },
     {
-      "background": "bg_stageS4.png",
       "speaker": "Мэй",
       "text": "Киана......",
-      "sprite_left": "Mei 1.png",
-      "sprite_right": ""
+      "sprite_left": "Mei 1.png"
     },
     {
       "speaker": "Киана",
       "text": "Что такое, Мэй?",
-      "sprite_left": "Kiana 1.png",
-      "sprite_right": ""
+      "sprite_left": "Kiana 1.png"
     },
     {
       "speaker": "Мэй",
       "text": "Ничего, я просто думаю, найдем ли мы мисс Бледную Лису? Мы пробыли здесь долгое время...",
-      "sprite_left": "Mei 1.png",
-      "sprite_right": ""
+      "sprite_left": "Mei 1.png"
     },
     {
       "speaker": "Киана",
       "text": "Не волнуйся~ Этот телефон может иногда не работать, но он довольно полезный~",
-      "sprite_left": "Kiana 1.png",
-      "sprite_right": ""
+      "sprite_left": "Kiana 1.png"
     },
     {
       "text": "Бжжж......",
       "sprite_left": "Kiana 1.png",
-      "sprite_right": "",
       "dim_override": "both"
     },
     {
       "speaker": "Киана",
       "text": "Видишь? Я же говорила.",
-      "sprite_left": "Kiana 1.png",
-      "sprite_right": ""
+      "sprite_left": "Kiana 1.png"
     },
     {
       "speaker": "Мэй",
       "text": "Это действительно замечательное устройство. Человек, который изобрел его, должно быть, очень могущественный......",
-      "sprite_left": "Mei 3.png",
-      "sprite_right": ""
+      "sprite_left": "Mei 3.png"
     },
     {
       "speaker": "Киана",
       "text": "Я не знаю, хорош ли он или нет, но он, должно быть, из тех, кто любит побегать.",
-      "sprite_left": "Kiana 1.png",
-      "sprite_right": ""
+      "sprite_left": "Kiana 1.png"
     },
     {
       "speaker": "Мэй",
       "text": "О? Киана, ты знаешь его?",
-      "sprite_left": "Mei 3.png",
-      "sprite_right": ""
+      "sprite_left": "Mei 3.png"
     },
     {
       "speaker": "Киана",
       "text": "На самом деле мы с ним не так уж близки, хотя он мой... Забудь об этом, я не хочу говорить о нём. Давай найдём эту лису и избавимся от источника Хоукая.",
-      "sprite_left": "Kiana 1.png",
-      "sprite_right": ""
+      "sprite_left": "Kiana 1.png"
     },
     {
       "speaker": "Мэй",
       "text": "Что ж, Киана, если ты не хочешь говорить об этом, забудь тогда.",
-      "sprite_left": "Mei 1.png",
-      "sprite_right": ""
+      "sprite_left": "Mei 1.png"
     },
     {
       "speaker": "Мэй",
       "text": "Пошли, Киана. Недалеко отсюда должно быть святилище. Это и есть то святилище, о котором упоминала мисс Бледная Лиса?",
-      "sprite_left": "Mei 1.png",
-      "sprite_right": ""
+      "sprite_left": "Mei 1.png"
     },
     {
       "speaker": "Киана",
       "text": "А? Мэй-сэмпай, тебе известно это место?",
-      "sprite_left": "Kiana 3.png",
-      "sprite_right": ""
+      "sprite_left": "Kiana 3.png"
     },
     {
       "speaker": "Мэй",
       "text": "Ну, я уже была здесь раньше... Я думаю, что приезжала сюда со своим отцом, когда была совсем маленькой...",
-      "sprite_left": "Mei 3.png",
-      "sprite_right": ""
+      "sprite_left": "Mei 3.png"
     },
     {
       "speaker": "Киана",
       "text": "Вот как... Эй, сэмпай, что за человек твой отец? Хотя я видела воспоминания сэмпай, это были всего лишь фрагменты...",
-      "sprite_left": "Kiana 3.png",
-      "sprite_right": ""
+      "sprite_left": "Kiana 3.png"
     },
     {
       "speaker": "Мэй",
       "text": "Отец... Был строгим человеком, как со мной, так и с самим собой.",
-      "sprite_left": "Mei 1.png",
-      "sprite_right": ""
+      "sprite_left": "Mei 1.png"
     },
     {
       "speaker": "Киана",
       "text": "И всё же даже такой серьёзный человек, как он, привел Мэй-сэмпай в это место. Так что я думаю, что он на самом деле любит сэмпай. Верно, может быть, он просто плохо умеет выражать свои чувства.",
-      "sprite_left": "Kiana 3.png",
-      "sprite_right": ""
+      "sprite_left": "Kiana 3.png"
     },
     {
       "speaker": "Мэй",
       "text": "А что насчёт Кианы? Что за человек твой отец? Если я не ошибаюсь, этот телефон был сделан им, верно?",
-      "sprite_left": "Mei 3.png",
-      "sprite_right": ""
+      "sprite_left": "Mei 3.png"
     },
     {
       "speaker": "Киана",
       "text": "Ну... что касается моего отца, то на самом деле я почти ничего о нём не знаю. Я знаю только, что он забрал меня из \"Шиксала\", а затем лично научил меня некоторым боевым искусствам семьи Каслана и рассказал о Хонкае. Но теперь я не знаю, куда он делся, он оставил только этот сломанный телефон...",
-      "sprite_left": "Kiana 1.png",
-      "sprite_right": ""
+      "sprite_left": "Kiana 1.png"
     },
     {
       "speaker": "Мэй",
       "text": "Шиксал? Что это за место?",
-      "sprite_left": "Mei 3.png",
-      "sprite_right": ""
+      "sprite_left": "Mei 3.png"
     },
     {
       "speaker": "Киана",
       "text": "А... Я рассказала лишнего...",
-      "sprite_left": "Kiana 1.png",
-      "sprite_right": ""
+      "sprite_left": "Kiana 1.png"
     },
     {
       "speaker": "Киана",
       "text": "Ничего страшного, сэмпай, тебя это не должно волновать~ ты сказала, что здесь есть святилище, верно? Давай отправимся туда и исследуем его, может быть, мы найдём какие-нибудь подсказки!",
-      "sprite_left": "Kiana 1.png",
-      "sprite_right": ""
+      "sprite_left": "Kiana 1.png"
     },
     {
       "speaker": "Мэй",
       "text": "Оу... Хорошо...",
-      "sprite_left": "Mei 3.png",
-      "sprite_right": ""
+      "sprite_left": "Mei 3.png"
     },
     {
       "speaker": "Бледная Лиса",

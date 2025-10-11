@@ -6,10 +6,9 @@
            "text_style": "full",
            "full_text_size": "lg",
            "full_text_align": "center",
-            "background": "bg_stage1.png"
+            "background": "bg_stageS3.png"
         },
     {
-      "background": "bg_stageS3.png",
       "speaker": "Мэй",
       "text": "......",
       "sprite_left": "Mei 3.png"

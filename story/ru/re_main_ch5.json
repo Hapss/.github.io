@@ -5,13 +5,12 @@
            "text_style": "full",
            "full_text_size": "lg",
            "full_text_align": "center",
-            "background": "bg_stage1.png"
+            "background": "bg_stage5.png"
         },
     {
       "speaker": "Киана",
       "text": "Кажется, остались только мы вдвоём во всей академии~ Это похоже на сцену из кино~",
-      "sprite_left": "Kiana 1.png",
-      "background": "bg_stage5.png"
+      "sprite_left": "Kiana 1.png"
     },
     {
       "speaker": "Мэй",

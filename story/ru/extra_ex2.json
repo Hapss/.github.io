@@ -5,13 +5,12 @@
            "text_style": "full",
            "full_text_size": "lg",
            "full_text_align": "center",
-            "background": "bg_stage1.png"
+            "background": "bg_stageS2b.png"
         },
     {
       "speaker": "Киана",
       "text": "Фуф! Наконец-то нормальное место! Останься я там, просто бы задохнулась...",
-      "sprite_left": "Kiana 1.png",
-     "background": "bg_stageS2b.png"
+      "sprite_left": "Kiana 1.png"
     },
     {
       "speaker": "Киана",

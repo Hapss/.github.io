@@ -5,13 +5,12 @@
            "text_style": "full",
            "full_text_size": "lg",
            "full_text_align": "center",
-            "background": "bg_stage1.png"
+            "background": "bg_stage6.png"
         },
     {
       "speaker": "Мэй",
       "text": "Странно. Несмотря на то, что мы покинули академгородок, мы всё ещё находимся в пределах досягаемости Хоукая...",
-      "sprite_left": "Mei 3.png",
-      "background": "bg_stage6.png"
+      "sprite_left": "Mei 3.png"
     },
    {
       "speaker": "Мэй",

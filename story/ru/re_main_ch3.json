@@ -6,13 +6,12 @@
            "text_style": "full",
            "full_text_size": "lg",
            "full_text_align": "center",
-            "background": "bg_stage1.png"
+            "background": "bg_stage3.png"
         },
         {
             "speaker": "Киана",
             "text": "Ху~Ху~ Им нет конца! Я не ожидала, что все зомби в округе будут привлечены источником Хоукая! Продолжать в таком духе не получится.",
-            "sprite_left": "Kiana 4.png",
-            "background": "bg_stage3.png"
+            "sprite_left": "Kiana 4.png"
         },
         {
             "speaker": "Киана",
