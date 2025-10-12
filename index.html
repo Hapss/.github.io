@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0">
-    <title>Архив сюжета Houkai Gakuen 2</title>
+    <title>Guns Girl Z: Архив Сюжета</title>
     <!-- Подключение Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -331,7 +331,7 @@
     <!-- 1. Header Bar: Оптимизирован для мобильных -->
     <header id="header" class="fixed top-0 left-0 right-0 z-50 p-3 md:p-4 shadow-xl transition-colors duration-300" style="background-color: var(--color-bg-darkest);">
         <div class="flex flex-wrap justify-between items-center max-w-7xl mx-auto">
-            <h1 id="headerTitle" class="text-lg md:text-xl font-bold tracking-wider mb-2 md:mb-0" style="color: var(--color-text-primary);">Архив сюжета Houkai Gakuen 2</h1>
+            <h1 id="headerTitle" class="text-lg md:text-xl font-bold tracking-wider mb-2 md:mb-0" style="color: var(--color-text-primary);">Guns Girl Z: Архив Сюжета</h1>
             
             <div class="flex items-center space-x-2 md:space-x-4">
                  <!-- Кнопка Истории -->
@@ -437,7 +437,7 @@
                 <!-- Dialogue Text Content Box (height and padding are adaptive in CSS) -->
                 <div id="dialogueContentBox" 
                     class="vn-overlay rounded-xl shadow-2xl overflow-hidden flex items-start justify-start text-left"> 
-                    <!-- Изменено: теперь используется innerHTML для поддержки <br> -->
+                    <!-- Использует innerHTML для поддержки <br> -->
                     <p id="currentText" class="leading-tight transition-opacity duration-300">Текст диалога...</p>
                 </div>
             </div>
@@ -446,7 +446,7 @@
             <div id="fullDialogueBox" class="hidden">
                 <!-- Inner content to handle flex alignment -->
                 <div id="fullDialogueContent" class="h-full w-full flex flex-col p-4 md:p-8">
-                    <!-- Изменено: теперь используется innerHTML для поддержки <br> -->
+                    <!-- Использует innerHTML для поддержки <br> -->
                     <p id="fullCurrentText" class="leading-relaxed transition-opacity duration-300"></p>
                 </div>
             </div>
@@ -457,21 +457,21 @@
     <!-- 4. Полноэкранное предупреждение (Modal Overlay) -->
     <div id="warning-overlay" class="fixed inset-0 z-[100] bg-gray-900/95 flex items-center justify-center p-4 md:p-8 transition-opacity duration-500 opacity-100">
         
-        <!-- Карточка предупреждения -->
-        <div id="warning-card" class="p-8 md:p-12 rounded-3xl shadow-2xl max-w-sm md:max-xl w-full text-center 
+        <!-- Карточка предупреждения: увеличена ширина до lg:max-w-4xl для ПК -->
+        <div id="warning-card" class="p-8 md:p-12 rounded-3xl shadow-2xl max-w-sm lg:max-w-4xl w-full text-center 
                     transform scale-100 transition-transform duration-300 border-2" 
                     style="background-color: var(--color-warning-bg); border-color: var(--color-warning-accent); color: var(--color-text-primary);">
 
-            <!-- Заголовок -->
-            <h1 class="text-4xl md:text-7xl font-extrabold mb-6 select-none tracking-tight" 
+            <!-- Заголовок: Изменен на "ПРИМЕЧАНИЕ" -->
+            <h1 id="warningTitleText" class="text-4xl md:text-7xl font-extrabold mb-6 select-none tracking-tight" 
                 style="color: var(--color-warning-accent);">
-                ВНИМАНИЕ
+                ПРИМЕЧАНИЕ
             </h1>
 
             <!-- Основной текст предупреждения -->
             <p class="text-base md:text-xl mb-3 font-medium leading-relaxed" 
                style="color: var(--color-text-secondary);">
-                Это фанатский архив сюжета Архив сюжета Houkai Gakuen 2 (Gun Girls Z). Все права принадлежат miHoYo.
+                Это фанатский архив сюжета Guns Girl Z (Honkai Gakuen 2). Все права принадлежат miHoYo.
             </p>
 
             <!-- Добавленные строки -->
@@ -528,16 +528,16 @@
             main: { zh: "主线剧情", ru: "Основной сюжет", prefix: "main_" },
             extra: { zh: "额外剧情", ru: "Дополнительный сюжет", prefix: "extra_" },
             bosses: { zh: "Boss 关卡", ru: "Боссы", prefix: "boss_" },
-            vn: { zh: "视觉小说", ru: "Визуальные новеллы", prefix: "vn_" },
-            romance: { zh: "恋爱小说", ru: "Лёгкие новеллы", prefix: "ln_" }
+            vn: { zh: "视觉小说", ru: "Визуальная новелла", prefix: "vn_" },
+            romance: { zh: "恋爱小说", ru: "Романтические истории", prefix: "ln_" }
         };
         
         const MAIN_STORY_ARCS = {
-            re: { zh: "追忆篇", ru: "Ретроспектр" },
-            in: { zh: "遗愿篇", ru: "Наследние" },
-            fm: { zh: "蛾火篇", ru: "Огненный Мотылёк" },
-            nl: { zh: "新生篇", ru: "Новая жизнь" },
-            ah: { zh: "崩坏学园篇", ru: "Академия Хоукая" }
+            re: { zh: "追忆篇", ru: "Глава Воспоминаний" },
+            in: { zh: "遗愿篇", ru: "Глава Завещания" },
+            fm: { zh: "蛾火篇", ru: "Глава Мотылька и Огня" },
+            nl: { zh: "新生篇", ru: "Глава Возрождения" },
+            ah: { zh: "崩坏学园篇", ru: "Глава Honkai Academy" }
         };
 
         let currentLang = localStorage.getItem(CONFIG.STORAGE.LANG_KEY) || 'ru'; // Русский по умолчанию
@@ -557,7 +557,7 @@
 
         const i18n = {
             ru: {
-                headerTitle: "Архив сюжета Houkai Gakuen 2", labelStoryType: "Тип сюжета", labelArc: "Арка", labelChapter: "Глава",
+                headerTitle: "Guns Girl Z: Архив Сюжета", labelStoryType: "Тип сюжета", labelArc: "Арка", labelChapter: "Глава",
                 loadText: "Загрузить", loadingText: "Загрузка...", loadedText: "Загружено", 
                 errorLoading: "Повтор", endOfStory: "Конец истории!",
                 startOfStory: "Это начало истории.", placeholderMetadata: "--- Метаданные не загружены ---",
@@ -680,7 +680,9 @@
                 card.style.backgroundColor = bgColor;
                 card.style.borderColor = accentColor;
                 
-                card.querySelector('h1').style.color = accentColor;
+                // Используем ID для заголовка
+                const warningTitleText = document.getElementById('warningTitleText');
+                if (warningTitleText) warningTitleText.style.color = accentColor;
                 
                 card.querySelectorAll('p').forEach(p => p.style.color = secondaryTextColor);
 
@@ -820,6 +822,7 @@
                 "re_main_ch1": { ru: "Пролог: Начало", zh: "序章: 开始" },
                 "re_main_ch2": { ru: "Глава 2: Поиск", zh: "第2章: 搜寻" },
                 "re_main_ch3": { ru: "Глава 3: Возвращение", zh: "第3章: 归来" },
+                "re_main_ch11": { ru: "Глава 11: Неизвестная угроза", zh: "第11章: 未知威胁" }, // Добавлено для тестирования
                 "in_main_ch1": { ru: "Глава Завещания 1", zh: "遗愿篇 1" },
                 "in_main_ch2": { ru: "Глава Завещания 2", zh: "遗愿篇 2" },
                 "extra_01": { ru: "Событие: Пляж", zh: "活动: 海滩" },
@@ -1364,16 +1367,27 @@
             let targetPrefix = '';
             
             if (typeKey === 'main') {
+                // Если выбран тип 'main', префикс должен включать арку и 'main_'
                 targetPrefix = `${arcKey}_main_`; 
             } else {
+                // Иначе используем префикс группы
                 targetPrefix = storyGroup.prefix; 
             }
+
+            // =================================================
+            // DEBUG LOGS ДЛЯ ОТЛАДКИ ПРОБЛЕМЫ ГЛАВЫ 11
+            // =================================================
+            console.log(`[DEBUG: Chapter Filter] Целевой префикс: "${targetPrefix}"`); 
 
             select.innerHTML = `<option value="">--- ${i18n[lang].labelChapter} ---</option>`;
 
             let chapterFound = false;
             
             for (const fullChapterKey in window.storyMetadata) {
+                console.log(`[DEBUG: Chapter Filter] Проверка ключа: "${fullChapterKey}"`); 
+                
+                // Проверяем, начинается ли ключ главы с целевого префикса. 
+                // Это должно корректно работать для всех глав, включая ch11
                 if (fullChapterKey.startsWith(targetPrefix)) {
                     
                     const chapterData = window.storyMetadata[fullChapterKey];
