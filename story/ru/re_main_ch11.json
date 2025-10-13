@@ -804,7 +804,6 @@
     {
       
       "text": "Грохот!!!",
-      "dim_override": "both",
       "sprite_left": "Himeko 1.png"
     },
     {
@@ -880,7 +879,6 @@
     {
       
       "text": "Грохот!!!!!!",
-      "dim_override": "both",
       "sprite_left": "Theresa 2.png"
     },
     {
@@ -927,6 +925,190 @@
       "speaker": "Химеко Мурата",
       "text": "Вы должны вернуться живыми!",
       "sprite_left": "Himeko 1.png"
+    },
+    {
+      "text": "......"
+    },
+    {
+      "text": "Ту-дум!!!"
+    },
+    {
+      "text": "Грохот!!!"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Кхм! Гиперион действительно нажил себе много врагов, но их слишком много!"
+    },
+    {
+      "speaker": "Мэй",
+      "text": "В конце концов, мы находимся глубоко в тылу врага, препятствий такого масштаба следовало ожидать..."
+    },
+    {
+      "speaker": "Броня",
+      "text": "Прямо впереди находится энергетическая секция Лунного трона. Если Броня сможет подключиться к системе управления энергетическим реактором, она сможет его отключить."
+    },
+    {
+      "speaker": "Киана",
+      "text": "Значит нам нужно только прорваться, да?"
+    },
+    {
+      "speaker": "Броня",
+      "text": "На данный момент, похоже, лучшего решения нет."
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Хорошо. Будь осторожна."
+    },
+    {
+      "speaker": "Син",
+      "text": "Похоже ты так решительна~ Отлично, отлично~ Разбивать надежды других ещё до того, как они успеют их оправдать, так волнительно~ Ку-ку-ку~",
+      "sprite_right": "Sin Mal 5.png"
+    },
+    {
+      "speaker": "Броня",
+      "text": "Син... Мы вместе выросли в мамином приюте. Будь то Син или Зеле, Броня никогда не хотела причинить боль ни одному из вас...",
+      "sprite_left": "Bronya 2.png",
+      "sprite_right": "Sin Mal 5.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Син",
+      "text": "Ты всё ещё строишь из себя святую? Эта девчушка, Зеле, такая же: ведёт себя как слабачка и жалко. Смешно! Ты забыла, что сказала мать? Выживают только сильные, так что Син станет гордостью матери! А что до тебя, то ты можешь сколько угодно сожалеть о своей слабости, пока идёшь навстречу смерти!",
+      "sprite_left": "Bronya 2.png",
+      "sprite_right": "Sin Mal 5.png",
+      "dim_override": "left"
+    },
+    {
+      
+      "text": "......"
+    },
+    {
+      "speaker": "Броня",
+      "text": "Син, хватит. Всё кончено.",
+      "sprite_left": "Bronya 2.png"
+    },
+    {
+      "speaker": "Син",
+      "text": "Почему! Почему! Почему я никогда не могу тебя победить!? Ты такая слабачка!! Почему!",
+      "sprite_left": "Bronya 2.png",
+      "sprite_right": "Sin Mal 5.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Броня",
+      "text": "Броня, как и Син, верила, что, если она станет достаточно сильной, то сможет защитить тех, кто её окружает... Но в конце концов и Зеле, и ты оказались вне досягаемости Брони.",
+      "sprite_left": "Bronya 2.png",
+      "sprite_right": "Sin Mal 5.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Броня",
+      "text": "Однако с помощью сестрицы Мэй и всех остальных Броня постепенно начала добиваться того, чего действительно хотела.",
+      "sprite_left": "Bronya 2.png",
+      "sprite_right": "Sin Mal 5.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Броня",
+      "text": "Чтобы стать сильнее, тело, твёрдое как сталь, казалось, постепенно наполнялось тёплой кровью.",
+      "sprite_left": "Bronya 2.png",
+      "sprite_right": "Sin Mal 5.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Броня",
+      "text": "Хотя она всё ещё не может выдавить из себя улыбку, сердце Брони, должно быть, сейчас радуется.",
+      "sprite_left": "Bronya 2.png",
+      "sprite_right": "Sin Mal 5.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Син",
+      "text": "Заткнись! Заткнись! Заткнись, чёрт возьми!! Я могу в одиночку убить каждого из вас!",
+      "sprite_left": "Bronya 2.png",
+      "sprite_right": "Sin Mal 5.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Броня",
+      "text": "Прости, Син...",
+      "sprite_left": "Bronya 2.png",
+      "sprite_right": "Sin Mal 5.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Син",
+      "text": "Отпусти! Отпусти меня!! Мне не нужна твоя жалость!",
+      "sprite_left": "Bronya 2.png",
+      "sprite_right": "Sin Mal 5.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Броня",
+      "text": "Мне жаль, что тебе пришлось пройти через всё это в одиночку...",
+      "sprite_left": "Bronya 2.png",
+      "sprite_right": "Sin Mal 5.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Син",
+      "text": "Не смотри на меня так! Не смотри!! Нет!!!!",
+      "sprite_left": "Bronya 2.png",
+      "sprite_right": "Sin Mal 5.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Син",
+      "text": "А-а-а-а!!!!!!",
+      "sprite_left": "Bronya 2.png",
+      "sprite_right": "Sin Mal 5.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Мэй",
+      "text": "Осторожно!!",
+      "sprite_left": "Mei 1.png",
+      "sprite_right": "Sin Mal 5.png",
+      "dim_override": "right"
+    },
+    {
+      
+      "text": "Тудух!!!"
+    },
+    {
+      "speaker": "Броня",
+      "text": "А...",
+      "sprite_left": "Bronya 2.png",
+      "sprite_right": "Sin Mal 5.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Син",
+      "text": "...Я действительно недооценила вас, ребята, раз вы так надавили на Син.",
+      "sprite_left": "Bronya 2.png",
+      "sprite_right": "Sin Mal 5.png",
+      "dim_override": "left"
+    },
+    {
+      "speaker": "Киана",
+      "text": "Её лицо... может ли она находиться под таким же контролем, как и Броня!?",
+      "sprite_left": "Kiana 4.png",
+      "sprite_right": "Sin Mal 5.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Броня",
+      "text": "Мам, прошу, остановись.",
+      "sprite_left": "Bronya 2.png",
+      "sprite_right": "Sin Mal 5.png",
+      "dim_override": "right"
+    },
+    {
+      "speaker": "Син",
+      "text": "Броня, кажется, ты совсем забыла о нашей цели... Я буду ждать тебя в зоне питания. Пора с этим заканчивать.",
+      "sprite_left": "Bronya 2.png",
+      "sprite_right": "Sin Mal 5.png",
+      "dim_override": "left"
     }
   ]
 }
