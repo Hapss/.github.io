@@ -538,9 +538,9 @@
             fm: { zh: "蛾火篇", ru: "Огненный Мотылёк" },
             nl: { zh: "新生篇", ru: "Новая жизнь" },
             ah: { zh: "崩坏学园篇", ru: "Академия Хоукая" }
-        };
+        }
 
-        let currentLang = localStorage.getItem(CONFIG.STORAGE.LANG_KEY) || 'ru'; // Русский по умолчанию
+        let currentLang = localStorage.getItem(CONFIG.STORAGE.LANG_KEY) || 'ru'; 
         
         let currentDialogue = []; 
         let currentDialogueIndex = 0;
@@ -553,11 +553,12 @@
         let currentLeftSpriteFile = null;
         let currentRightSpriteFile = null;
         
-        let preloadedAssets = {}; 
+        // Глобальный кэш для хранения Promise изображений (по аналогии с util.js)
+        let imgCache = {}; 
 
         const i18n = {
             ru: {
-                headerTitle: "Houkai Gakuen 2: Архив сюжета", labelStoryType: "Тип сюжета", labelArc: "Арка", labelChapter: "Глава",
+                headerTitle: "Guns Girl Z: Архив Сюжета", labelStoryType: "Тип сюжета", labelArc: "Арка", labelChapter: "Глава",
                 loadText: "Загрузить", loadingText: "Загрузка...", loadedText: "Загружено", 
                 errorLoading: "Повтор", endOfStory: "Конец истории!",
                 startOfStory: "Это начало истории.", placeholderMetadata: "--- Метаданные не загружены ---",
@@ -593,18 +594,19 @@
         let elements = {};
 
         // ====================================================================
-        // === УТИЛИТЫ ДЛЯ ПРЕДВАРИТЕЛЬНОЙ ЗАГРУЗКИ (PRELOADING UTILITIES) ===
-        // Улучшенная логика для обеспечения мгновенной загрузки из кэша.
+        // === CORE: ФУНКЦИИ КЭШИРОВАНИЯ И ЗАГРУЗКИ ИЗОБРАЖЕНИЙ (imgCache) ===
         // ====================================================================
         
         /**
-         * Загружает изображение, используя Promises для кэширования в памяти. 
-         * Это обеспечивает мгновенную загрузку при повторном вызове, если 
-         * изображение уже было запрошено.
+         * Загружает изображение и кэширует его Promise в imgCache.
+         * Это обеспечивает мгновенное получение Promise при повторном вызове с тем же URL.
+         * Аналогично логике на предоставленном сайте (util.js).
+         * @param {string} url - URL изображения.
+         * @returns {Promise<HTMLImageElement>} Promise, который разрешится объектом Image.
          */
         function loadImage(url) {
-            if (preloadedAssets[url]) {
-                return preloadedAssets[url];
+            if (imgCache[url]) {
+                return imgCache[url];
             }
 
             const promise = new Promise((resolve, reject) => {
@@ -615,9 +617,8 @@
                 };
                 
                 img.onerror = () => {
-                    console.warn(`[Preload] Ошибка загрузки: ${url}`);
+                    console.warn(`[Cache] Ошибка загрузки: ${url}. Повторная попытка с кэш-бастером.`);
                     // Попытка загрузки с кэш-бастером, если первая попытка не удалась 
-                    // (для обхода проблем с устаревшим кэшем браузера).
                     const cacheBusterUrl = `${url}?v=${Date.now()}`;
                     const retryImg = new Image();
                     
@@ -630,12 +631,13 @@
                 img.src = url; 
             });
 
-            preloadedAssets[url] = promise;
+            // Кэшируем Promise, чтобы предотвратить повторные сетевые запросы
+            imgCache[url] = promise;
             return promise;
         }
 
         /**
-         * Предварительно загружает активы для указанного шага диалога.
+         * Предварительно загружает активы для указанного шага диалога и следующего.
          */
         async function preloadAssets(index) {
             if (index < 0 || index >= currentDialogue.length) return Promise.resolve([]);
@@ -658,14 +660,8 @@
                 loadPromises.push(loadImage(spriteUrl).catch(() => null));
             }
 
-            // Запускаем агрессивную предзагрузку, но не ждем ее
             return Promise.all(loadPromises);
         }
-
-        function aggressivePreload() {
-             console.log("[Aggressive Preload] Фоновая загрузка всех ресурсов отключена. Используется пошаговое кэширование.");
-        }
-
 
         // ====================================================================
         // === УПРАВЛЕНИЕ ТЕМАМИ и ПРЕДУПРЕЖДЕНИЕМ (UX) ===
@@ -815,19 +811,6 @@
             // Загрузка метаданных и инициализация UI
             await fetchChapterMetadata();
             initializeOrUpdateUI(); 
-            aggressivePreload(); 
-
-            // Закрытие Истории по клику вне панели
-            document.addEventListener('click', (event) => {
-                const historyPanel = elements.historyPanel;
-                const historyToggle = elements.historyButton;
-                
-                if (isHistoryVisible) {
-                    if (!historyPanel.contains(event.target) && !historyToggle.contains(event.target)) {
-                        toggleHistory(); 
-                    }
-                }
-            });
         });
 
         // ====================================================================
@@ -835,8 +818,6 @@
         // ====================================================================
         
         async function fetchChapterMetadata() {
-            // УДАЛЕНЫ ЗАГЛУШКИ. Приложение теперь должно полагаться только на story/story_metadata.json.
-            
             try {
                 const response = await fetch(CONFIG.PATHS.METADATA_FILE); 
                 if (!response.ok) {
@@ -849,7 +830,6 @@
             } catch (error) {
                 console.error(`[Metadata] Критическая ошибка: не удалось загрузить story_metadata.json.`, error);
                 
-                // Если метаданные не загружены, устанавливаем null, чтобы UI показывал ошибку.
                 window.storyMetadata = null; 
             }
         }
@@ -899,7 +879,7 @@
             }
             
             try {
-                // Пытаемся получить изображение из кэша прелоадера (или загрузить, если не кэшировано)
+                // Использование кэшированной функции loadImage
                 const loadedImage = await loadImage(url); 
 
                 // Установка src из нативного объекта Image, который уже загружен (МГНОВЕННО)
@@ -924,7 +904,7 @@
             const currentLayer = activeBgLayer === 1 ? bgLayer1 : bgLayer2;
             
             try {
-                // Пытаемся получить изображение из кэша прелоадера (или загрузить)
+                // Использование кэшированной функции loadImage
                 const loadedImage = await loadImage(finalBgUrl); 
 
                 // Установка фона из нативного объекта Image, который уже загружен
@@ -1185,7 +1165,6 @@
                         elements.fullDialogueBox.classList.add('hidden'); 
 
                         // === КРИТИЧЕСКИ ВАЖНОЕ УСКОРЕНИЕ: ЖДЕМ ЗАГРУЗКИ ПЕРВОЙ СЦЕНЫ ===
-                        // Это гарантирует, что первая сцена отобразится мгновенно.
                         const initialStep = currentDialogue[currentDialogueIndex];
                         if (initialStep) {
                             await preloadAssets(currentDialogueIndex); 
@@ -1388,19 +1367,11 @@
                 targetPrefix = storyGroup.prefix; 
             }
 
-            // =================================================
-            // DEBUG LOGS ДЛЯ ОТЛАДКИ ПРОБЛЕМЫ ФИЛЬТРАЦИИ
-            // =================================================
-            console.log(`[DEBUG: Chapter Filter] Целевой префикс: "${targetPrefix}"`); 
-
             select.innerHTML = `<option value="">--- ${i18n[lang].labelChapter} ---</option>`;
 
             let chapterFound = false;
             
             for (const fullChapterKey in window.storyMetadata) {
-                console.log(`[DEBUG: Chapter Filter] Проверка ключа: "${fullChapterKey}"`); 
-                
-                // Проверяем, начинается ли ключ главы с целевого префикса. 
                 if (fullChapterKey.startsWith(targetPrefix)) {
                     
                     const chapterData = window.storyMetadata[fullChapterKey];
