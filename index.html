@@ -331,7 +331,12 @@
     <!-- 1. Header Bar: Оптимизирован для мобильных -->
     <header id="header" class="fixed top-0 left-0 right-0 z-50 p-3 md:p-4 shadow-xl transition-colors duration-300" style="background-color: var(--color-bg-darkest);">
         <div class="flex flex-wrap justify-between items-center max-w-7xl mx-auto">
-            <h1 id="headerTitle" class="text-lg md:text-xl font-bold tracking-wider mb-2 md:mb-0" style="color: var(--color-text-primary);">Houkai Gakuen 2: Архив сюжета</h1>
+            <!-- ОБНОВЛЕНО: Добавлен контейнер для заголовка и спиннера -->
+            <div class="flex items-center space-x-3">
+                <h1 id="headerTitle" class="text-lg md:text-xl font-bold tracking-wider mb-2 md:mb-0" style="color: var(--color-text-primary);">Houkai Gakuen 2: Архив сюжета</h1>
+                <!-- ИНДИКАТОР ЗАГРУЗКИ: Появляется во время фоновой загрузки всех изображений -->
+                <div id="preload-spinner" class="hidden w-5 h-5 border-2 border-t-transparent border-cyan-400 rounded-full animate-spin"></div>
+            </div>
             
             <div class="flex items-center space-x-2 md:space-x-4">
                  <!-- Кнопка Истории -->
@@ -644,8 +649,82 @@
             return Promise.all(loadPromises);
         }
 
-        function aggressivePreload() {
-             console.log("[Aggressive Preload] Фоновая загрузка всех ресурсов отключена. Используется пошаговое кэширование.");
+        /**
+         * УЛУЧШЕНО: Агрессивная фоновая предзагрузка.
+         * Сканирует все файлы глав из метаданных, собирает уникальные URL-адреса
+         * изображений и загружает их в фоновом режиме с визуальным индикатором.
+         */
+        async function aggressivePreload() {
+            const { preloadSpinner } = elements;
+            
+            // 1. Внутренняя функция для сбора всех URL ассетов
+            const collectAllAssetUrls = async () => {
+                if (!window.storyMetadata) return [];
+                
+                const uniqueUrls = new Set();
+                const lang = currentLang;
+                const chapterKeys = Object.keys(window.storyMetadata);
+                
+                // Создаем массив промисов для параллельной загрузки JSON-файлов глав
+                const chapterFetchPromises = chapterKeys.map(key => 
+                    fetch(`${CONFIG.PATHS.STORY_BASE}${lang}/${key}.json`)
+                        .then(res => {
+                            if (res.ok) return res.json();
+                            // Игнорируем ошибки 404, так как главы могут быть не для всех языков
+                            if (res.status === 404) return null; 
+                            throw new Error(`Failed to fetch chapter ${key} for preloading`);
+                        })
+                        .catch(err => {
+                            console.warn(`[Aggressive Preload] Ошибка при загрузке JSON главы "${key}":`, err.message);
+                            return null; // Возвращаем null при ошибке, чтобы не прерывать Promise.all
+                        })
+                );
+                
+                // Ожидаем завершения загрузки всех JSON
+                const chaptersData = await Promise.all(chapterFetchPromises);
+                
+                // Обрабатываем полученные данные
+                for (const chapter of chaptersData) {
+                    if (chapter && Array.isArray(chapter.dialogue)) {
+                        for (const step of chapter.dialogue) {
+                            if (step.background) uniqueUrls.add(CONFIG.PATHS.BACKGROUND_BASE + encodeURIComponent(step.background));
+                            if (step.sprite_left) uniqueUrls.add(spritePath(step.sprite_left));
+                            if (step.sprite_right) uniqueUrls.add(spritePath(step.sprite_right));
+                        }
+                    }
+                }
+                
+                return Array.from(uniqueUrls);
+            };
+
+            // 2. Запуск процесса
+            if (preloadSpinner) preloadSpinner.classList.remove('hidden');
+
+            console.log("[Aggressive Preload] Начинается сбор и фоновая загрузка всех ассетов...");
+            const urlsToLoad = await collectAllAssetUrls();
+
+            if (urlsToLoad.length === 0) {
+                 console.log("[Aggressive Preload] Ассеты для фоновой загрузки не найдены.");
+                 if (preloadSpinner) preloadSpinner.classList.add('hidden');
+                 return;
+            }
+            
+            console.log(`[Aggressive Preload] Загружается ${urlsToLoad.length} уникальных ассетов...`);
+
+            // 3. Создание промисов на загрузку каждого изображения
+            const imageLoadPromises = urlsToLoad.map(url =>
+                loadImage(url).catch(err => {
+                    // Логируем ошибку, но не прерываем общий процесс
+                    console.warn(`[Aggressive Preload] Ошибка при фоновой загрузке ассета: ${url}`, err.message);
+                    return null; // Возвращаем null, чтобы Promise.allSettled продолжил работу
+                })
+            );
+
+            // 4. Ожидаем завершения всех загрузок (как успешных, так и провальных)
+            await Promise.allSettled(imageLoadPromises);
+
+            if (preloadSpinner) preloadSpinner.classList.add('hidden');
+            console.log("[Aggressive Preload] Фоновая загрузка всех ассетов завершена.");
         }
 
 
@@ -785,6 +864,8 @@
             elements.mainContent = document.getElementById('mainContent'); 
             elements.warningOverlay = document.getElementById('warning-overlay');
             elements.closeWarningButton = document.getElementById('close-warning-button');
+            // ДОБАВЛЕНО: Кэширование спиннера
+            elements.preloadSpinner = document.getElementById('preload-spinner');
 
             // Установка дефолтного фона на активный слой (цвет)
             elements.bgLayer1.style.backgroundColor = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR;
