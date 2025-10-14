@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0">
-    <title>Houkai Gakuen 2: Архив сюжета</title>
+    <title>Guns Girl Z: Архив Сюжета</title>
     <!-- Подключение Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -331,10 +331,7 @@
     <!-- 1. Header Bar: Оптимизирован для мобильных -->
     <header id="header" class="fixed top-0 left-0 right-0 z-50 p-3 md:p-4 shadow-xl transition-colors duration-300" style="background-color: var(--color-bg-darkest);">
         <div class="flex flex-wrap justify-between items-center max-w-7xl mx-auto">
-            <!-- УДАЛЕНО: Глобальный спиннер и счетчик больше не нужны -->
-            <div class="flex items-center space-x-3">
-                <h1 id="headerTitle" class="text-lg md:text-xl font-bold tracking-wider mb-2 md:mb-0" style="color: var(--color-text-primary);">Houkai Gakuen 2: Архив сюжета</h1>
-            </div>
+            <h1 id="headerTitle" class="text-lg md:text-xl font-bold tracking-wider mb-2 md:mb-0" style="color: var(--color-text-primary);">Guns Girl Z: Архив Сюжета</h1>
             
             <div class="flex items-center space-x-2 md:space-x-4">
                  <!-- Кнопка Истории -->
@@ -394,7 +391,7 @@
 
             <!-- Выбор Главы -->
             <div class="w-full md:flex-1 md:min-w-[250px]">
-                <label for="chapterSelect" id="labelChapter" class="block text-sm font-medium mb-1" style="color: var(--color-text-secondary);"></label>
+                <label for="chapterSelect" id="labelChapter" class="block text-sm font-medium mb-1" style="color: var(--color-text-secondary);">Глава</label>
                 <select id="chapterSelect" onchange="enableLoadButton()" class="select-field w-full rounded-lg p-2.5 cursor-pointer focus:ring-4 transition text-sm" disabled style="background-color: var(--color-bg-main);">
                     <!-- Options populated by JS -->
                 </select>
@@ -452,12 +449,6 @@
                     <!-- Использует innerHTML для поддержки <br> -->
                     <p id="fullCurrentText" class="leading-relaxed transition-opacity duration-300"></p>
                 </div>
-            </div>
-            
-            <!-- НОВОЕ: Индикатор загрузки главы -->
-            <div id="chapter-load-overlay" class="absolute inset-0 z-40 flex flex-col items-center justify-center transition-opacity duration-300 hidden" style="background-color: rgba(23, 28, 38, 0.9);">
-                <div class="w-12 h-12 border-4 border-t-transparent border-cyan-400 rounded-full animate-spin"></div>
-                <p id="chapter-load-progress" class="mt-4 text-white font-mono text-lg"></p>
             </div>
             
         </div>
@@ -538,15 +529,15 @@
             extra: { zh: "额外剧情", ru: "Дополнительный сюжет", prefix: "extra_" },
             bosses: { zh: "Boss 关卡", ru: "Боссы", prefix: "boss_" },
             vn: { zh: "视觉小说", ru: "Визуальная новелла", prefix: "vn_" },
-            romance: { zh: "恋爱小说", ru: "Лёгкая новелла", prefix: "ln_" }
+            romance: { zh: "恋爱小说", ru: "Романтические истории", prefix: "ln_" }
         };
         
         const MAIN_STORY_ARCS = {
-            re: { zh: "追忆篇", ru: "Ретроспектр" },
-            in: { zh: "遗愿篇", ru: "Наследие" },
-            fm: { zh: "蛾火篇", ru: "Огненный Мотылёк" },
-            nl: { zh: "新生篇", ru: "Новая жизнь" },
-            ah: { zh: "崩坏学园篇", ru: "Академия Хоукая" }
+            re: { zh: "追忆篇", ru: "Глава Воспоминаний" },
+            in: { zh: "遗愿篇", ru: "Глава Завещания" },
+            fm: { zh: "蛾火篇", ru: "Глава Мотылька и Огня" },
+            nl: { zh: "新生篇", ru: "Глава Возрождения" },
+            ah: { zh: "崩坏学园篇", ru: "Глава Honkai Academy" }
         };
 
         let currentLang = localStorage.getItem(CONFIG.STORAGE.LANG_KEY) || 'ru'; // Русский по умолчанию
@@ -566,7 +557,7 @@
 
         const i18n = {
             ru: {
-                headerTitle: "Houkai Gakuen 2: Архив сюжета", labelStoryType: "Тип сюжета", labelArc: "Арка", labelChapter: "Глава",
+                headerTitle: "Guns Girl Z: Архив Сюжета", labelStoryType: "Тип сюжета", labelArc: "Арка", labelChapter: "Глава",
                 loadText: "Загрузить", loadingText: "Загрузка...", loadedText: "Загружено", 
                 errorLoading: "Повтор", endOfStory: "Конец истории!",
                 startOfStory: "Это начало истории.", placeholderMetadata: "--- Метаданные не загружены ---",
@@ -603,8 +594,14 @@
 
         // ====================================================================
         // === УТИЛИТЫ ДЛЯ ПРЕДВАРИТЕЛЬНОЙ ЗАГРУЗКИ (PRELOADING UTILITIES) ===
+        // Улучшенная логика для обеспечения мгновенной загрузки из кэша.
         // ====================================================================
         
+        /**
+         * Загружает изображение, используя Promises для кэширования в памяти. 
+         * Это обеспечивает мгновенную загрузку при повторном вызове, если 
+         * изображение уже было запрошено.
+         */
         function loadImage(url) {
             if (preloadedAssets[url]) {
                 return preloadedAssets[url];
@@ -619,7 +616,15 @@
                 
                 img.onerror = () => {
                     console.warn(`[Preload] Ошибка загрузки: ${url}`);
-                    reject(new Error(`Failed to load image: ${url}`)); 
+                    // Попытка загрузки с кэш-бастером, если первая попытка не удалась 
+                    // (для обхода проблем с устаревшим кэшем браузера).
+                    const cacheBusterUrl = `${url}?v=${Date.now()}`;
+                    const retryImg = new Image();
+                    
+                    retryImg.onload = () => resolve(retryImg);
+                    retryImg.onerror = () => reject(new Error(`Failed to load image after retry: ${url}`));
+                    
+                    retryImg.src = cacheBusterUrl;
                 };
 
                 img.src = url; 
@@ -629,8 +634,9 @@
             return promise;
         }
 
-        // Эта функция больше не нужна для предзагрузки "следующего" шага,
-        // так как мы загружаем всю главу сразу. Но она безвредна.
+        /**
+         * Предварительно загружает активы для указанного шага диалога.
+         */
         async function preloadAssets(index) {
             if (index < 0 || index >= currentDialogue.length) return Promise.resolve([]);
             
@@ -652,10 +658,14 @@
                 loadPromises.push(loadImage(spriteUrl).catch(() => null));
             }
 
+            // Запускаем агрессивную предзагрузку, но не ждем ее
             return Promise.all(loadPromises);
         }
 
-        // УДАЛЕНО: Функция aggressivePreload() больше не нужна.
+        function aggressivePreload() {
+             console.log("[Aggressive Preload] Фоновая загрузка всех ресурсов отключена. Используется пошаговое кэширование.");
+        }
+
 
         // ====================================================================
         // === УПРАВЛЕНИЕ ТЕМАМИ и ПРЕДУПРЕЖДЕНИЕМ (UX) ===
@@ -794,11 +804,6 @@
             elements.warningOverlay = document.getElementById('warning-overlay');
             elements.closeWarningButton = document.getElementById('close-warning-button');
 
-            // --- Элементы загрузчика главы ---
-            elements.chapterLoadOverlay = document.getElementById('chapter-load-overlay');
-            elements.chapterLoadProgress = document.getElementById('chapter-load-progress');
-            
-
             // Установка дефолтного фона на активный слой (цвет)
             elements.bgLayer1.style.backgroundColor = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR;
             elements.bgLayer1.style.backgroundImage = 'none';
@@ -810,7 +815,7 @@
             // Загрузка метаданных и инициализация UI
             await fetchChapterMetadata();
             initializeOrUpdateUI(); 
-            // aggressivePreload(); // УДАЛЕНО
+            aggressivePreload(); 
 
             // Закрытие Истории по клику вне панели
             document.addEventListener('click', (event) => {
@@ -830,30 +835,22 @@
         // ====================================================================
         
         async function fetchChapterMetadata() {
-            // Заглушка для метаданных (РУССКИЕ/КИТАЙСКИЕ ПЛЕЙСХОЛДЕРЫ)
-            const chapterPlaceholders = {
-                "re_main_ch1": { ru: "Пролог: Начало", zh: "序章: 开始" },
-                "re_main_ch2": { ru: "Глава 2: Поиск", zh: "第2章: 搜寻" },
-                "re_main_ch3": { ru: "Глава 3: Возвращение", zh: "第3章: 归来" },
-                "re_main_ch11": { ru: "Глава 11: Неизвестная угроза", zh: "第11章: 未知威胁" }, // Добавлено для тестирования
-                "in_main_ch1": { ru: "Глава Завещания 1", zh: "遗愿篇 1" },
-                "in_main_ch2": { ru: "Глава Завещания 2", zh: "遗愿篇 2" },
-                "extra_01": { ru: "Событие: Пляж", zh: "活动: 海滩" },
-                "extra_02": { ru: "Событие: Зимний бал", zh: "活动: 冬日舞会" },
-                "boss_01": { ru: "Босс: Королева зомби", zh: "Boss: 僵尸女王" },
-            };
+            // УДАЛЕНЫ ЗАГЛУШКИ. Приложение теперь должно полагаться только на story/story_metadata.json.
             
             try {
                 const response = await fetch(CONFIG.PATHS.METADATA_FILE); 
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                if (!response.ok) {
+                    console.error(`[Metadata] HTTP ошибка! статус: ${response.status}`);
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 
                 window.storyMetadata = await response.json();
                 
             } catch (error) {
-                console.warn(`[Metadata] Не удалось загрузить story_metadata.json. Используются заглушки.`, error);
+                console.error(`[Metadata] Критическая ошибка: не удалось загрузить story_metadata.json.`, error);
                 
-                // Использование заглушек, чтобы приложение могло продолжить работу
-                window.storyMetadata = chapterPlaceholders; 
+                // Если метаданные не загружены, устанавливаем null, чтобы UI показывал ошибку.
+                window.storyMetadata = null; 
             }
         }
 
@@ -869,8 +866,8 @@
                 if (newIndex >= 0 && newIndex < currentDialogue.length) {
                     currentDialogueIndex = newIndex;
                     renderDialogueStep();
-                    
-                    // Предзагрузка следующего шага остается, она не мешает
+
+                    // Предварительная загрузка следующего шага для БЫСТРОЙ навигации
                     if (direction > 0) { 
                         preloadAssets(currentDialogueIndex + 1);
                     }
@@ -961,7 +958,7 @@
             }
         }
         
-        // --- НОВАЯ ФУНКЦИЯ: Обработка переносов строк ---
+        // --- Функция: Обработка переносов строк ---
         function processTextForBreaks(text) {
             if (!text) return "";
             // Заменяем символ новой строки (\n) на HTML тег разрыва строки (<br>)
@@ -1110,98 +1107,132 @@
             }
         }
         
-        /**
-         * УЛУЧШЕНО: Полностью переработанная функция загрузки главы.
-         * Теперь она предзагружает ВСЕ ассеты для выбранной главы ПЕРЕД началом,
-         * обеспечивая плавный опыт без задержек.
-         */
         async function updateStoryContent() {
-            const lang = currentLang;
-            const fullStoryKey = elements.chapterSelect.value.trim();
-            const { loadButton, loadText, chapterLoadOverlay, chapterLoadProgress } = elements;
-
+            const lang = currentLang; 
+            const fullStoryKey = elements.chapterSelect.value.trim(); 
+            const { loadButton, loadText } = elements;
+            
             if (!fullStoryKey) return;
 
-            // --- Шаг 1: Подготовка к загрузке ---
-            loadButton.disabled = true;
-            loadText.textContent = i18n[lang].loadingText;
-            chapterLoadOverlay.classList.remove('hidden');
-            chapterLoadProgress.textContent = `(0/?)`;
-
-            // --- Шаг 2: Загрузка JSON файла главы ---
-            const expectedFilePath = `${CONFIG.PATHS.STORY_BASE}${lang}/${fullStoryKey}.json`;
-            let chapterData;
-            try {
-                const response = await fetch(expectedFilePath);
-                if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                chapterData = await response.json();
-                if (!chapterData || !Array.isArray(chapterData.dialogue)) {
-                    throw new Error("Неверный формат JSON: отсутствует массив 'dialogue'.");
-                }
-            } catch (error) {
-                console.error(`[Content Load] Критическая ошибка при загрузке или парсинге JSON главы: ${expectedFilePath}`, error);
-                alertMessage(i18n[lang].errorChapterNotFound);
-                loadText.textContent = i18n[lang].loadText;
-                loadButton.disabled = false;
-                chapterLoadOverlay.classList.add('hidden');
-                return;
-            }
-
-            // --- Шаг 3: Сбор всех уникальных URL ассетов из главы ---
-            const urlsToLoad = (() => {
-                const uniqueUrls = new Set();
-                for (const step of chapterData.dialogue) {
-                    if (step.background) uniqueUrls.add(CONFIG.PATHS.BACKGROUND_BASE + encodeURIComponent(step.background));
-                    if (step.sprite_left) uniqueUrls.add(spritePath(step.sprite_left));
-                    if (step.sprite_right) uniqueUrls.add(spritePath(step.sprite_right));
-                }
-                return Array.from(uniqueUrls);
-            })();
-
-            // --- Шаг 4: Пакетная загрузка всех ассетов главы ---
-            const BATCH_SIZE = 10;
-            let loadedCount = 0;
-            const totalToLoad = urlsToLoad.length;
-
-            if (totalToLoad > 0) {
-                 for (let i = 0; i < totalToLoad; i += BATCH_SIZE) {
-                    const batch = urlsToLoad.slice(i, i + BATCH_SIZE);
-                    const batchPromises = batch.map(url => loadImage(url).catch(err => console.warn(err)));
-                    
-                    await Promise.allSettled(batchPromises);
-
-                    loadedCount += batch.length;
-                    const progress = Math.min(loadedCount, totalToLoad);
-                    chapterLoadProgress.textContent = `(${progress}/${totalToLoad})`;
-                }
-            } else {
-                 chapterLoadProgress.textContent = `(0/0)`;
-            }
-
-            // --- Шаг 5: Инициализация и рендеринг первого шага ---
-            currentDialogue = chapterData.dialogue;
-            currentDialogueIndex = 0;
-            dialogueIsLoaded = true;
+            currentDialogueIndex = 0; 
             
-            // Сброс состояния для чистой загрузки
-            currentBackgroundUrl = null;
-            currentLeftSpriteFile = null;
-            currentRightSpriteFile = null;
-            elements.spriteLeftContainer.classList.add('hidden');
-            elements.spriteRightContainer.classList.add('hidden');
-            elements.spriteLeftElement.src = '';
-            elements.spriteRightElement.src = '';
-            elements.fullDialogueBox.classList.add('hidden'); 
+            // ПУТЬ К ФАЙЛУ: Использует выбранный язык для папки (ru/key.json или zh/key.json)
+            const expectedFilePath = `${CONFIG.PATHS.STORY_BASE}${lang}/${fullStoryKey}.json`;
 
-            renderDialogueStep(); // Первый рендер
+            console.log(`[Content Load] Попытка загрузить главу: ${expectedFilePath}`);
+            
+            const { INITIAL_DELAY_MS, MAX_DELAY_MS, MAX_ATTEMPTS } = CONFIG.BACKOFF;
 
-            // --- Шаг 6: Завершение и сброс UI ---
-            chapterLoadOverlay.classList.add('hidden');
-            loadText.textContent = i18n[lang].loadedText;
-            setTimeout(() => {
-                loadText.textContent = i18n[lang].loadText;
-                loadButton.disabled = false;
-            }, 1500);
+            loadButton.disabled = true;
+            loadText.textContent = i18n[lang].loadingText; 
+            
+            const attemptLoad = async (attempt = 1) => {
+                let success = false;
+                let errorType = null;
+                let chapterData;
+
+                try {
+                    const response = await fetch(expectedFilePath);
+                    
+                    if (response.status === 404) {
+                        errorType = "404 Not Found";
+                        throw new Error("404 Not Found");
+                    }
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    
+                    try {
+                        chapterData = await response.json(); 
+                        success = true;
+                    } catch (e) {
+                        if (e instanceof SyntaxError) {
+                            errorType = "SyntaxError";
+                            throw e; 
+                        }
+                        throw e;
+                    }
+
+                } catch (e) {
+                    if (e instanceof SyntaxError) {
+                       console.error(`[Content Load] Критическая ошибка JSON в файле ${expectedFilePath}:`, e);
+                    } else if (e.message !== "404 Not Found") {
+                       console.error(`[Content Load] Общая ошибка загрузки (Попытка ${attempt}).`, e);
+                    }
+                }
+
+                if (success && chapterData) {
+                    try {
+                        currentDialogue = chapterData.dialogue;
+
+                        if (!Array.isArray(currentDialogue)) {
+                            throw new Error("Файл не содержит массив 'dialogue'. Проверьте структуру JSON.");
+                        }
+
+                        if (currentDialogue.length === 0) {
+                             console.warn(`[Content Load] Файл главы загружен, но массив 'dialogue' пуст.`);
+                        }
+                        
+                        currentDialogueIndex = 0; 
+                        dialogueIsLoaded = true;
+                        
+                        // Сброс состояния для чистой загрузки
+                        currentBackgroundUrl = null; 
+                        currentLeftSpriteFile = null;
+                        currentRightSpriteFile = null;
+                        elements.spriteLeftContainer.classList.add('hidden');
+                        elements.spriteRightContainer.classList.add('hidden');
+                        elements.spriteLeftElement.src = ''; 
+                        elements.spriteRightElement.src = '';
+                        elements.fullDialogueBox.classList.add('hidden'); 
+
+                        // === КРИТИЧЕСКИ ВАЖНОЕ УСКОРЕНИЕ: ЖДЕМ ЗАГРУЗКИ ПЕРВОЙ СЦЕНЫ ===
+                        // Это гарантирует, что первая сцена отобразится мгновенно.
+                        const initialStep = currentDialogue[currentDialogueIndex];
+                        if (initialStep) {
+                            await preloadAssets(currentDialogueIndex); 
+                            preloadAssets(currentDialogueIndex + 1); // Агрессивная предзагрузка следующей
+                        }
+
+                        renderDialogueStep(); 
+
+                        loadText.textContent = i18n[lang].loadedText; 
+                        setTimeout(() => {
+                            loadText.textContent = i18n[lang].loadText;
+                            loadButton.disabled = false;
+                        }, 1500);
+                        
+                    } catch (renderError) {
+                         console.error("[Content Load] Критическая ошибка рендеринга/обработки:", renderError);
+                         alertMessage(i18n[lang].errorRender(renderError.message));
+                         loadButton.disabled = false;
+                         loadText.textContent = i18n[lang].loadText;
+                         return; 
+                    }
+
+                } else {
+                    if (errorType === "SyntaxError") {
+                        loadText.textContent = "Ошибка JSON";
+                        alertMessage(i18n[lang].errorJsonSyntax); 
+                        loadButton.disabled = false;
+                        return;
+                    }
+                    
+                    if (attempt >= MAX_ATTEMPTS) {
+                        // Если 404, показываем специфическое сообщение
+                        const finalErrorText = errorType === "404 Not Found" ? i18n[lang].errorChapterNotFound : `Ошибка (${attempt})`;
+                        loadText.textContent = finalErrorText;
+                        loadButton.disabled = false;
+                        console.error(`[Content Load] Критическая ошибка: не удалось загрузить главу "${fullStoryKey}" (${expectedFilePath}).`);
+                        return;
+                    }
+                    
+                    const delay = Math.min(MAX_DELAY_MS, INITIAL_DELAY_MS * Math.pow(2, attempt - 1));
+                    loadText.textContent = `${i18n[lang].errorLoading} (${attempt})...`; 
+
+                    setTimeout(() => attemptLoad(attempt + 1), delay);
+                }
+            };
+            
+            attemptLoad();
         }
 
         // ====================================================================
@@ -1322,6 +1353,7 @@
             select.value = ""; 
             
             if (!window.storyMetadata) {
+                // Отображаем сообщение об ошибке, если метаданные не загружены
                 select.innerHTML = `<option value="">${i18n[lang].placeholderMetadata}</option>`;
                 enableLoadButton();
                 return;
@@ -1335,8 +1367,8 @@
             
             if (typeKey === 'main' && !arcKey) { 
                 select.innerHTML = `<option value="">--- ${i18n[lang].placeholderSelectArc} ---</option>`;
-                 enableLoadButton();
-                 return;
+                enableLoadButton();
+                return;
             }
             
             const storyGroup = STORY_GROUPS[typeKey];
@@ -1357,19 +1389,18 @@
             }
 
             // =================================================
-            // DEBUG LOGS ДЛЯ ОТЛАДКИ ПРОБЛЕМЫ ГЛАВЫ 11
+            // DEBUG LOGS ДЛЯ ОТЛАДКИ ПРОБЛЕМЫ ФИЛЬТРАЦИИ
             // =================================================
-            // console.log(`[DEBUG: Chapter Filter] Целевой префикс: "${targetPrefix}"`); 
+            console.log(`[DEBUG: Chapter Filter] Целевой префикс: "${targetPrefix}"`); 
 
             select.innerHTML = `<option value="">--- ${i18n[lang].labelChapter} ---</option>`;
 
             let chapterFound = false;
             
             for (const fullChapterKey in window.storyMetadata) {
-                // console.log(`[DEBUG: Chapter Filter] Проверка ключа: "${fullChapterKey}"`); 
+                console.log(`[DEBUG: Chapter Filter] Проверка ключа: "${fullChapterKey}"`); 
                 
                 // Проверяем, начинается ли ключ главы с целевого префикса. 
-                // Это должно корректно работать для всех глав, включая ch11
                 if (fullChapterKey.startsWith(targetPrefix)) {
                     
                     const chapterData = window.storyMetadata[fullChapterKey];
