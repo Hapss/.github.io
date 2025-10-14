@@ -1532,288 +1532,343 @@
       "speaker": "Коколия",
       "text": "Хмпф! Ты ещё не поняла? Меня совершенно не интересует твоя так называемая академия экспериментов над людьми в Шиксале. Этот дурацкий Шиксал просто канет в лету в Судный день. Никому не будет дела до того, существовали ли вы вообще.",
       "sprite_right": "Cocolia 1.png",
-      "sprite_left": "Kiana 4.png"
+      "sprite_left": "Kiana 4.png",
+      "dim_override": "left"
     },
     {
       "speaker": "Коколия",
       "text": "Однако для того, чтобы добиться эволюции человечества и запустить Великий Выброс, нужен артефакт активации, и этот артефакт находится под этой академией. Я здесь, чтобы забрать его.",
       "sprite_right": "Cocolia 1.png",
-      "sprite_left": "Kiana 4.png"
+      "sprite_left": "Kiana 4.png",
+      "dim_override": "left"
     },
     {
       "speaker": "Мэй",
       "text": "Артефакт? Может быть, именно это ты просила Броню найти в церкви?!",
       "sprite_left": "Mei 1.png",
-      "sprite_right": "Cocolia 1.png"
+      "sprite_right": "Cocolia 1.png",
+      "dim_override": "right"
     },
     {
       "speaker": "Коколия",
       "text": "Верно. Предмет, который должен был быть передан Анти-Энтропии на хранение, не удалось вернуть из-за небольшой уловки, которую провернул Епископ Шиксала. Сегодня я здесь, чтобы просто забрать его.",
       "sprite_right": "Cocolia 1.png",
-      "sprite_left": "Mei 1.png"
+      "sprite_left": "Mei 1.png",
+      "dim_override": "left"
     },
     {
       "speaker": "Киана",
       "text": "И что это за... чёртова штуковина?!",
       "sprite_left": "Kiana 4.png",
-      "sprite_right": "Cocolia 1.png"
+      "sprite_right": "Cocolia 1.png",
+      "dim_override": "right"
     },
     {
       "speaker": "Коколия",
       "text": "Похоже, Шиксал недостаточно тщательно занимался воспитанием детей, которых он взрастил. Как ты могла не знать, что под самой академией, в которой ты живёшь, спрятана такая опасная бомба?",
       "sprite_right": "Cocolia 1.png",
-      "sprite_left": "Kiana 4.png"
+      "sprite_left": "Kiana 4.png",
+      "dim_override": "left"
     },
     {
       "speaker": "Коколия",
       "text": "Это результат Второго Выброса, который разразился ещё в 2000 году, — Второй Херршер.",
       "sprite_right": "Cocolia 1.png",
-      "sprite_left": "Kiana 4.png"
+      "sprite_left": "Kiana 4.png",
+      "dim_override": "left"
     },
     {
       "speaker": "Мэй",
       "text": "Второй Херршер...",
       "sprite_left": "Mei 1.png",
-      "sprite_right": "Cocolia 1.png"
+      "sprite_right": "Cocolia 1.png",
+      "dim_override": "right"
     },
     {
       "speaker": "Коколия",
       "text": "Похоже, в эти мирные дни ты забыла, кто ты на самом деле, Райден Мэй. Верно, под этой церковью похоронено нечто похожее на тебя. Разница лишь в том, что ты всё ещё жива, а то, что лежит под землёй, — всего лишь останки Второго Херршера.",
       "sprite_right": "Cocolia 1.png",
-      "sprite_left": "Mei 1.png"
+      "sprite_left": "Mei 1.png",
+      "dim_override": "left"
     },
     {
       "speaker": "Мэй",
       "text": "В архивах Валькирии хранится запись об этой истории... В 2000 году, во время Второго Выброса Хоукая, разразившегося в Сибири, Валькирии под предводительством Шиксала вступили в ожесточённую битву не на жизнь, а на смерть со Вторым Херршером и в конце концов одержали над ним победу...",
       "sprite_left": "Mei 1.png",
-      "sprite_right": "Cocolia 1.png"
+      "sprite_right": "Cocolia 1.png",
+      "dim_override": "right"
     },
     {
       "speaker": "Коколия",
       "text": "Они «захватили», а не «устранили». Переписывать историю — не лучшая привычка.",
       "sprite_right": "Cocolia 1.png",
-      "sprite_left": "Mei 1.png"
+      "sprite_left": "Mei 1.png",
+      "dim_override": "left"
     },
     {
       "speaker": "Киана",
       "text": "К чёрту Второго Херршера или как там его! Какой смысл в этой мёртвой штуке... Тьфу! Твои цели явно не ограничиваются этим!",
       "sprite_left": "Kiana 4.png",
-      "sprite_right": "Cocolia 1.png"
+      "sprite_right": "Cocolia 1.png",
+      "dim_override": "right"
     },
     {
       "speaker": "Коколия",
       "text": "Хм, а я-то думала, что валькирии Шиксала всего лишь безмозглые машины, выполняющие приказы. Похоже, их IQ не дотягивает даже до машинного уровня, их скорее можно назвать марионетками~",
       "sprite_right": "Cocolia 1.png",
-      "sprite_left": "Kiana 4.png"
+      "sprite_left": "Kiana 4.png",
+      "dim_override": "left"
     },
     {
       "speaker": "Киана",
       "text": "Что сказала!?",
       "sprite_left": "Kiana 4.png",
-      "sprite_right": "Cocolia 1.png"
+      "sprite_right": "Cocolia 1.png",
+      "dim_override": "right"
     },
     {
       "speaker": "Коколия",
       "text": "Наша цель неизменна: запустить Великий Выброс Хоукая и открыть врата в следующую эру. Чтобы запустить Великий Выброс, нужны две важнейшие вещи: совершенное оружие, созданное Хоукаем для уничтожения человечества. Одно из них — Второй Херршер под церковью. А другое... ну, угадайте, что это?",
       "sprite_right": "Cocolia 1.png",
-      "sprite_left": "Kiana 4.png"
+      "sprite_left": "Kiana 4.png",
+      "dim_override": "left"
     },
     {
       "speaker": "Киана",
       "text": "Ещё одно оружие... Быть не может!",
       "sprite_left": "Kiana 4.png",
-      "sprite_right": "Cocolia 1.png"
+      "sprite_right": "Cocolia 1.png",
+      "dim_override": "right"
     },
     {
       "speaker": "Син",
       "text": "...",
       "sprite_right": "Sin Mal 5.png",
-      "sprite_left": "Kiana 4.png"
+      "sprite_left": "Kiana 4.png",
+      "dim_override": "left"
     },
     {
       "speaker": "Мэй",
       "text": "А-а!!",
       "sprite_left": "Mei 1.png",
-      "sprite_right": "Sin Mal 5.png"
+      "sprite_right": "Sin Mal 5.png",
+      "dim_override": "right"
     },
     {
       "speaker": "Киана",
       "text": "Мэй-сэмпай!?",
       "sprite_left": "Kiana 4.png",
-      "sprite_right": "Sin Mal 5.png"
+      "sprite_right": "Sin Mal 5.png",
+      "dim_override": "right"
     },
     {
       "speaker": "Коколия",
       "text": "Верно, это «Третий Херршер», Райден Мэй!",
       "sprite_right": "Cocolia 1.png",
-      "sprite_left": "Kiana 4.png"
+      "sprite_left": "Kiana 4.png",
+      "dim_override": "left"
     },
     {
       "speaker": "Киана",
       "text": "Отпусти Мэй-сэмпай!!",
       "sprite_left": "Kiana 4.png",
-      "sprite_right": "Cocolia 1.png"
+      "sprite_right": "Cocolia 1.png",
+      "dim_override": "right"
     },
     {
       "speaker": "Син",
       "text": "...",
       "sprite_right": "Sin Mal 5.png",
-      "sprite_left": "Kiana 4.png"
+      "sprite_left": "Kiana 4.png",
+      "dim_override": "left"
     },
     {
-      
-      "text": "Бэнг!!!"
+      "speaker": "",
+      "text": "Бэнг!!!",
+      "dim_override": "both"
     },
     {
       "speaker": "Киана",
       "text": "А-а-а-а-а!!!",
       "sprite_left": "Kiana 4.png",
-      "sprite_right": "Sin Mal 5.png"
+      "sprite_right": "Sin Mal 5.png",
+      "dim_override": "right"
     },
     {
       "speaker": "Коколия",
       "text": "Хе-хе-хе... Верно, Син. Раскрой силу камня внутри себя! Ты — последняя надежда мамы. Покажи маме, чего ты добилась!",
       "sprite_right": "Cocolia 1.png",
-      "sprite_left": "Kiana 4.png"
+      "sprite_left": "Kiana 4.png",
+      "dim_override": "left"
     },
     {
       "speaker": "Син",
       "text": "Да... мама.",
       "sprite_right": "Sin Mal 5.png",
-      "sprite_left": "Kiana 4.png"
+      "sprite_left": "Kiana 4.png",
+      "dim_override": "left"
     },
     {
       "speaker": "Киана",
       "text": "Чёрт подери!! Я не позволю тебе причинить боль Мэй-сэмпай!!",
       "sprite_left": "Kiana 4.png",
-      "sprite_right": "Sin Mal 5.png"
+      "sprite_right": "Sin Mal 5.png",
+      "dim_override": "right"
     },
     {
-      
+      "speaker": "",
       "text": "...",
       "dim_override": "both"
     },
     {
       "speaker": "Син",
       "text": "Мама... Прости меня... Я всё ещё слишком слаб. Я даже не могу остаться в живых...",
-      "sprite_right": "Sin Mal 5.png"
+      "sprite_right": "Sin Mal 5.png",
+      "sprite_left": "Kiana 4.png",
+      "dim_override": "left"
     },
     {
       "speaker": "Коколия",
       "text": "Син... Всё в порядке. Скоро мы будем свободны. Мама приведёт тебя в новый мир... где не будет ни кровопролития, ни резни... только бескрайние пшеничные поля и колыбельные, которые разносит ветер.",
-      "sprite_right": "Cocolia 1.png"
+      "sprite_right": "Cocolia 1.png",
+      "sprite_left": "Kiana 4.png",
+      "dim_override": "left"
     },
     {
       "speaker": "Син",
       "text": "Син слышит, как её мама поёт колыбельную... такое тёплое чувство...",
-      "sprite_right": "Sin Mal 5.png"
+      "sprite_right": "Sin Mal 5.png",
+      "sprite_left": "Kiana 4.png",
+      "dim_override": "left"
     },
     {
       "speaker": "Коколия",
       "text": "А теперь спи, ведь когда ты проснёшься, настанет новый мир.",
-      "sprite_right": "Cocolia 1.png"
+      "sprite_right": "Cocolia 1.png",
+      "sprite_left": "Kiana 4.png",
+      "dim_override": "left"
     },
     {
       "speaker": "Син",
       "text": "Да, мама...",
-      "sprite_right": "Sin Mal 5.png"
+      "sprite_right": "Sin Mal 5.png",
+      "sprite_left": "Kiana 4.png",
+      "dim_override": "left"
     },
     {
       "speaker": "Коколия",
       "text": "...",
-      "sprite_right": "Cocolia 1.png"
+      "sprite_right": "Cocolia 1.png",
+      "sprite_left": "Kiana 4.png",
+      "dim_override": "left"
     },
     {
       "speaker": "Киана",
       "text": "Кха! Кха! Угрх! Уф!!",
       "sprite_left": "Kiana 4.png",
-      "sprite_right": "Cocolia 1.png"
+      "sprite_right": "Cocolia 1.png",
+      "dim_override": "right"
     },
     {
       "speaker": "Мэй",
       "text": "Киана! Взбродрись! Киана!",
       "sprite_left": "Mei 1.png",
-      "sprite_right": "Cocolia 1.png"
+      "sprite_right": "Cocolia 1.png",
+      "dim_override": "right"
     },
     {
       "speaker": "Киана",
       "text": "Всё кончено... Я же говорила, что не позволю тебе разрушить всё, что я люблю...",
       "sprite_left": "Kiana 4.png",
-      "sprite_right": "Cocolia 1.png"
+      "sprite_right": "Cocolia 1.png",
+      "dim_override": "right"
     },
     {
       "speaker": "Коколия",
       "text": "Ха, ты всё ещё слишком наивна. Всё было решено в тот момент, когда Лунный трон вошёл в воздушное пространство.",
       "sprite_right": "Cocolia 1.png",
-      "sprite_left": "Kiana 4.png"
+      "sprite_left": "Kiana 4.png",
+      "dim_override": "left"
     },
     {
       "speaker": "Коколия",
       "text": "Этот реактор, известный как «Сирин», служит не только источником энергии для этого военного корабля, но и ключом к открытию нового мира — ядра Второго Херршера.",
       "sprite_right": "Cocolia 1.png",
-      "sprite_left": "Kiana 4.png"
+      "sprite_left": "Kiana 4.png",
+      "dim_override": "left"
     },
     {
       "speaker": "Киана",
       "text": "Ядро... Херршера?",
       "sprite_left": "Kiana 4.png",
-      "sprite_right": "Cocolia 1.png"
+      "sprite_right": "Cocolia 1.png",
+      "dim_override": "right"
     },
     {
       "speaker": "Коколия",
       "text": "Всё предопределено... Будь то выживание человечества или круговорот жизни в мире, мы всего лишь песчинки в этой вечно бурлящей звёздной реке. Как бы мы ни старались, мы не можем вызвать даже малейшую рябь.",
       "sprite_right": "Cocolia 1.png",
-      "sprite_left": "Kiana 4.png"
+      "sprite_left": "Kiana 4.png",
+      "dim_override": "left"
     },
     {
       "speaker": "Киана",
       "text": "Просто ты не хочешь признавать существующие возможности...",
       "sprite_left": "Kiana 4.png",
-      "sprite_right": "Cocolia 1.png"
+      "sprite_right": "Cocolia 1.png",
+      "dim_override": "right"
     },
     {
       "speaker": "Коколия",
       "text": "Возможности? Ну так докажи...",
       "sprite_right": "Cocolia 1.png",
-      "sprite_left": "Kiana 4.png"
+      "sprite_left": "Kiana 4.png",
+      "dim_override": "left"
     },
     {
       "speaker": "Коколия",
       "text": "Сирин, проснись, моя последняя «дочь». Проложи последний отрезок пути для своей матери.",
       "sprite_right": "Cocolia 1.png",
-      "sprite_left": "Kiana 4.png"
+      "sprite_left": "Kiana 4.png",
+      "dim_override": "left"
     },
     {
-      
-      "text": "«Да, моя мама»."
+      "speaker": "",
+      "text": "«Да, моя мама».",
+      "dim_override": "both"
     },
     {
-      
-      "text": "Грохот!!!!!"
+      "speaker": "",
+      "text": "Грохот!!!!!",
+      "dim_override": "both"
     },
     {
       "speaker": "Киана",
       "text": "Воу! Что произошло?...",
       "sprite_left": "Kiana 4.png",
-      "sprite_right": "Cocolia 1.png"
+      "sprite_right": "Cocolia 1.png",
+      "dim_override": "right"
     },
     {
       "speaker": "Броня",
       "text": "В реакторе Лунного трона была обнаружена мощная энергетическая реакция Хоукая... Однако энергетические системы линкора перестали функционировать, и теперь Лунный трон находится в свободном падении.",
       "sprite_left": "Bronya 2.png",
-      "sprite_right": "Cocolia 1.png"
+      "sprite_right": "Cocolia 1.png",
+      "dim_override": "right"
     },
     {
       "speaker": "Коколия",
       "text": "Начался контакт с новым миром...",
       "sprite_right": "Cocolia 1.png",
-      "sprite_left": "Bronya 2.png"
+      "sprite_left": "Bronya 2.png",
+      "dim_override": "left"
     },
     {
       "speaker": "Коколия",
       "text": "В свете возрождения Второго Херршера давайте встретим последний Выброс Хоукая!! Ха-ха-ха!!!",
       "sprite_right": "Cocolia 1.png",
-      "sprite_left": "Bronya 2.png"
+      "sprite_left": "Bronya 2.png",
+      "dim_override": "left"
     }
   ]
 }
