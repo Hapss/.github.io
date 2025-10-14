@@ -280,7 +280,7 @@
   },
   {
     "speaker": "Мэй",
-    "sprite_left": "Mei 3.png",
+    "sprite_left": "Mei 1.png",
     "text": "Кхм!"
   },
   {
@@ -290,7 +290,7 @@
   },
   {
     "speaker": "Мэй",
-    "sprite_left": "Mei 3.png",
+    "sprite_left": "Mei 1.png",
     "text": "М-м... Я в порядке, благодаря защите Брони... Киана! Где Киана?"
   },
   {
@@ -300,7 +300,7 @@
   },
   {
     "speaker": "Мэй",
-    "sprite_left": "Mei 3.png",
+    "sprite_left": "Mei 1.png",
     "text": "Киана... Почему!? Она оттолкнула меня в самом конце... Зачем она так поступила!? Разве мы не обещали быть вместе вечно!?"
   },
   {
@@ -310,7 +310,7 @@
   },
   {
     "speaker": "Мэй",
-    "sprite_left": "Mei 3.png",
+    "sprite_left": "Mei 1.png",
     "text": "Директриса Тереза... Я... Мне очень жаль... Это всё моя вина..."
   },
   {
@@ -325,7 +325,7 @@
   },
   {
     "speaker": "Мэй",
-    "sprite_left": "Mei 3.png",
+    "sprite_left": "Mei 1.png",
     "text": "Хм... Пожалуйста, отпустите и меня с ней... Она, должно быть, ещё жива... По крайней мере, дайте мне увидеть её ещё раз..."
   },
   {
@@ -575,7 +575,7 @@
   },
   {
     "speaker": "Мэй",
-    "sprite_left": "Mei 3.png",
+    "sprite_left": "Mei 1.png",
     "text": "Киана здесь!? Киана!"
   },
   {
@@ -605,19 +605,19 @@
   },
   {
     "speaker": "Мэй",
-    "sprite_left": "Mei 3.png",
+    "sprite_left": "Mei 1.png",
     "text": "Хорошо..."
   },
   {
     "speaker": "Коколия",
-    "sprite_left": "Mei 3.png",
+    "sprite_left": "Mei 1.png",
     "sprite_right": "Cocolia 1.png",
     "dim_override": "left",
     "text": "Хе-хе-хе... хе-хе... Все условия соблюдены! Начался последний шаг! Человечество встретит Бога нового мира!"
   },
   {
     "text": "Ту-дух!!!",
-    "sprite_left": "Mei 3.png",
+    "sprite_left": "Mei 1.png",
     "sprite_right": "Cocolia 1.png",
     "dim_override": "both"
   },
@@ -630,7 +630,7 @@
   },
   {
     "speaker": "Мэй",
-    "sprite_left": "Mei 3.png",
+    "sprite_left": "Mei 1.png",
     "sprite_right": "Cocolia 1.png",
     "dim_override": "right",
     "text": "Киана!? Ты в порядке!?"
@@ -735,7 +735,7 @@
   },
   {
     "speaker": "Мэй",
-    "sprite_left": "Mei 3.png",
+    "sprite_left": "Mei 1.png",
     "sprite_right": "Cocolia 1.png",
     "dim_override": "right",
     "text": "Киана... Что такое?"
@@ -889,7 +889,7 @@
   },
   {
     "speaker": "Мэй",
-    "sprite_left": "Mei 3.png",
+    "sprite_left": "Mei 1.png",
     "sprite_right": "Cocolia 1.png",
     "dim_override": "right",
     "text": "Киана!!!"
@@ -931,7 +931,7 @@
   },
   {
     "speaker": "Мэй",
-    "sprite_left": "Mei 3.png",
+    "sprite_left": "Mei 1.png",
     "sprite_right": "Cocolia 1.png",
     "dim_override": "right",
     "text": "Киана!!"
@@ -945,14 +945,14 @@
   },
   {
     "speaker": "Мэй",
-    "sprite_left": "Mei 3.png",
+    "sprite_left": "Mei 1.png",
     "sprite_right": "Cocolia 1.png",
     "dim_override": "right",
     "text": "Киана... Киана!!!"
   },
   {
     "text": "Ту-дух!!!!",
-    "sprite_left": "Mei 3.png",
+    "sprite_left": "Mei 1.png",
     "sprite_right": "Cocolia 1.png",
     "dim_override": "both"
   },
