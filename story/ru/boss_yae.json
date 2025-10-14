@@ -1,0 +1,296 @@
+{
+  "dialogue": [
+  {
+    "speaker": "Лиса",
+    "sprite_right": "Fox 1.png",
+    "text": "..."
+  },
+  {
+    "speaker": "Киана",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Fox 1.png",
+    "dim_override": "right",
+    "text": "Ого! Какая огромная лиса! Чёрт, я не встретила ни одного врага на всём пути сюда. Я думала, что наконец-то выбралась из зоны Хоукая... Оказывается, ничто не проходит так гладко..."
+  },
+  {
+    "speaker": "Лиса",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Fox 1.png",
+    "dim_override": "left",
+    "text": "..."
+  },
+  {
+    "speaker": "Лиса",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Fox 1.png",
+    "dim_override": "left",
+    "text": "Люди, я только что пробудилась от долгого сна. У меня нет желания сражаться с вами. Покиньте это место."
+  },
+  {
+    "speaker": "Мэй",
+    "sprite_left": "Mei 2.png",
+    "sprite_right": "Fox 1.png",
+    "dim_override": "right",
+    "text": "Мисс лиса...? Мы не хотим вас беспокоить, но все остальные дороги из города перекрыты. Можем ли мы пройти здесь?"
+  },
+  {
+    "speaker": "Лиса",
+    "sprite_left": "Mei 2.png",
+    "sprite_right": "Fox 1.png",
+    "dim_override": "left",
+    "text": "Нет! Здесь живу я и моя принцесса. Никто не может пройти!"
+  },
+  {
+    "speaker": "Киана",
+    "sprite_left": "Kiana 1.png",
+    "sprite_right": "Fox 1.png",
+    "dim_override": "right",
+    "text": "(Шепчет) Мэй-сэмпай, с этим монстром-лисой не поладить. Нам нужно просто её уничтожить! Пока она не обращает на нас внимания, думаю, мы сможем подкрасться к ней."
+  },
+  {
+    "speaker": "Мэй",
+    "sprite_left": "Mei 1.png",
+    "sprite_right": "Fox 1.png",
+    "dim_override": "right",
+    "text": "Киана, перестань дурачиться... Мисс лиса, могу я поговорить с принцессой наедине?"
+  },
+  {
+    "speaker": "Лиса",
+    "sprite_left": "Mei 1.png",
+    "sprite_right": "Fox 1.png",
+    "dim_override": "left",
+    "text": "Нет! Никто не посмеет потревожить мою принцессу! Люди, немедленно убирайтесь отсюда!"
+  },
+  {
+    "text": "......"
+  },
+  {
+    "speaker": "Киана",
+    "sprite_left": "Kiana 1.png",
+    "text": "Хех, всё же в ней ничего особенного. Похоже, на этот раз мы легко победим~"
+  },
+  {
+    "speaker": "Мэй",
+    "sprite_left": "Mei 1.png",
+    "text": "Не отвлекайся во время боя: лиса выглядит довольно необычно."
+  },
+  {
+    "speaker": "Лиса",
+    "sprite_left": "Mei 1.png",
+    "sprite_right": "Fox 1.png",
+    "dim_override": "left",
+    "text": "Проклятые люди! Принцесса, пожалуйста, помогите мне в бою!"
+  },
+  {
+    "speaker": "Яэ Сакура",
+    "sprite_left": "Mei 1.png",
+    "sprite_right": "Sakura.png",
+    "dim_override": "left",
+    "text": "..."
+  },
+  {
+    "text": "......"
+  },
+  {
+    "speaker": "Яэ Сакура",
+    "sprite_right": "Sakura.png",
+    "text": "Моя голова... так сильно болит... Эти воспоминания..."
+  },
+  {
+    "speaker": "Киана",
+    "sprite_left": "Kiana 3.png",
+    "sprite_right": "Sakura.png",
+    "dim_override": "right",
+    "text": "Мэй-сэмпай, эта девушка-монстр выглядит как-то странно."
+  },
+  {
+    "speaker": "Яэ Сакура",
+    "sprite_left": "Kiana 3.png",
+    "sprite_right": "Sakura.png",
+    "dim_override": "left",
+    "text": "Монстр... Да, я собираюсь одолеть монстра-лису... Этот клинок в моей руке... Это мой меч?"
+  },
+  {
+    "speaker": "Мэй",
+    "sprite_left": "Mei 1.png",
+    "sprite_right": "Sakura.png",
+    "dim_override": "right",
+    "text": "Киана, похоже, её контролирует лиса... Может быть, мы сможем её спасти."
+  },
+  {
+    "speaker": "Киана",
+    "sprite_left": "Kiana 1.png",
+    "sprite_right": "Sakura.png",
+    "dim_override": "right",
+    "text": "Мэй-сэмпай, ты и правда такая мягкосердечная..."
+  },
+  {
+    "speaker": "Яэ Сакура",
+    "sprite_left": "Kiana 1.png",
+    "sprite_right": "Sakura.png",
+    "dim_override": "left",
+    "text": "Священный клинок, передававшийся из поколения в поколение в моей семье... Почему он стал таким..."
+  },
+  {
+    "speaker": "Лиса",
+    "sprite_left": "Kiana 1.png",
+    "sprite_right": "Fox 2.png",
+    "dim_override": "left",
+    "text": "А-а-а-а-а-а! Принцесса, я не позволю тебе вспомнить! Просто останься со мной навсегда!"
+  },
+  {
+    "speaker": "Лиса",
+    "sprite_left": "Kiana 1.png",
+    "sprite_right": "Fox 2.png",
+    "dim_override": "left",
+    "text": "Давай, возвращайся скорее в наше тело!"
+  },
+  {
+    "speaker": "Киана",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Fox 2.png",
+    "dim_override": "right",
+    "text": "Эта лиса правда проглотила девушку-монстра целиком, какой ужас!"
+  },
+  {
+    "speaker": "Мэй",
+    "sprite_left": "Mei 1.png",
+    "sprite_right": "Fox 2.png",
+    "dim_override": "right",
+    "text": "Не сдавайся, возможно, её ещё можно спасти!"
+  },
+  {
+    "speaker": "Лиса",
+    "sprite_left": "Mei 1.png",
+    "sprite_right": "Fox 2.png",
+    "dim_override": "left",
+    "text": "Чёрт возьми!!!!!! Никто не сможет разлучить меня с моей принцессой!"
+  },
+  {
+    "speaker": "Мэй",
+    "sprite_left": "Mei 2.png",
+    "sprite_right": "Fox 2.png",
+    "dim_override": "right",
+    "text": "Но, мисс лиса, у Вас больше нет сил, чтобы помешать нам спасти её."
+  },
+  {
+    "speaker": "Киана",
+    "sprite_left": "Kiana 1.png",
+    "sprite_right": "Fox 2.png",
+    "dim_override": "right",
+    "text": "Да! Мой гарем стал немного больше! О боже, я выпалила то, о чём подумала~"
+  },
+  {
+    "speaker": "Киана",
+    "sprite_left": "Kiana 1.png",
+    "sprite_right": "Fox 2.png",
+    "dim_override": "right",
+    "text": "Ладно, давай нанесём последний удар этому лисомонстру!"
+  },
+  {
+    "speaker": "Яэ Сакура",
+    "sprite_left": "Kiana 1.png",
+    "sprite_right": "Sakura.png",
+    "dim_override": "left",
+    "text": "Остановитесь!"
+  },
+  {
+    "speaker": "Мэй",
+    "sprite_left": "Mei 1.png",
+    "sprite_right": "Sakura.png",
+    "dim_override": "right",
+    "text": "Мисс, почему? Этот монстр чуть не проглотил Вас целиком!"
+  },
+  {
+    "speaker": "Яэ Сакура",
+    "sprite_left": "Mei 1.png",
+    "sprite_right": "Sakura.png",
+    "dim_override": "left",
+    "text": "Нет... всё в порядке... потому что я умерла 500 лет назад..."
+  },
+  {
+    "speaker": "Яэ Сакура",
+    "sprite_left": "Mei 1.png",
+    "sprite_right": "Sakura.png",
+    "dim_override": "left",
+    "text": "Последнее, что я помню, это путешествие с целью подчинить себе демоническую лису Хигёкумару. Затем... все воины, которые были со мной, потерпели поражение..."
+  },
+  {
+    "speaker": "Лиса",
+    "sprite_left": "Mei 1.png",
+    "sprite_right": "Fox 2.png",
+    "dim_override": "left",
+    "text": "Одна лишь ты отличаешься. С того момента, как я впервые увидела тебя, я влюбилась в тебя!"
+  },
+  {
+    "speaker": "Лиса",
+    "sprite_left": "Mei 1.png",
+    "sprite_right": "Fox 2.png",
+    "dim_override": "left",
+    "text": "У меня был только один выход: поглотить тебя целиком, погрузиться в сон, от которого мы никогда не проснёмся..."
+  },
+  {
+    "speaker": "Лиса",
+    "sprite_left": "Mei 1.png",
+    "sprite_right": "Fox 2.png",
+    "dim_override": "left",
+    "text": "Во сне я — твой верный рыцарь, а ты — моя благородная принцесса, которой никогда не суждено проснуться..."
+  },
+  {
+    "speaker": "Лиса",
+    "sprite_left": "Mei 1.png",
+    "sprite_right": "Fox 2.png",
+    "dim_override": "left",
+    "text": "Теперь ты свободна... Я должна покинуть этот мир. Иди с этими двумя девушками."
+  },
+  {
+    "speaker": "Яэ Сакура",
+    "sprite_left": "Mei 1.png",
+    "sprite_right": "Sakura.png",
+    "dim_override": "left",
+    "text": "..."
+  },
+  {
+    "speaker": "Яэ Сакура",
+    "sprite_left": "Mei 1.png",
+    "sprite_right": "Sakura.png",
+    "dim_override": "left",
+    "text": "Нет... Прошло 500 лет. Ты правда думаешь, что я совсем не испытываю к тебе чувств?"
+  },
+  {
+    "speaker": "Яэ Сакура",
+    "sprite_left": "Mei 1.png",
+    "sprite_right": "Sakura.png",
+    "dim_override": "left",
+    "text": "Пятьсот лет... В этом мире всё и все, кем я дорожила, исчезли. Вместо того чтобы оставаться в этом незнакомом мире, я лучше уйду вместе с тобой."
+  },
+  {
+    "speaker": "Яэ Сакура",
+    "sprite_left": "Mei 1.png",
+    "sprite_right": "Sakura.png",
+    "dim_override": "left",
+    "text": "Если существует загробная жизнь... Я надеюсь встретиться с тобой в другой жизни..."
+  },
+  {
+    "speaker": "Лиса",
+    "sprite_left": "Mei 1.png",
+    "sprite_right": "Fox 2.png",
+    "dim_override": "left",
+    "text": "Ты... такая дура."
+  },
+  {
+    "speaker": "Киана",
+    "sprite_left": "Kiana 3.png",
+    "sprite_right": "Fox 2.png",
+    "dim_override": "right",
+    "text": "Они умерли?"
+  },
+  {
+    "speaker": "Мэй",
+    "sprite_left": "Mei 1.png",
+    "sprite_right": "Fox 2.png",
+    "dim_override": "right",
+    "text": "Угу... Они ушли. Я надеюсь, что, когда они переродятся, в этом мире не будет раздоров..."
+  }
+   ]
+}
