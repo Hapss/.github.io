@@ -134,7 +134,7 @@
   },
   {
     "speaker": "Мэй",
-    "sprite_left": "Mei 3.png",
+    "sprite_left": "Mei 1.png",
     "sprite_right": "Cocolia 1.png",
     "dim_override": "right",
     "text": "Ха... Киана! Я не позволю тебе сражаться в одиночку! Давай вместе остановим эту катастрофу!"
@@ -155,7 +155,7 @@
   },
   {
     "speaker": "Мэй",
-    "sprite_left": "Mei 3.png",
+    "sprite_left": "Mei 1.png",
     "sprite_right": "Cocolia 1.png",
     "dim_override": "right",
     "text": "Да!"
