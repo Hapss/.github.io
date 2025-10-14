@@ -1683,7 +1683,7 @@
       "dim_override": "left"
     },
     {
-      "speaker": "",
+      
       "text": "Бэнг!!!",
       "dim_override": "both"
     },
@@ -1716,7 +1716,7 @@
       "dim_override": "right"
     },
     {
-      "speaker": "",
+      
       "text": "...",
       "dim_override": "both"
     },
@@ -1833,12 +1833,12 @@
       "dim_override": "left"
     },
     {
-      "speaker": "",
+      
       "text": "«Да, моя мама».",
       "dim_override": "both"
     },
     {
-      "speaker": "",
+      
       "text": "Грохот!!!!!",
       "dim_override": "both"
     },

@@ -1,0 +1,11 @@
+{
+  "dialogue": [
+    { 
+            "text": "Герой высоко поднял золотой меч,\nи кровь змея пролилась на увядающую землю.",
+           "text_style": "full",
+           "full_text_size": "lg",
+           "full_text_align": "center",
+            "background": "bg_stage12.png"
+        }
+    ]
+}
