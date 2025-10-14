@@ -215,18 +215,12 @@
             position: absolute;
             bottom: 0; 
             height: 95%; 
-            /* Уменьшаем ширину спрайта, чтобы освободить место на узких экранах */
-            width: 40%;
+            width: 60%; 
             transition: opacity 0.5s ease; 
             z-index: 10;
             display: flex; 
             justify-content: center;
             align-items: flex-end;
-        }
-        @media (min-width: 768px) {
-            .sprite-position {
-                width: 45%; /* Увеличиваем на больших экранах */
-            }
         }
 
         .sprite-position.left { left: 0; }
