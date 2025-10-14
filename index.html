@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0">
-    <title>Guns Girl Z: Архив Сюжета</title>
+    <title>Houkai Gakuen 2: Архив сюжета</title>
     <!-- Подключение Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -331,7 +331,7 @@
     <!-- 1. Header Bar: Оптимизирован для мобильных -->
     <header id="header" class="fixed top-0 left-0 right-0 z-50 p-3 md:p-4 shadow-xl transition-colors duration-300" style="background-color: var(--color-bg-darkest);">
         <div class="flex flex-wrap justify-between items-center max-w-7xl mx-auto">
-            <h1 id="headerTitle" class="text-lg md:text-xl font-bold tracking-wider mb-2 md:mb-0" style="color: var(--color-text-primary);">Guns Girl Z: Архив Сюжета</h1>
+            <h1 id="headerTitle" class="text-lg md:text-xl font-bold tracking-wider mb-2 md:mb-0" style="color: var(--color-text-primary);">Houkai Gakuen 2: Архив сюжета</h1>
             
             <div class="flex items-center space-x-2 md:space-x-4">
                  <!-- Кнопка Истории -->
@@ -529,15 +529,15 @@
             extra: { zh: "额外剧情", ru: "Дополнительный сюжет", prefix: "extra_" },
             bosses: { zh: "Boss 关卡", ru: "Боссы", prefix: "boss_" },
             vn: { zh: "视觉小说", ru: "Визуальная новелла", prefix: "vn_" },
-            romance: { zh: "恋爱小说", ru: "Романтические истории", prefix: "ln_" }
+            romance: { zh: "恋爱小说", ru: "Лёгкие новаеллы", prefix: "ln_" }
         };
         
         const MAIN_STORY_ARCS = {
-            re: { zh: "追忆篇", ru: "Глава Воспоминаний" },
-            in: { zh: "遗愿篇", ru: "Глава Завещания" },
-            fm: { zh: "蛾火篇", ru: "Глава Мотылька и Огня" },
-            nl: { zh: "新生篇", ru: "Глава Возрождения" },
-            ah: { zh: "崩坏学园篇", ru: "Глава Honkai Academy" }
+            re: { zh: "追忆篇", ru: "Ретроспектр" },
+            in: { zh: "遗愿篇", ru: "Наследие" },
+            fm: { zh: "蛾火篇", ru: "Огненный Мотылёк" },
+            nl: { zh: "新生篇", ru: "Новая жизнь" },
+            ah: { zh: "崩坏学园篇", ru: "Академия Хоукая" }
         };
 
         let currentLang = localStorage.getItem(CONFIG.STORAGE.LANG_KEY) || 'ru'; // Русский по умолчанию
@@ -557,7 +557,7 @@
 
         const i18n = {
             ru: {
-                headerTitle: "Guns Girl Z: Архив Сюжета", labelStoryType: "Тип сюжета", labelArc: "Арка", labelChapter: "Глава",
+                headerTitle: "Houkai Gakuen 2: Архив сюжета", labelStoryType: "Тип сюжета", labelArc: "Арка", labelChapter: "Глава",
                 loadText: "Загрузить", loadingText: "Загрузка...", loadedText: "Загружено", 
                 errorLoading: "Повтор", endOfStory: "Конец истории!",
                 startOfStory: "Это начало истории.", placeholderMetadata: "--- Метаданные не загружены ---",
