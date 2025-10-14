@@ -567,6 +567,397 @@
   },
   {
     "text": "......"
+  },
+  {
+    "speaker": "Тереза",
+    "sprite_left": "Theresa 2.png",
+    "text": "Теперь мы вошли в сектор догма... Даже я не смогла бы попасть в эту зону без специального разрешения из штаб-квартиры."
+  },
+  {
+    "speaker": "Мэй",
+    "sprite_left": "Mei 3.png",
+    "text": "Киана здесь!? Киана!"
+  },
+  {
+    "speaker": "Тереза",
+    "sprite_left": "Theresa 2.png",
+    "text": "Обожди!  Не делай необдуманных шагов..."
+  },
+  {
+    "speaker": "Тереза",
+    "sprite_left": "Theresa 2.png",
+    "text": "Верхняя часть сектора догма была разрушена боевым кораблём... Я и представить себе не могла, что Анти-Энтропия воспользуется этим методом, чтобы прорваться сюда."
+  },
+  {
+    "speaker": "Тереза",
+    "sprite_left": "Theresa 2.png",
+    "text": "Броня, можешь ли ты обнаружить поблизости какие-либо колебания энергии Хоукая?"
+  },
+  {
+    "speaker": "Броня",
+    "sprite_left": "Bronya 2.png",
+    "text": "Концентрация энергии Хоукая поблизости чрезвычайно высока... Если говорить о её идентификации... то лишь в одном месте наблюдается едва заметная разница. Это место находится прямо под Лунным троном прямо перед нами."
+  },
+  {
+    "speaker": "Тереза",
+    "sprite_left": "Theresa 2.png",
+    "text": "Принято. Привести оружие в боевую готовность. Независимо от текущего положения Кианы, не действуйте импульсивно. Ясно?"
+  },
+  {
+    "speaker": "Мэй",
+    "sprite_left": "Mei 3.png",
+    "text": "Хорошо..."
+  },
+  {
+    "speaker": "Коколия",
+    "sprite_left": "Mei 3.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "left",
+    "text": "Хе-хе-хе... хе-хе... Все условия соблюдены! Начался последний шаг! Человечество встретит Бога нового мира!"
+  },
+  {
+    "text": "Ту-дух!!!",
+    "sprite_left": "Mei 3.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "both"
+  },
+  {
+    "speaker": "Киана",
+    "sprite_left": "Kiana 2.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Ай! Больно... Как так можно было провалиться!?"
+  },
+  {
+    "speaker": "Мэй",
+    "sprite_left": "Mei 3.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Киана!? Ты в порядке!?"
+  },
+  {
+    "speaker": "Киана",
+    "sprite_left": "Kiana 1.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Мэй-сэмпай!? Ты тоже в порядке! Вот и отлично~"
+  },
+  {
+    "speaker": "Коколия",
+    "sprite_left": "Kiana 1.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "left",
+    "text": "...Человечишки, вы ещё живы?"
+  },
+  {
+    "speaker": "Киана",
+    "sprite_left": "Kiana 2.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Ха~ Я так просто не сдамся! Мне ещё нужно разобраться со многими незаконченными делами!"
+  },
+  {
+    "speaker": "Киана",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Прежде всего я положу конец выходкам сумасшедшей женщины!"
+  },
+  {
+    "speaker": "Коколия",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "left",
+    "text": "Хмпф... Эта чёртова девчонка, в конце концов, всё равно чертовски раздражает!"
+  },
+  {
+    "speaker": "Киана",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Замечательно! Давай сразу же разберёмся со всеми нашими старыми и новыми делами!"
+  },
+  {
+    "text": "......"
+  },
+  {
+    "speaker": "Тереза",
+    "sprite_left": "Theresa 2.png",
+    "text": "Коколия... Всё кончено. Твой план провалился!"
+  },
+  {
+    "speaker": "Коколия",
+    "sprite_left": "Theresa 2.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "left",
+    "text": "Хех... Ни за что. Пока моя дочь здесь, она позаботится о том, чтобы моё желание сбылось..."
+  },
+  {
+    "speaker": "Киана",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Дочь... ты имеешь в виду Сирин? Она тебе не дочь!"
+  },
+  {
+    "speaker": "Тереза",
+    "sprite_left": "Theresa 2.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "!?"
+  },
+  {
+    "speaker": "Тереза",
+    "sprite_left": "Theresa 2.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Киана! Ты видела второго Херршера!?"
+  },
+  {
+    "speaker": "Киана",
+    "sprite_left": "Kiana 1.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Да~ В пустынном месте стояла маленькая девочка и ждала свою маму. Я пообещала ей, что отведу её к маме, в любом случае, мне нужно найти своего никчёмного отца..."
+  },
+  {
+    "text": "Ту-дух!!",
+    "sprite_left": "Kiana 1.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "both"
+  },
+  {
+    "speaker": "Киана",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Агх!!"
+  },
+  {
+    "speaker": "Мэй",
+    "sprite_left": "Mei 3.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Киана... Что такое?"
+  },
+  {
+    "speaker": "Броня",
+    "sprite_left": "Bronya 2.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Обнаружен мощный всплеск энергии Хоукая. Энергия Хоукая в центральной области концентрируется. Она... исходит из тела Кианы... энергия Ядра Херршера..."
+  },
+  {
+    "speaker": "Киана",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Угх... Что за чертовщина... Моё тело ужасно себя чувствует!"
+  },
+  {
+    "speaker": "Тереза",
+    "sprite_left": "Theresa 2.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Второй Херршер... Неужели она слилась с Кианой?.. Как такое возможно!?"
+  },
+  {
+    "speaker": "Коколия",
+    "sprite_left": "Theresa 2.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "left",
+    "text": "Способна выдержать силу ядра Херршера... Что же это за девушка... Погодите! Твой отец Зигфрид?!"
+  },
+  {
+    "speaker": "Киана",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Ух... Откуда ты знаешь?"
+  },
+  {
+    "speaker": "Коколия",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "left",
+    "text": "Хе-хе-хе... Ха-ха-ха!! Значит, всё идёт по воле Богов! Киана, тебе больше не нужно искать своего отца, потому что Зигфрид..."
+  },
+  {
+    "speaker": "Тереза",
+    "sprite_left": "Theresa 2.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Не смей!"
+  },
+  {
+    "speaker": "Коколия",
+    "sprite_left": "Theresa 2.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "left",
+    "text": "Зигрфид мёртв!"
+  },
+  {
+    "speaker": "Киана",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Что... ты сказала...? Это невозможно! Папа не мог умереть!"
+  },
+  {
+    "speaker": "Коколия",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "left",
+    "text": "Хе-хе-хе... Ты и правда невежественная девчонка. По данным Анти-Энтропии, Зигфрид умер ещё в 2012 году. Причиной смерти стало участие в операции Шиксала по задержанию сосуда Херршера, во время которой произошёл выброс энергии... Похоже, тем самым сосудом Херршера была ты!"
+  },
+  {
+    "speaker": "Тереза",
+    "sprite_left": "Theresa 2.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Вернуть сосуд Херршера... Не может быть! В отчётах сказано, что при задержании сбежавших Зигфрида и его дочери произошло случайное ранение... Как... Неужели эксперимент по воскрешению Второго Херршера тогда..."
+  },
+  {
+    "speaker": "Киана",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Как такое могло случиться... Тереза! Скажи мне, что она лжёт! Папа не умер!"
+  },
+  {
+    "speaker": "Тереза",
+    "sprite_left": "Theresa 2.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Киана... Я..."
+  },
+  {
+    "speaker": "Коколия",
+    "sprite_left": "Theresa 2.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "left",
+    "text": "Хе-хе-хе... Похоже, в Шиксале до сих пор много недопонимания, да? Что ж, тогда позвольте мне сказать вам ещё одну правду..."
+  },
+  {
+    "speaker": "Коколия",
+    "sprite_left": "Theresa 2.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "left",
+    "text": "Место, где погиб Зигфрид, было зоной масштабного проявления Хоукая, и Зигфрид не выдержал разрушительного воздействия Хоукая. Другими словами..."
+  },
+  {
+    "speaker": "Коколия",
+    "sprite_left": "Theresa 2.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "left",
+    "text": "Его убила собственная «дочь»!"
+  },
+  {
+    "speaker": "Киана",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Ах... Невозможно... Этого не может быть! Я убила своего отца... Как такое могло произойти!? Я не верю!!!"
+  },
+  {
+    "speaker": "Коколия",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "left",
+    "text": "Ха-ха-ха! Доказательства предельно ясны! Ты можешь использовать силу Ядра Херршера! Это доказывает, что ты сосуд, созданный Шиксалом для воскрешения Второго Херршера! Ты тот самый «Бог», которому суждено уничтожить мир!!"
+  },
+  {
+    "speaker": "Киана",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Нет! Нет!! Нет!!!! Нет!!!!!!!"
+  },
+  {
+    "speaker": "Тереза",
+    "sprite_left": "Theresa 2.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Киана! Успокойся!"
+  },
+  {
+    "speaker": "Броня",
+    "sprite_left": "Bronya 2.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Уровень энергии Хоукая превысил критический порог. Скоро произойдёт новый выброс Хоукая. Мэй, директриса Тереза, Броня рекомендует немедленно эвакуироваться."
+  },
+  {
+    "speaker": "Мэй",
+    "sprite_left": "Mei 3.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Киана!!!"
+  },
+  {
+    "speaker": "Киана",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Вы все мне лжёте!!!!!!"
+  },
+  {
+    "speaker": "Коколия",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "left",
+    "text": "Верно! Ещё больше ненависти! Ненависти к собственной некомпетентности и беспомощности! Вот что значит быть человеком!"
+  },
+  {
+    "speaker": "Тереза",
+    "sprite_left": "Theresa 2.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Остановите Киану! Она не должна слиться с ядром Херршера!"
+  },
+  {
+    "speaker": "Коколия",
+    "sprite_left": "Theresa 2.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "left",
+    "text": "Хе-хе... Она ещё не настоящий Херршер. Чтобы открыть врата, осталось выполнить только одно условие — Райден Мэй... Как только сущность Второго Херршера внутри тебя вернётся к своему законному владельцу, Бог действительно сойдёт на землю!"
+  },
+  {
+    "speaker": "Броня",
+    "sprite_left": "Bronya 2.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Неконтролируемый выброс энергии Хоукая... Проект Зайка, развернись и приготовься к удару."
+  },
+  {
+    "speaker": "Мэй",
+    "sprite_left": "Mei 3.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Киана!!"
+  },
+  {
+    "speaker": "Тереза",
+    "sprite_left": "Theresa 2.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Мэй! Тебе нельзя туда!"
+  },
+  {
+    "speaker": "Мэй",
+    "sprite_left": "Mei 3.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "right",
+    "text": "Киана... Киана!!!"
+  },
+  {
+    "text": "Ту-дух!!!!",
+    "sprite_left": "Mei 3.png",
+    "sprite_right": "Cocolia 1.png",
+    "dim_override": "both"
+  },
+  {
+    "text": "......"
   }
     ]
 }
