@@ -215,12 +215,18 @@
             position: absolute;
             bottom: 0; 
             height: 95%; 
-            width: 60%; 
+            /* Уменьшаем ширину спрайта, чтобы освободить место на узких экранах */
+            width: 50%;
             transition: opacity 0.5s ease; 
             z-index: 10;
             display: flex; 
             justify-content: center;
             align-items: flex-end;
+        }
+        @media (min-width: 768px) {
+            .sprite-position {
+                width: 65%; /* Увеличиваем на больших экранах */
+            }
         }
 
         .sprite-position.left { left: 0; }
@@ -285,6 +291,34 @@
         #historyContent::-webkit-scrollbar-track { background: var(--color-bg-medium); border-radius: 10px; }
         #historyContent::-webkit-scrollbar-thumb { background: var(--color-accent-primary); border-radius: 10px; border: 2px solid var(--color-bg-darkest); }
         #historyContent::-webkit-scrollbar-thumb:hover { background: var(--color-accent-secondary); }
+
+        /* Стили для регулятора громкости */
+        #volume-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 80px;
+            height: 5px;
+            background: var(--color-bg-medium);
+            border-radius: 5px;
+            outline: none;
+            transition: opacity 0.2s;
+        }
+        #volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--color-accent-ring);
+            cursor: pointer;
+            border-radius: 50%;
+        }
+         #volume-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: var(--color-accent-ring);
+            cursor: pointer;
+            border-radius: 50%;
+        }
     </style>
 </head>
 <body class="min-h-screen dark-theme">
@@ -346,6 +380,16 @@
                     <option value="ru" selected>Русский</option>
                     <option value="zh">简体中文</option>
                 </select>
+
+                <!-- НОВОЕ: Регулятор громкости -->
+                <div id="volume-control-container" class="flex items-center space-x-2" style="background-color: var(--color-bg-medium); padding: 4px 8px; border-radius: 9999px;">
+                    <button id="mute-button" onclick="toggleMute()" class="p-1 rounded-full transition-colors duration-150 hover:bg-[var(--color-bg-main)]">
+                        <svg id="volume-icon" class="w-5 h-5" fill="var(--color-text-primary)" viewBox="0 0 20 20">
+                            <!-- Path will be set by JS -->
+                        </svg>
+                    </button>
+                    <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5">
+                </div>
             </div>
         </div>
     </header>
@@ -499,6 +543,10 @@
         </div>
     </div>
 
+    <!-- Аудиоплееры для кроссфейда -->
+    <audio id="audioPlayer1" loop></audio>
+    <audio id="audioPlayer2" loop></audio>
+
 
     <script>
         // ====================================================================
@@ -509,6 +557,7 @@
             PATHS: {
                 SPRITE_BASE: 'images/sprites/',
                 BACKGROUND_BASE: 'images/background/',
+                AUDIO_BASE: 'audio/', // Путь к аудиофайлам
                 METADATA_FILE: 'story/story_metadata.json', 
                 STORY_BASE: 'story/', // Теперь ожидается папка языка: story/ru/ или story/zh/
             },
@@ -516,6 +565,8 @@
                 THEME_KEY: 'vn_theme',
                 WARNING_KEY: 'vn_warning_dismissed',
                 LANG_KEY: 'vn_lang', // Ключ для хранения выбранного языка
+                VOLUME_KEY: 'vn_volume', // Ключ для хранения громкости
+                MUTE_KEY: 'vn_muted',    // Ключ для хранения состояния Mute
             },
             BACKOFF: {
                 INITIAL_DELAY_MS: 750,  
@@ -557,6 +608,12 @@
         let currentRightSpriteFile = null;
         
         let preloadedAssets = {}; 
+
+        // === Новые переменные для аудио ===
+        let activeAudioPlayer = 1;
+        let currentAudioUrl = null;
+        let userVolume = 0.5; // Громкость по умолчанию
+        let isMuted = false;
 
         const i18n = {
             ru: {
@@ -649,7 +706,129 @@
             return Promise.all(loadPromises);
         }
 
-        // УДАЛЕНО: Функция aggressivePreload() больше не нужна.
+        // ====================================================================
+        // === НОВЫЕ ФУНКЦИИ УПРАВЛЕНИЯ АУДИО ===
+        // ====================================================================
+        
+        const ICONS = {
+            volumeHigh: 'M5.041 1.48A.5.5 0 004 2v16a.5.5 0 00.959.224l4.158-6.237a.5.5 0 000-.448L4.959 1.776a.5.5 0 00-.918-.296zM10 4a1 1 0 011 1v10a1 1 0 11-2 0V5a1 1 0 011-1zm4 2a1 1 0 011 1v6a1 1 0 11-2 0V7a1 1 0 011-1z',
+            volumeLow: 'M5.041 1.48A.5.5 0 004 2v16a.5.5 0 00.959.224l4.158-6.237a.5.5 0 000-.448L4.959 1.776a.5.5 0 00-.918-.296zM11 5a1 1 0 00-1 1v8a1 1 0 102 0V6a1 1 0 00-1-1z',
+            volumeMuted: 'M4.959 1.776A.5.5 0 004 2v16a.5.5 0 00.959.224l4.158-6.237a.5.5 0 000-.448L4.959 1.776a.5.5 0 00-.918-.296zM13.646 13.646a.5.5 0 01-.708 0L10 10.707l-2.939 2.939a.5.5 0 01-.708-.708L9.293 10 6.354 7.061a.5.5 0 01.708-.708L10 9.293l2.939-2.94a.5.5 0 01.708.708L10.707 10l2.939 2.939a.5.5 0 010 .707z'
+        };
+
+        function setVolume(level, save = true) {
+            const volumeLevel = isMuted ? 0 : parseFloat(level);
+            userVolume = parseFloat(level);
+
+            elements.audioPlayer1.volume = volumeLevel;
+            elements.audioPlayer2.volume = volumeLevel;
+            elements.volumeSlider.value = userVolume;
+
+            updateVolumeIcon();
+
+            if (save) {
+                localStorage.setItem(CONFIG.STORAGE.VOLUME_KEY, userVolume.toString());
+            }
+        }
+
+        function updateVolumeIcon() {
+            const iconPath = elements.volumeIcon.querySelector('path') || document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            if (isMuted || userVolume === 0) {
+                iconPath.setAttribute('d', ICONS.volumeMuted);
+            } else if (userVolume < 0.5) {
+                iconPath.setAttribute('d', ICONS.volumeLow);
+            } else {
+                iconPath.setAttribute('d', ICONS.volumeHigh);
+            }
+            if (!elements.volumeIcon.contains(iconPath)) {
+                elements.volumeIcon.innerHTML = '';
+                elements.volumeIcon.appendChild(iconPath);
+            }
+        }
+        
+        function toggleMute() {
+            isMuted = !isMuted;
+            localStorage.setItem(CONFIG.STORAGE.MUTE_KEY, isMuted.toString());
+            setVolume(userVolume, false); // Update volume without saving level
+        }
+
+        function loadVolume() {
+            const savedVolume = localStorage.getItem(CONFIG.STORAGE.VOLUME_KEY);
+            const savedMute = localStorage.getItem(CONFIG.STORAGE.MUTE_KEY);
+
+            userVolume = savedVolume ? parseFloat(savedVolume) : 0.5;
+            isMuted = savedMute === 'true';
+            
+            elements.volumeSlider.value = userVolume;
+            setVolume(userVolume, false);
+        }
+
+        function fadeAudio(player, targetVolume, duration = 500) {
+            return new Promise(resolve => {
+                const startVolume = player.volume;
+                const delta = targetVolume - startVolume;
+                if (delta === 0) {
+                    resolve();
+                    return;
+                }
+                
+                const tickRate = 25; // ms per tick
+                const ticks = Math.floor(duration / tickRate);
+                let currentTick = 0;
+
+                const timer = setInterval(() => {
+                    currentTick++;
+                    const progress = currentTick / ticks;
+                    const newVolume = startVolume + (delta * progress);
+                    
+                    // Убедимся, что громкость не выходит за пределы [0, 1]
+                    player.volume = Math.max(0, Math.min(1, newVolume));
+
+                    if (currentTick >= ticks) {
+                        clearInterval(timer);
+                        player.volume = targetVolume;
+                        resolve();
+                    }
+                }, tickRate);
+            });
+        }
+
+        async function handleAudio(audioFile) {
+            const newAudioUrl = audioFile ? `${CONFIG.PATHS.AUDIO_BASE}${encodeURIComponent(audioFile)}` : null;
+
+            if (newAudioUrl === currentAudioUrl) return;
+
+            console.log(`[Audio] Transition from "${currentAudioUrl || 'none'}" to "${newAudioUrl || 'none'}"`);
+
+            const currentPlayer = (activeAudioPlayer === 1) ? elements.audioPlayer1 : elements.audioPlayer2;
+            const nextPlayer = (activeAudioPlayer === 1) ? elements.audioPlayer2 : elements.audioPlayer1;
+
+            // 1. Fade out the current player if it's playing
+            if (currentAudioUrl && !currentPlayer.paused) {
+                await fadeAudio(currentPlayer, 0);
+                currentPlayer.pause();
+                currentPlayer.src = '';
+            }
+
+            currentAudioUrl = newAudioUrl;
+
+            // 2. Fade in the new audio if one is provided
+            if (newAudioUrl) {
+                nextPlayer.src = newAudioUrl;
+                nextPlayer.volume = 0;
+                
+                try {
+                    await nextPlayer.play();
+                    await fadeAudio(nextPlayer, isMuted ? 0 : userVolume);
+                    activeAudioPlayer = (activeAudioPlayer === 1) ? 2 : 1;
+                } catch (e) {
+                    // Ошибка может возникнуть, если пользователь не взаимодействовал со страницей
+                    console.warn(`[Audio] Playback failed for ${newAudioUrl}. User interaction might be required.`, e);
+                    currentAudioUrl = null;
+                }
+            }
+        }
+
 
         // ====================================================================
         // === УПРАВЛЕНИЕ ТЕМАМИ и ПРЕДУПРЕЖДЕНИЕМ (UX) ===
@@ -792,6 +971,13 @@
             elements.chapterLoadOverlay = document.getElementById('chapter-load-overlay');
             elements.chapterLoadProgress = document.getElementById('chapter-load-progress');
             
+            // --- Элементы управления аудио ---
+            elements.audioPlayer1 = document.getElementById('audioPlayer1');
+            elements.audioPlayer2 = document.getElementById('audioPlayer2');
+            elements.volumeSlider = document.getElementById('volume-slider');
+            elements.muteButton = document.getElementById('mute-button');
+            elements.volumeIcon = document.getElementById('volume-icon');
+
 
             // Установка дефолтного фона на активный слой (цвет)
             elements.bgLayer1.style.backgroundColor = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR;
@@ -800,6 +986,10 @@
             
             loadTheme(); 
             handleWarningModalState(); 
+            loadVolume(); // Загрузка громкости при старте
+
+            // Добавление обработчиков событий для громкости
+            elements.volumeSlider.addEventListener('input', (e) => setVolume(e.target.value));
             
             // Загрузка метаданных и инициализация UI
             await fetchChapterMetadata();
@@ -872,6 +1062,7 @@
                 } else if (newIndex >= currentDialogue.length) {
                     alertMessage(i18n[lang].endOfStory);
                     currentDialogueIndex = currentDialogue.length - 1;
+                    handleAudio(null); // Останавливаем музыку в конце истории
                 } else {
                     alertMessage(i18n[lang].startOfStory);
                 }
@@ -978,6 +1169,9 @@
             const step = currentDialogue[currentDialogueIndex];
             const isFullText = step.text_style === 'full';
             
+            // 0. Управление аудио
+            handleAudio(step.audio || null);
+
             // 1. Управление видимостью диалоговых окон
             dialogueWrapper.classList.toggle('hidden', isFullText);
             fullDialogueBox.classList.toggle('hidden', !isFullText);
@@ -1115,6 +1309,9 @@
             const { loadButton, loadText, chapterLoadOverlay, chapterLoadProgress } = elements;
 
             if (!fullStoryKey) return;
+
+            // --- Шаг 0: Остановить любую текущую музыку ---
+            await handleAudio(null);
 
             // --- Шаг 1: Подготовка к загрузке ---
             loadButton.disabled = true;
