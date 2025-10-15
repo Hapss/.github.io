@@ -600,7 +600,7 @@
         let currentDialogue = []; 
         let currentDialogueIndex = 0;
         let dialogueIsLoaded = false;
-        let currentBackgroundUrl = null; 
+        let currentBackgroundFileName = null; 
         window.storyMetadata = null; 
         let isHistoryVisible = false; 
         let activeBgLayer = 1; // 1 or 2
@@ -877,7 +877,7 @@
             }
 
             // Обновление цвета дефолтного фона VN
-            if (currentBackgroundUrl === CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR) {
+            if (currentBackgroundFileName === CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR) {
                  const style = getComputedStyle(document.body);
                  const themeBgColor = style.getPropertyValue('--color-bg-main').trim();
                  
@@ -983,7 +983,7 @@
             // Установка дефолтного фона на активный слой (цвет)
             elements.bgLayer1.style.backgroundColor = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR;
             elements.bgLayer1.style.backgroundImage = 'none';
-            currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR; 
+            currentBackgroundFileName = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR; 
             
             loadTheme(); 
             handleWarningModalState(); 
@@ -1106,7 +1106,7 @@
             const encodedBgFileName = encodeURIComponent(newBgFileName);
             const finalBgUrl = CONFIG.PATHS.BACKGROUND_BASE + encodedBgFileName;
             
-            if (finalBgUrl === currentBackgroundUrl) return; 
+            if (finalBgUrl === currentBackgroundFileName) return; 
 
             const { bgLayer1, bgLayer2 } = elements;
             const nextLayer = activeBgLayer === 1 ? bgLayer2 : bgLayer1;
@@ -1126,7 +1126,7 @@
                     nextLayer.style.opacity = '1';
                     
                     activeBgLayer = activeBgLayer === 1 ? 2 : 1;
-                    currentBackgroundUrl = loadedImage.src;
+                    currentBackgroundFileName = loadedImage.src;
                 }, 10);
                 
             } catch (error) {
@@ -1142,7 +1142,7 @@
                     nextLayer.style.opacity = '1';
 
                     activeBgLayer = activeBgLayer === 1 ? 2 : 1;
-                    currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR;
+                    currentBackgroundFileName = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR;
                 }, 10);
             }
         }
@@ -1381,7 +1381,7 @@
             dialogueIsLoaded = true;
             
             // Сброс состояния для чистой загрузки
-            currentBackgroundUrl = null;
+            currentBackgroundFileName = null;
             currentLeftSpriteFile = null;
             currentRightSpriteFile = null;
             elements.spriteLeftContainer.classList.add('hidden');
