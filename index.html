@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0">
     <title>Houkai Gakuen 2: Архив сюжета</title>
+    <link rel="icon" type="image/png" href="images/icon.png">
     <!-- Подключение Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -216,7 +217,7 @@
             bottom: 0; 
             height: 95%; 
             /* Уменьшаем ширину спрайта, чтобы освободить место на узких экранах */
-            width: 50%;
+            width: 40%;
             transition: opacity 0.5s ease; 
             z-index: 10;
             display: flex; 
@@ -225,7 +226,7 @@
         }
         @media (min-width: 768px) {
             .sprite-position {
-                width: 65%; /* Увеличиваем на больших экранах */
+                width: 60%; /* Увеличиваем на больших экранах */
             }
         }
 
@@ -1169,8 +1170,13 @@
             const step = currentDialogue[currentDialogueIndex];
             const isFullText = step.text_style === 'full';
             
-            // 0. Управление аудио
-            handleAudio(step.audio || null);
+            // 0. Управление аудио (ИЗМЕНЕНА ЛОГИКА)
+            // Музыка меняется только если в шаге явно указан параметр 'audio'.
+            // Если параметра нет, текущая музыка продолжает играть.
+            // Если 'audio' равно null, музыка остановится.
+            if ('audio' in step) {
+                handleAudio(step.audio);
+            }
 
             // 1. Управление видимостью диалоговых окон
             dialogueWrapper.classList.toggle('hidden', isFullText);
