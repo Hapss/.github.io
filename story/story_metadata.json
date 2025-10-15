@@ -19,7 +19,8 @@
     "extra_ex6": { "ru": "Экстра 6: Энергетический сосуд", "en": "Extra 6", "zh": "额外 6" },
     "extra_ex7": { "ru": "Экстра 7: Рай Хому — танец в ночи", "en": "Extra 7", "zh": "额外 7" },
     "extra_ex8": { "ru": "Экстра 8: Рай Хому — снежная рапсодия", "en": "Extra 8", "zh": "额外 8" },
-    "boss_yae1": { "ru": "Яэ Сакура", "en": "Yae Sakura", "zh": "八重樱" },
-    "vn_vn1": { "ru": "Хоукай: Эпоха фамильяров", "en": "Houkai: Familiar era", "zh": "崩坏:使魔纪元" },
+    "boss_yae": { "ru": "Яэ Сакура", "en": "Yae Sakura", "zh": "八重樱" },
+    "vn_vn1": { "ru": "Тайник моря иллюзий", "en": "Illusion Sea secret room", "zh": "幻海密室" },
+    "vn_vn2": { "ru": "Хоукай: Эпоха фамильяров", "en": "Houkai: Familiar era", "zh": "崩坏:使魔纪元" },
     "ln_1": { "ru": "Операция по спасению Хому 1", "en": "Homu Rescue Operation 1", "zh": "吼姆救援作战（上）" }
 }
