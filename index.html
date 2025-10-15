@@ -600,7 +600,7 @@
         let currentDialogue = []; 
         let currentDialogueIndex = 0;
         let dialogueIsLoaded = false;
-        let currentBackgroundFileName = null; 
+        let currentBackgroundUrl = null; 
         window.storyMetadata = null; 
         let isHistoryVisible = false; 
         let activeBgLayer = 1; // 1 or 2
@@ -877,7 +877,7 @@
             }
 
             // Обновление цвета дефолтного фона VN
-            if (currentBackgroundFileName === CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR) {
+            if (currentBackgroundUrl === CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR) {
                  const style = getComputedStyle(document.body);
                  const themeBgColor = style.getPropertyValue('--color-bg-main').trim();
                  
@@ -983,7 +983,7 @@
             // Установка дефолтного фона на активный слой (цвет)
             elements.bgLayer1.style.backgroundColor = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR;
             elements.bgLayer1.style.backgroundImage = 'none';
-            currentBackgroundFileName = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR; 
+            currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR; 
             
             loadTheme(); 
             handleWarningModalState(); 
@@ -1106,15 +1106,15 @@
             const encodedBgFileName = encodeURIComponent(newBgFileName);
             const finalBgUrl = CONFIG.PATHS.BACKGROUND_BASE + encodedBgFileName;
             
-            if (finalBgUrl === currentBackgroundFileName) return; 
+            if (finalBgUrl === currentBackgroundUrl) return; 
 
             const { bgLayer1, bgLayer2 } = elements;
             const nextLayer = activeBgLayer === 1 ? bgLayer2 : bgLayer1;
             const currentLayer = activeBgLayer === 1 ? bgLayer1 : bgLayer2;
             
             try {
-                // Пытаемся получить изображение из кэша прелоадера (или загрузить)
-                const loadedImage = await loadImage(url); 
+                // ИСПРАВЛЕНО: Раньше здесь по ошибке было 'url' вместо 'finalBgUrl'
+                const loadedImage = await loadImage(finalBgUrl); 
 
                 // Установка фона из нативного объекта Image, который уже загружен
                 nextLayer.style.backgroundImage = `url('${loadedImage.src}')`;
@@ -1126,7 +1126,7 @@
                     nextLayer.style.opacity = '1';
                     
                     activeBgLayer = activeBgLayer === 1 ? 2 : 1;
-                    currentBackgroundFileName = loadedImage.src;
+                    currentBackgroundUrl = loadedImage.src;
                 }, 10);
                 
             } catch (error) {
@@ -1142,7 +1142,7 @@
                     nextLayer.style.opacity = '1';
 
                     activeBgLayer = activeBgLayer === 1 ? 2 : 1;
-                    currentBackgroundFileName = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR;
+                    currentBackgroundUrl = CONFIG.PLACEHOLDERS.DEFAULT_BG_COLOR;
                 }, 10);
             }
         }
@@ -1381,7 +1381,7 @@
             dialogueIsLoaded = true;
             
             // Сброс состояния для чистой загрузки
-            currentBackgroundFileName = null;
+            currentBackgroundUrl = null;
             currentLeftSpriteFile = null;
             currentRightSpriteFile = null;
             elements.spriteLeftContainer.classList.add('hidden');
@@ -1720,4 +1720,5 @@
     </script>
 </body>
 </html>
+
 
