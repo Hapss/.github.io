@@ -35,27 +35,27 @@
         }
 
         /* ==================================================================== */
-        /* === Цветовые переменные (Light Theme) === */
+        /* === Цветовые переменные (Light Theme) - ОБНОВЛЕНО === */
         /* ==================================================================== */
         .light-theme {
             --color-bg-darkest: #ffffff;  
-            --color-bg-main: #f3f4f6;    
+            --color-bg-main: #f9fafb;    
             --color-bg-medium: #ffffff;  
             
-            --color-accent-primary: #0f766e; 
-            --color-accent-secondary: #115e59; 
-            --color-accent-ring: #0d9488; 
+            --color-accent-primary: #2563eb; 
+            --color-accent-secondary: #1d4ed8; 
+            --color-accent-ring: #60a5fa; 
             
             /* Акцент для предупреждения */
-            --color-warning-accent: #9333ea; 
-            --color-warning-bg: #ede9fe; 
+            --color-warning-accent: #c026d3; 
+            --color-warning-bg: #fce7f3; 
             
             /* Текст */
-            --color-text-primary: #111827; 
-            --color-text-secondary: #4b5563; 
+            --color-text-primary: #1f2937; 
+            --color-text-secondary: #6b7280; 
             
-            /* Фиолетовый */
-            --color-speaker-name: #9333ea; 
+            /* Синий акцент для имени */
+            --color-speaker-name: #1d4ed8; 
         }
 
         /* ==================================================================== */
@@ -360,7 +360,6 @@
     <!-- 1. Header Bar: Оптимизирован для мобильных -->
     <header id="header" class="fixed top-0 left-0 right-0 z-50 p-3 md:p-4 shadow-xl transition-colors duration-300" style="background-color: var(--color-bg-darkest);">
         <div class="flex flex-wrap justify-between items-center max-w-7xl mx-auto">
-            <!-- УДАЛЕНО: Глобальный спиннер и счетчик больше не нужны -->
             <div class="flex items-center space-x-3">
                 <h1 id="headerTitle" class="text-lg md:text-xl font-bold tracking-wider mb-2 md:mb-0" style="color: var(--color-text-primary);">Houkai Gakuen 2: Архив сюжета</h1>
             </div>
@@ -376,13 +375,7 @@
                     <span id="themeIcon">🌙</span> <span id="themeText">Темная</span>
                 </button>
 
-                <!-- Выбор языка (Добавлен RU и ZH) -->
-                <select id="languageSelect" onchange="initializeOrUpdateUI(true)" class="select-field rounded-lg p-1 md:p-2 cursor-pointer transition hover:ring-2 text-xs md:text-sm" style="background-color: var(--color-bg-medium);">
-                    <option value="ru" selected>Русский</option>
-                    <option value="zh">简体中文</option>
-                </select>
-
-                <!-- НОВОЕ: Регулятор громкости -->
+                <!-- Регулятор громкости -->
                 <div id="volume-control-container" class="flex items-center space-x-2" style="background-color: var(--color-bg-medium); padding: 4px 8px; border-radius: 9999px;">
                     <button id="mute-button" onclick="toggleMute()" class="p-1 rounded-full transition-colors duration-150 hover:bg-[var(--color-bg-main)]">
                         <svg id="volume-icon" class="w-5 h-5" fill="var(--color-text-primary)" viewBox="0 0 20 20">
@@ -560,12 +553,11 @@
                 BACKGROUND_BASE: 'images/background/',
                 AUDIO_BASE: 'audio/', // Путь к аудиофайлам
                 METADATA_FILE: 'story/story_metadata.json', 
-                STORY_BASE: 'story/', // Теперь ожидается папка языка: story/ru/ или story/zh/
+                STORY_BASE: 'story/ru/', // Путь к главам жестко задан для русского языка
             },
             STORAGE: {
                 THEME_KEY: 'vn_theme',
                 WARNING_KEY: 'vn_warning_dismissed',
-                LANG_KEY: 'vn_lang', // Ключ для хранения выбранного языка
                 VOLUME_KEY: 'vn_volume', // Ключ для хранения громкости
                 MUTE_KEY: 'vn_muted',    // Ключ для хранения состояния Mute
             },
@@ -580,22 +572,20 @@
         };
 
         const STORY_GROUPS = {
-            main: { zh: "主线剧情", ru: "Основной сюжет", prefix: "main_" },
-            extra: { zh: "额外剧情", ru: "Дополнительный сюжет", prefix: "extra_" },
-            bosses: { zh: "Boss 关卡", ru: "Боссы", prefix: "boss_" },
-            vn: { zh: "视觉小说", ru: "Визуальная новелла", prefix: "vn_" },
-            romance: { zh: "恋爱小说", ru: "Лёгкая новелла", prefix: "ln_" }
+            main: { ru: "Основной сюжет", prefix: "main_" },
+            extra: { ru: "Дополнительный сюжет", prefix: "extra_" },
+            bosses: { ru: "Боссы", prefix: "boss_" },
+            vn: { ru: "Визуальная новелла", prefix: "vn_" },
+            romance: { ru: "Лёгкая новелла", prefix: "ln_" }
         };
         
         const MAIN_STORY_ARCS = {
-            re: { zh: "追忆篇", ru: "Ретроспектр" },
-            in: { zh: "遗愿篇", ru: "Наследие" },
-            fm: { zh: "蛾火篇", ru: "Огненный Мотылёк" },
-            nl: { zh: "新生篇", ru: "Новая жизнь" },
-            ah: { zh: "崩坏学园篇", ru: "Академия Хоукая" }
+            re: { ru: "Ретроспектр" },
+            in: { ru: "Наследие" },
+            fm: { ru: "Огненный Мотылёк" },
+            nl: { ru: "Новая жизнь" },
+            ah: { ru: "Академия Хоукая" }
         };
-
-        let currentLang = localStorage.getItem(CONFIG.STORAGE.LANG_KEY) || 'ru'; // Русский по умолчанию
         
         let currentDialogue = []; 
         let currentDialogueIndex = 0;
@@ -632,22 +622,6 @@
                 placeholderSelectType: "--- Выберите тип сюжета ---",
                 narrativePlaceholder: "[Повествование]",
                 scenePlaceholder: "Сцена: "
-            },
-            zh: {
-                headerTitle: "崩坏学园2 剧情归档", labelStoryType: "剧情类型", labelArc: "篇章", labelChapter: "章节",
-                loadText: "加载", loadingText: "正在加载...", loadedText: "已加载", 
-                errorLoading: "重试", endOfStory: "剧情结束!",
-                startOfStory: "这是剧情的开始。", placeholderMetadata: "--- 元数据未加载 ---",
-                placeholderSelectArc: "--- 请先选择篇章 ---", 
-                errorFetchMetadataStrict: "致命错误: 无法加载章节元数据。文件 story/story_metadata.json 缺失或不可用。",
-                errorChapterNotFound: "章节文件未找到。",
-                errorJsonSyntax: "JSON 致命错误: 请检查章节 JSON 文件结构 (多余的逗号/括号)!",
-                errorRender: (msg) => `渲染致命错误: ${msg}。请检查数据结构!`, 
-                themeDark: "黑暗", themeLight: "明亮",
-                historyTitle: "对话历史", historyButton: "历史", historyEmpty: "历史记录为空。",
-                placeholderSelectType: "--- 请先选择剧情类型 ---",
-                narrativePlaceholder: "[叙事]",
-                scenePlaceholder: "场景: "
             }
         };
 
@@ -848,7 +822,7 @@
 
             if (elements.themeIcon && elements.themeText) {
                 elements.themeIcon.textContent = isDark ? '🌙' : '☀️';
-                elements.themeText.textContent = isDark ? i18n[currentLang].themeDark : i18n[currentLang].themeLight;
+                elements.themeText.textContent = isDark ? i18n.ru.themeDark : i18n.ru.themeLight;
             }
             
             // Обновление цвета карточки предупреждения при смене темы
@@ -931,7 +905,6 @@
         
         document.addEventListener('DOMContentLoaded', async () => {
             // Кэширование всех необходимых элементов DOM
-            elements.languageSelect = document.getElementById('languageSelect');
             elements.storyTypeSelect = document.getElementById('storyTypeSelect');
             elements.arcSelectContainer = document.getElementById('arcSelectContainer');
             elements.arcSelect = document.getElementById('arcSelect');
@@ -995,7 +968,6 @@
             // Загрузка метаданных и инициализация UI
             await fetchChapterMetadata();
             initializeOrUpdateUI(); 
-            // aggressivePreload(); // УДАЛЕНО
 
             // Закрытие Истории по клику вне панели
             document.addEventListener('click', (event) => {
@@ -1015,17 +987,17 @@
         // ====================================================================
         
         async function fetchChapterMetadata() {
-            // Заглушка для метаданных (РУССКИЕ/КИТАЙСКИЕ ПЛЕЙСХОЛДЕРЫ)
+            // Заглушка для метаданных (РУССКИЕ ПЛЕЙСХОЛДЕРЫ)
             const chapterPlaceholders = {
-                "re_main_ch1": { ru: "Пролог: Начало", zh: "序章: 开始" },
-                "re_main_ch2": { ru: "Глава 2: Поиск", zh: "第2章: 搜寻" },
-                "re_main_ch3": { ru: "Глава 3: Возвращение", zh: "第3章: 归来" },
-                "re_main_ch11": { ru: "Глава 11: Неизвестная угроза", zh: "第11章: 未知威胁" }, // Добавлено для тестирования
-                "in_main_ch1": { ru: "Глава Завещания 1", zh: "遗愿篇 1" },
-                "in_main_ch2": { ru: "Глава Завещания 2", zh: "遗愿篇 2" },
-                "extra_01": { ru: "Событие: Пляж", zh: "活动: 海滩" },
-                "extra_02": { ru: "Событие: Зимний бал", zh: "活动: 冬日舞会" },
-                "boss_01": { ru: "Босс: Королева зомби", zh: "Boss: 僵尸女王" },
+                "re_main_ch1": { ru: "Пролог: Начало" },
+                "re_main_ch2": { ru: "Глава 2: Поиск" },
+                "re_main_ch3": { ru: "Глава 3: Возвращение" },
+                "re_main_ch11": { ru: "Глава 11: Неизвестная угроза" },
+                "in_main_ch1": { ru: "Глава Завещания 1" },
+                "in_main_ch2": { ru: "Глава Завещания 2" },
+                "extra_01": { ru: "Событие: Пляж" },
+                "extra_02": { ru: "Событие: Зимний бал" },
+                "boss_01": { ru: "Босс: Королева зомби" },
             };
             
             try {
@@ -1049,27 +1021,25 @@
                 if (!dialogueIsLoaded || currentDialogue.length === 0) return;
                 
                 const newIndex = currentDialogueIndex + direction;
-                const lang = currentLang; 
 
                 if (newIndex >= 0 && newIndex < currentDialogue.length) {
                     currentDialogueIndex = newIndex;
                     renderDialogueStep();
                     
-                    // Предзагрузка следующего шага остается, она не мешает
                     if (direction > 0) { 
                         preloadAssets(currentDialogueIndex + 1);
                     }
 
                 } else if (newIndex >= currentDialogue.length) {
-                    alertMessage(i18n[lang].endOfStory);
+                    alertMessage(i18n.ru.endOfStory);
                     currentDialogueIndex = currentDialogue.length - 1;
                     handleAudio(null); // Останавливаем музыку в конце истории
                 } else {
-                    alertMessage(i18n[lang].startOfStory);
+                    alertMessage(i18n.ru.startOfStory);
                 }
             } catch (e) {
                  console.error("[Dialogue Navigation] Ошибка переключения:", e);
-                 alertMessage(i18n[currentLang].errorRender(e.message));
+                 alertMessage(i18n.ru.errorRender(e.message));
             }
         }
         
@@ -1088,10 +1058,7 @@
             }
             
             try {
-                // Пытаемся получить изображение из кэша прелоадера (или загрузить, если не кэшировано)
                 const loadedImage = await loadImage(url); 
-
-                // Установка src из нативного объекта Image, который уже загружен (МГНОВЕННО)
                 element.src = loadedImage.src; 
                 container.classList.remove('hidden');
 
@@ -1113,14 +1080,11 @@
             const currentLayer = activeBgLayer === 1 ? bgLayer1 : bgLayer2;
             
             try {
-                // ИСПРАВЛЕНО: Раньше здесь по ошибке было 'url' вместо 'finalBgUrl'
                 const loadedImage = await loadImage(finalBgUrl); 
 
-                // Установка фона из нативного объекта Image, который уже загружен
                 nextLayer.style.backgroundImage = `url('${loadedImage.src}')`;
                 nextLayer.style.backgroundColor = 'transparent'; 
                 
-                // Кроссфейд
                 setTimeout(() => {
                     currentLayer.style.opacity = '0';
                     nextLayer.style.opacity = '1';
@@ -1147,13 +1111,10 @@
             }
         }
         
-        // --- НОВАЯ ФУНКЦИЯ: Обработка переносов строк ---
         function processTextForBreaks(text) {
             if (!text) return "";
-            // Заменяем символ новой строки (\n) на HTML тег разрыва строки (<br>)
             return text.replace(/\n/g, '<br>');
         }
-        // ----------------------------------------------
 
 
         function renderDialogueStep() {
@@ -1170,29 +1131,20 @@
             const step = currentDialogue[currentDialogueIndex];
             const isFullText = step.text_style === 'full';
             
-            // 0. Управление аудио (ИЗМЕНЕНА ЛОГИКА)
-            // Музыка меняется только если в шаге явно указан параметр 'audio'.
-            // Если параметра нет, текущая музыка продолжает играть.
-            // Если 'audio' равно null, музыка остановится.
             if ('audio' in step) {
                 handleAudio(step.audio);
             }
 
-            // 1. Управление видимостью диалоговых окон
             dialogueWrapper.classList.toggle('hidden', isFullText);
             fullDialogueBox.classList.toggle('hidden', !isFullText);
             
-            // 2. Фон (Асинхронно, но с ожиданием прелоада/загрузки)
             if (step.background) { 
                 crossFadeBackground(step.background);
             }
 
-            // --- 3. Управление Спрайтами (Видимость и Загрузка) ---
-            
             const newLeftSpriteFile = step.sprite_left || null;
             const newRightSpriteFile = step.sprite_right || null;
 
-            // A. Левый Спрайт
             if (newLeftSpriteFile) {
                 const url = spritePath(newLeftSpriteFile);
                 if (currentLeftSpriteFile !== newLeftSpriteFile) {
@@ -1207,7 +1159,6 @@
                 currentLeftSpriteFile = null;
             }
 
-            // B. Правый Спрайт
             if (newRightSpriteFile) {
                  const url = spritePath(newRightSpriteFile);
                 if (currentRightSpriteFile !== newRightSpriteFile) {
@@ -1222,9 +1173,6 @@
                 currentRightSpriteFile = null;
             }
             
-            // --- C. Логика Затемнения (применяется только к стандартному режиму) ---
-            
-            // 1. Сброс затемнения
             spriteLeftElement.classList.remove('dimmed-sprite');
             spriteRightElement.classList.remove('dimmed-sprite');
 
@@ -1236,56 +1184,39 @@
                 if (overrideValue === 'auto' && step.speaker && step.position) {
                     const isLeftSpeaker = step.position.toLowerCase() === 'left';
                     dimTarget = isLeftSpeaker ? 'right' : 'left';
-                } else if (overrideValue === 'left' || overrideValue === 'right' || overrideValue === 'both' || overrideValue === 'none') {
+                } else if (['left', 'right', 'both', 'none'].includes(overrideValue)) {
                     dimTarget = overrideValue;
                 }
             }
 
-            // --- 4. Применение затемнения к видимым спрайтам ---
             if (!isFullText) {
-                // Затемнение левого спрайта
                 const shouldDimLeft = dimTarget === 'left' || dimTarget === 'both';
                 if (shouldDimLeft && !spriteLeftContainer.classList.contains('hidden')) {
                     spriteLeftElement.classList.add('dimmed-sprite');
                 }
 
-                // Затемнение правого спрайта
                 const shouldDimRight = dimTarget === 'right' || dimTarget === 'both';
                 if (shouldDimRight && !spriteRightContainer.classList.contains('hidden')) {
                     spriteRightElement.classList.add('dimmed-sprite');
                 }
             }
 
-            // --- 5. Рендеринг Текста ---
-
             if (isFullText) {
-                // --- Рендеринг Большого Диалогового Окна ---
-                
-                // 1. Текст (Используем innerHTML и обработку переносов)
                 fullCurrentText.innerHTML = processTextForBreaks(step.text);
                 
-                // 2. Размер текста (по умолчанию 'md')
                 const size = step.full_text_size || 'md';
                 fullCurrentText.className = 'leading-relaxed transition-opacity duration-300'; // Сброс классов
                 fullCurrentText.classList.add(`full-text-${size}`);
                 
-                // 3. Выравнивание (по умолчанию 'top-left')
                 const align = step.full_text_align || 'top-left';
                 
-                // Сброс и применение выравнивания
                 fullDialogueContent.classList.remove('align-top-left', 'align-center');
-                if (align === 'center') {
-                    fullDialogueContent.classList.add('align-center');
-                } else {
-                    fullDialogueContent.classList.add('align-top-left');
-                }
+                fullDialogueContent.classList.add(align === 'center' ? 'align-center' : 'align-top-left');
                 
                 currentSpeaker.textContent = ""; 
                 speakerNameContainer.classList.add('hidden');
 
             } else {
-                // --- Рендеринг Стандартного Диалогового Окна ---
-                
                 if (step.speaker) {
                     currentSpeaker.textContent = step.speaker;
                     speakerNameContainer.classList.remove('hidden');
@@ -1294,39 +1225,28 @@
                     speakerNameContainer.classList.add('hidden');
                 }
                 
-                // Текст (Используем innerHTML и обработку переносов)
                 currentText.innerHTML = processTextForBreaks(step.text);
             }
             
-            // 6. Обновление Истории
             if (isHistoryVisible) {
                 renderHistory();
             }
         }
         
-        /**
-         * УЛУЧШЕНО: Полностью переработанная функция загрузки главы.
-         * Теперь она предзагружает ВСЕ ассеты для выбранной главы ПЕРЕД началом,
-         * обеспечивая плавный опыт без задержек.
-         */
         async function updateStoryContent() {
-            const lang = currentLang;
             const fullStoryKey = elements.chapterSelect.value.trim();
             const { loadButton, loadText, chapterLoadOverlay, chapterLoadProgress } = elements;
 
             if (!fullStoryKey) return;
 
-            // --- Шаг 0: Остановить любую текущую музыку ---
             await handleAudio(null);
 
-            // --- Шаг 1: Подготовка к загрузке ---
             loadButton.disabled = true;
-            loadText.textContent = i18n[lang].loadingText;
+            loadText.textContent = i18n.ru.loadingText;
             chapterLoadOverlay.classList.remove('hidden');
             chapterLoadProgress.textContent = `(0/?)`;
 
-            // --- Шаг 2: Загрузка JSON файла главы ---
-            const expectedFilePath = `${CONFIG.PATHS.STORY_BASE}${lang}/${fullStoryKey}.json`;
+            const expectedFilePath = `${CONFIG.PATHS.STORY_BASE}${fullStoryKey}.json`;
             let chapterData;
             try {
                 const response = await fetch(expectedFilePath);
@@ -1337,14 +1257,13 @@
                 }
             } catch (error) {
                 console.error(`[Content Load] Критическая ошибка при загрузке или парсинге JSON главы: ${expectedFilePath}`, error);
-                alertMessage(i18n[lang].errorChapterNotFound);
-                loadText.textContent = i18n[lang].loadText;
+                alertMessage(i18n.ru.errorChapterNotFound);
+                loadText.textContent = i18n.ru.loadText;
                 loadButton.disabled = false;
                 chapterLoadOverlay.classList.add('hidden');
                 return;
             }
 
-            // --- Шаг 3: Сбор всех уникальных URL ассетов из главы ---
             const urlsToLoad = (() => {
                 const uniqueUrls = new Set();
                 for (const step of chapterData.dialogue) {
@@ -1355,13 +1274,15 @@
                 return Array.from(uniqueUrls);
             })();
 
-            // --- Шаг 4: Пакетная загрузка всех ассетов главы ---
-            const BATCH_SIZE = 10;
-            let loadedCount = 0;
+            // --- Шаг 4: Возврат к пакетной загрузке для стабильности ---
             const totalToLoad = urlsToLoad.length;
+            chapterLoadProgress.textContent = `(0/${totalToLoad})`;
 
             if (totalToLoad > 0) {
-                 for (let i = 0; i < totalToLoad; i += BATCH_SIZE) {
+                const BATCH_SIZE = 10;
+                let loadedCount = 0;
+
+                for (let i = 0; i < totalToLoad; i += BATCH_SIZE) {
                     const batch = urlsToLoad.slice(i, i + BATCH_SIZE);
                     const batchPromises = batch.map(url => loadImage(url).catch(err => console.warn(err)));
                     
@@ -1371,16 +1292,12 @@
                     const progress = Math.min(loadedCount, totalToLoad);
                     chapterLoadProgress.textContent = `(${progress}/${totalToLoad})`;
                 }
-            } else {
-                 chapterLoadProgress.textContent = `(0/0)`;
             }
 
-            // --- Шаг 5: Инициализация и рендеринг первого шага ---
             currentDialogue = chapterData.dialogue;
             currentDialogueIndex = 0;
             dialogueIsLoaded = true;
             
-            // Сброс состояния для чистой загрузки
             currentBackgroundUrl = null;
             currentLeftSpriteFile = null;
             currentRightSpriteFile = null;
@@ -1390,13 +1307,12 @@
             elements.spriteRightElement.src = '';
             elements.fullDialogueBox.classList.add('hidden'); 
 
-            renderDialogueStep(); // Первый рендер
+            renderDialogueStep(); 
 
-            // --- Шаг 6: Завершение и сброс UI ---
             chapterLoadOverlay.classList.add('hidden');
-            loadText.textContent = i18n[lang].loadedText;
+            loadText.textContent = i18n.ru.loadedText;
             setTimeout(() => {
-                loadText.textContent = i18n[lang].loadText;
+                loadText.textContent = i18n.ru.loadText;
                 loadButton.disabled = false;
             }, 1500);
         }
@@ -1419,10 +1335,8 @@
         }
 
         function updateI18nStrings() {
-            const lang = currentLang; 
-            const text = i18n[lang];
+            const text = i18n.ru;
             
-            // Обновление статических элементов
             document.getElementById('headerTitle').textContent = text.headerTitle;
             document.getElementById('labelStoryType').textContent = text.labelStoryType;
             document.getElementById('labelArc').textContent = text.labelArc; 
@@ -1434,7 +1348,6 @@
             const currentTheme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
             elements.themeText.textContent = currentTheme === 'dark' ? text.themeDark : text.themeLight;
 
-            // Обновление селектора Типа Сюжета
             const typeSelect = elements.storyTypeSelect;
             const currentType = typeSelect.value;
             typeSelect.innerHTML = '';
@@ -1447,7 +1360,7 @@
             for (const key in STORY_GROUPS) {
                 const option = document.createElement('option');
                 option.value = key;
-                option.textContent = STORY_GROUPS[key][lang]; 
+                option.textContent = STORY_GROUPS[key].ru; 
                 if (key === currentType) { 
                     option.selected = true;
                 }
@@ -1455,16 +1368,12 @@
             }
         }
         
-        /**
-         * Обновление UI при смене типа сюжета.
-         */
         function updateArcAndChapterUI() {
             updateI18nStrings(); 
             
             const typeKey = elements.storyTypeSelect.value;
             const arcSelect = elements.arcSelect;
             const arcContainer = elements.arcSelectContainer;
-            const lang = currentLang; 
             
             const currentArcKey = arcSelect.value; 
             
@@ -1479,14 +1388,14 @@
                 
                 const defaultOption = document.createElement('option');
                 defaultOption.value = "";
-                defaultOption.textContent = `--- ${i18n[lang].labelArc} ---`; 
+                defaultOption.textContent = `--- ${i18n.ru.labelArc} ---`; 
                 arcSelect.appendChild(defaultOption);
                 
                 let arcFound = false;
                 for (const key in MAIN_STORY_ARCS) {
                     const option = document.createElement('option');
                     option.value = key;
-                    option.textContent = MAIN_STORY_ARCS[key][lang];
+                    option.textContent = MAIN_STORY_ARCS[key].ru;
                     if (key === currentArcKey) { 
                         option.selected = true;
                     }
@@ -1503,14 +1412,10 @@
             updateChapterSelect();
         }
 
-        /**
-         * Функция, которая заполняет список Глав в зависимости от выбранного Типа и Арки.
-         */
         function updateChapterSelect() {
             const typeKey = elements.storyTypeSelect.value;
             const arcKey = elements.arcSelect.value;       
             const select = elements.chapterSelect;
-            const lang = currentLang; 
             
             const currentChapterKey = select.value;
 
@@ -1519,58 +1424,41 @@
             select.value = ""; 
             
             if (!window.storyMetadata) {
-                select.innerHTML = `<option value="">${i18n[lang].placeholderMetadata}</option>`;
+                select.innerHTML = `<option value="">${i18n.ru.placeholderMetadata}</option>`;
                 enableLoadButton();
                 return;
             }
             
             if (!typeKey) {
-                 select.innerHTML = `<option value="">--- ${i18n[lang].placeholderSelectType} ---</option>`;
+                 select.innerHTML = `<option value="">--- ${i18n.ru.placeholderSelectType} ---</option>`;
                  enableLoadButton();
                  return;
             }
             
             if (typeKey === 'main' && !arcKey) { 
-                select.innerHTML = `<option value="">--- ${i18n[lang].placeholderSelectArc} ---</option>`;
+                select.innerHTML = `<option value="">--- ${i18n.ru.placeholderSelectArc} ---</option>`;
                  enableLoadButton();
                  return;
             }
             
             const storyGroup = STORY_GROUPS[typeKey];
             if (!storyGroup) {
-                 select.innerHTML = `<option value="">--- ${i18n[lang].placeholderSelectType} ---</option>`;
+                 select.innerHTML = `<option value="">--- ${i18n.ru.placeholderSelectType} ---</option>`;
                  enableLoadButton();
                  return;
             }
             
-            let targetPrefix = '';
-            
-            if (typeKey === 'main') {
-                // Если выбран тип 'main', префикс должен включать арку и 'main_'
-                targetPrefix = `${arcKey}_main_`; 
-            } else {
-                // Иначе используем префикс группы
-                targetPrefix = storyGroup.prefix; 
-            }
+            let targetPrefix = (typeKey === 'main') ? `${arcKey}_main_` : storyGroup.prefix; 
 
-            // =================================================
-            // DEBUG LOGS ДЛЯ ОТЛАДКИ ПРОБЛЕМЫ ГЛАВЫ 11
-            // =================================================
-            // console.log(`[DEBUG: Chapter Filter] Целевой префикс: "${targetPrefix}"`); 
-
-            select.innerHTML = `<option value="">--- ${i18n[lang].labelChapter} ---</option>`;
+            select.innerHTML = `<option value="">--- ${i18n.ru.labelChapter} ---</option>`;
 
             let chapterFound = false;
             
             for (const fullChapterKey in window.storyMetadata) {
-                // console.log(`[DEBUG: Chapter Filter] Проверка ключа: "${fullChapterKey}"`); 
-                
-                // Проверяем, начинается ли ключ главы с целевого префикса. 
-                // Это должно корректно работать для всех глав, включая ch11
                 if (fullChapterKey.startsWith(targetPrefix)) {
                     
                     const chapterData = window.storyMetadata[fullChapterKey];
-                    const chapterName = chapterData[lang] || chapterData['ru']; // Fallback на русский
+                    const chapterName = chapterData.ru;
                     
                     if (chapterName) {
                         const option = document.createElement('option');
@@ -1595,25 +1483,8 @@
             enableLoadButton();
         }
         
-        function initializeOrUpdateUI(isLangChange = false) {
-             if (isLangChange) {
-                 // Обновляем глобальную переменную языка и сохраняем в localStorage
-                 currentLang = elements.languageSelect.value;
-                 localStorage.setItem(CONFIG.STORAGE.LANG_KEY, currentLang);
-                 
-                 // При смене языка сбрасываем состояние истории
-                 currentDialogue = [];
-                 dialogueIsLoaded = false;
-             }
-             
-             // Обновляем атрибут lang для HTML, чтобы CSS мог использовать переменные
-             document.documentElement.lang = currentLang;
-             
-             // Устанавливаем текущее значение в селектор
-             elements.languageSelect.value = currentLang; 
-             
+        function initializeOrUpdateUI() {
              updateArcAndChapterUI(); 
-             // Принудительное обновление темы, чтобы обновить текст в кнопке темы
              const currentTheme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
              applyTheme(currentTheme);
         }
@@ -1638,11 +1509,10 @@
 
         function renderHistory() {
             const { historyContent } = elements;
-            const lang = currentLang;
             historyContent.innerHTML = '';
             
             if (!dialogueIsLoaded || currentDialogue.length === 0) {
-                historyContent.innerHTML = `<p class="text-center mt-8 p-3 rounded-lg" style="color: var(--color-text-secondary); background-color: var(--color-bg-medium);">${i18n[lang].historyEmpty}</p>`;
+                historyContent.innerHTML = `<p class="text-center mt-8 p-3 rounded-lg" style="color: var(--color-text-secondary); background-color: var(--color-bg-medium);">${i18n.ru.historyEmpty}</p>`;
                 return;
             }
             
@@ -1677,11 +1547,10 @@
                     toggleHistory(); 
                 };
 
-                // В истории отображаем имя спикера, даже если это Full Text, для контекста
                 let speakerNameText = step.speaker || '';
                 
                 if (step.text_style === 'full' && !speakerNameText) {
-                    speakerNameText = i18n[lang].narrativePlaceholder;
+                    speakerNameText = i18n.ru.narrativePlaceholder;
                 }
                 
                 if (speakerNameText) {
@@ -1695,15 +1564,13 @@
                 const textContent = document.createElement('p');
                 textContent.className = 'text-sm leading-snug';
                 
-                // Если нет текста, но есть фон, показываем placeholder
                 let displayText = step.text;
                 if (!displayText && step.background) {
-                    displayText = `[${i18n[lang].scenePlaceholder}${step.background}]`;
+                    displayText = `[${i18n.ru.scenePlaceholder}${step.background}]`;
                 } else if (!displayText && i === 0) {
-                    displayText = i18n[lang].startOfStory;
+                    displayText = i18n.ru.startOfStory;
                 }
                 
-                // В истории перенос строки не нужен, поэтому используем textContent
                 textContent.textContent = displayText || ''; 
                 historyItem.appendChild(textContent);
 
@@ -1720,5 +1587,4 @@
     </script>
 </body>
 </html>
-
 
