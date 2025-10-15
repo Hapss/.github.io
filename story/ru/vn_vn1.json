@@ -1,0 +1,1066 @@
+{
+  "dialogue": [
+{
+    "background": "seatitle01.jpg",
+    "text": "Эпизод 0: Дева, затерянная в пустоте"
+  },
+  {
+    "audio": "blackseele.ogg",
+    "background": "inlab01.jpg",
+    "text": "Постепенно исчезающая девушка застыла в лаборатории."
+  },
+  {
+    "text": "Сначала она потеряла чувствительность в руках."
+  },
+  {
+    "text": "Словно их никогда и не было, будто стёртые из самого воздуха."
+  },
+  {
+    "speaker": "Зеле",
+    "text": "Нельзя!",
+    "sprite_right": "Seele 13.png"
+  },
+  {
+    "text": "Девушка уже понимала: эксперимент провалился."
+  },
+  {
+    "speaker": "Зеле",
+    "text": "Нельзя... умереть здесь...",
+    "sprite_right": "Seele 13.png"
+  },
+  {
+    "text": "Всё, что она делала, было лишь предсмертной агонией."
+  },
+  {
+    "text": "Если эксперимент не удастся, то и смысл её присутствия здесь исчезнет."
+  },
+  {
+    "text": "Она пожертвовала собой ради любимого человека, дошла до крайней черты..."
+  },
+  {
+    "text": "Но всё оказалось тщетно."
+  },
+  {
+    "text": "Она не смогла изменить никого и ничего."
+  },
+  {
+    "speaker": "Зеле",
+    "text": "Сестрица Броня... Бро...ня...",
+    "sprite_right": "Seele 13.png"
+  },
+  {
+    "text": "В конце концов, у неё не осталось даже сил позвать имя того, кого она любила."
+  },
+  {
+    "text": "Её последний зов был словно слеза, упавшая в неподвижные воды старинного колодца."
+  },
+  {
+    "text": "Вместе с её «я», исчезающим в пустоте, он превратился в рябь на поверхности пространства."
+  },
+  {
+    "text": "Пока наконец..."
+  },
+  {
+    "text": "Не осталось и следа, будто её никогда не существовало."
+  },
+  {
+    "text": "И тогда из самой непроглядной тьмы донёсся голос, который искала девушка—"
+  },
+  {
+    "audio": "seelesister.ogg",
+    "speaker": "Зеле",
+    "text": "Где ты, сестрица Броня?",
+    "sprite_right": "Seele 14.png"
+  },
+  {
+    "audio": null,
+    "background": "seatitle02.jpg",
+    "text": "Эпизод 1: Лаборатория в глубоком море"
+  },
+  {
+    "audio": "outthelab.ogg",
+    "background": "outlab01.jpg",
+    "speaker": "Киана",
+    "text": "Ой, что это за место... кхе...",
+    "sprite_left": "Kiana 3.png",
+    "sprite_right": "Mei 1.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "Здесь...",
+    "sprite_right": "Mei 1.png",
+    "sprite_left": "Kiana 3.png",
+    "dim_override": "left"
+  },
+  {
+    "text": "Сначала взгляд упал на стены из стального каркаса, вероятно, из-за долгого отсутствия ремонта, они были покрыты ржавыми пятнами."
+  },
+  {
+    "text": "Аварийные холодные лампы на стенах, похоже, из-за нестабильной цепи, непрерывно мигали."
+  },
+  {
+    "speaker": "Мэй",
+    "text": "А...",
+    "sprite_right": "Mei 1.png",
+    "sprite_left": "Kiana 3.png",
+    "dim_override": "left"
+  },
+  {
+    "text": "Внешние стены коридора были сделаны из закалённого стекла, открывая практически ничем не загороженный вид на происходящее снаружи."
+  },
+  {
+    "speaker": "Броня",
+    "text": "Согласно данным Брони, мы действительно находимся в лаборатории какого-то исследовательского учреждения...",
+    "sprite_right": "Bronya 2.png",
+    "sprite_left": "Kiana 3.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Киана",
+    "text": "В лаборатории? Но здесь... должно быть, на дне моря!!",
+    "sprite_left": "Kiana 3.png",
+    "sprite_right": "Bronya 2.png",
+    "dim_override": "right"
+  },
+  {
+    "text": "За коридором простирается океан."
+  },
+  {
+    "speaker": "Киана",
+    "text": "...М-м, какое-то странное ощущение. И как мы вообще попали в это дьявольское место?",
+    "sprite_left": "Kiana 3.png",
+    "sprite_right": "Bronya 2.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "Как попали сюда... Кажется, мы до этого были на пляже?",
+    "sprite_right": "Mei 3.png",
+    "sprite_left": "Kiana 3.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Броня",
+    "text": "Верно. Если память Брони не повреждена, мы действительно обнаружили очень хаотичную реакцию энергии Хоукая и проследили её до побережья.",
+    "sprite_right": "Bronya 2.png",
+    "sprite_left": "Kiana 3.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Киана",
+    "text": "А что было потом, что именно произошло?",
+    "sprite_left": "Kiana 3.png",
+    "sprite_right": "Bronya 2.png",
+    "dim_override": "right"
+  },
+  {
+    "text": "В сознании мелькнула беспросветная тьма, разум погружался вниз."
+  },
+  {
+    "text": "Пространство, что непрерывно искажалось."
+  },
+  {
+    "text": "Искажалось, искажалось, искажалось, искажалось, искажалось..."
+  },
+  {
+    "speaker": "Киана",
+    "text": "М-м...",
+    "sprite_left": "Kiana 3.png",
+    "sprite_right": "Bronya 2.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Броня",
+    "text": "Броня предполагает, что из-за чрезмерно нестабильной энергии Хоукая произошло пространственное искажение, которое перенесло нас сюда...",
+    "sprite_right": "Bronya 2.png",
+    "sprite_left": "Kiana 3.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "Энергия Хоукая, пространственные искажения, лаборатория... что вообще здесь происходит?",
+    "sprite_left": "Mei 3.png",
+    "sprite_right": "Bronya 2.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Броня",
+    "text": "Пока не ясно, но Броня считает, что ключевым шагом будет найти источник Хоукая.",
+    "sprite_right": "Bronya 2.png",
+    "sprite_left": "Mei 3.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Киана",
+    "text": "Верно! В любом случае, стоит разобраться с источником Хоукая, а остальное — как-нибудь потом~",
+    "sprite_left": "Kiana 1.png",
+    "sprite_right": "Mei 1.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "Чувствую, что всё не так просто... Но сейчас другого выхода нет, пошли.",
+    "sprite_right": "Mei 1.png",
+    "sprite_left": "Kiana 1.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Броня",
+    "text": "...",
+    "sprite_left": "Bronya 2.png",
+    "sprite_right": "Mei 1.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "Броня, что-то не так?",
+    "sprite_right": "Mei 1.png",
+    "sprite_left": "Bronya 2.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Броня",
+    "text": "Нет... Всё в порядке. Возможно, системы Брони просто подверглись воздействию энергии Хоукая...",
+    "sprite_left": "Bronya 2.png",
+    "sprite_right": "Mei 1.png",
+    "dim_override": "right"
+  },
+  {
+    "background": "seatitle03.jpg",
+    "text": "Эпизод 2: Призрак"
+  },
+  {
+    "background": "outlab02.jpg",
+    "speaker": "Мэй",
+    "text": "Это... следы?",
+    "sprite_left": "Mei 3.png",
+    "sprite_right": "Kiana 1.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Киана",
+    "text": "Раньше здесь была лаборатория, разве странно, что есть следы?",
+    "sprite_right": "Kiana 1.png",
+    "sprite_left": "Mei 3.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "...Но сейчас здесь никого не должно быть.",
+    "sprite_left": "Mei 3.png",
+    "sprite_right": "Kiana 1.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Броня",
+    "text": "Эти следы... свежие, и они ведут в другую сторону коридора.",
+    "sprite_right": "Bronya 2.png",
+    "sprite_left": "Mei 3.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "Трудно представить, что кто-то всё ещё живёт в таком месте?",
+    "sprite_left": "Mei 3.png",
+    "sprite_right": "Bronya 2.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Киана",
+    "text": "Что ж, человеческий организм довольно вынослив.",
+    "sprite_right": "Kiana 1.png",
+    "sprite_left": "Mei 3.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "Но здесь же зона скопления энергии Хоукая, обычный человек не сможет выжить так долго.",
+    "sprite_left": "Mei 3.png",
+    "sprite_right": "Kiana 1.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Броня",
+    "text": "...Знакомо.",
+    "sprite_right": "Bronya 2.png",
+    "sprite_left": "Mei 3.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "Броня?",
+    "sprite_left": "Mei 3.png",
+    "sprite_right": "Bronya 2.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Броня",
+    "text": "Здешняя структура очень похожа на ту лабораторию, где меня подвергли модификациям, но...",
+    "sprite_right": "Bronya 2.png",
+    "sprite_left": "Mei 3.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Киана",
+    "text": "Неужели это та самая лаборатория?",
+    "sprite_left": "Kiana 1.png",
+    "sprite_right": "Bronya 2.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Броня",
+    "text": "...Нет, не может быть. Та лаборатория была не в этих водах.",
+    "sprite_right": "Bronya 2.png",
+    "sprite_left": "Kiana 1.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Киана",
+    "text": "Возможно, у той лаборатории по всему миру есть множество одинаковых копий!",
+    "sprite_left": "Kiana 1.png",
+    "sprite_right": "Bronya 2.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Киана",
+    "text": "В любом случае, пойдём сначала по этим следам, будь то человек или призрак, тогда и узнаем.",
+    "sprite_left": "Kiana 1.png",
+    "sprite_right": "Bronya 2.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "Киана, в ужастиках такие, как ты, не живут и пяти минут...",
+    "sprite_right": "Mei 1.png",
+    "sprite_left": "Kiana 1.png",
+    "dim_override": "left"
+  },
+  {
+    "text": "Другая сторона коридора была лишена света."
+  },
+  {
+    "text": "Похоже, лишь этот коридор позволял видеть внешний вид лаборатории, картины океана."
+  },
+  {
+    "text": "Стоя в освещённом месте, казалось, что покрытая ржавчиной комната в конце коридора становилась всё темнее и более ветхой."
+  },
+  {
+    "text": "В момент нерешительности стоит ли входить в освещённый холодным светом аварийных ламп коридор лаборатории —"
+  },
+  {
+    "text": "«Хи-хи...»"
+  },
+  {
+    "text": "С другой стороны коридора донёсся зловещий смех."
+  },
+  {
+    "speaker": "Киана",
+    "text": "Кто!! Кто там!! Неужели призрак?! А-а, Мэй, скорее спаси меня!!",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Mei 1.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "Киана! Это не призрак, похоже... просто маленькая девочка.",
+    "sprite_right": "Mei 1.png",
+    "sprite_left": "Kiana 4.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Киана",
+    "text": "Чёрная... тень... мелькнула, пролетела, я чуть не умерла от страха...",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Mei 1.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "Ладно, ладно, мы все рядом с тобой, всё в порядке.",
+    "sprite_right": "Mei 1.png",
+    "sprite_left": "Kiana 4.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Броня",
+    "text": "—! Сестрица Мэй, Киана, это, кажется, знакомая Брони из прошлого!",
+    "sprite_left": "Bronya 2.png",
+    "sprite_right": "Mei 1.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Броня",
+    "text": "Броня должна найти её!",
+    "sprite_left": "Bronya 2.png",
+    "sprite_right": "Mei 1.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "Броня!",
+    "sprite_right": "Mei 1.png"
+  },
+  {
+    "speaker": "Киана",
+    "text": "Эта девчонка, опять куда-то помчалась... Быстрее, догоним её!",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Mei 1.png",
+    "dim_override": "right"
+  },
+  {
+    "audio": "soundeffectzizi.ogg",
+    "background": "black.png",
+    "text": "Треск электричества [Зззззз—]"
+  },
+  {
+    "audio": "soundeffectpa.ogg",
+    "text": "Слабый потрескивающий звук [Хруст—]"
+  },
+  {
+    "audio": "inthelab.ogg",
+    "background": "inlab01.jpg",
+    "speaker": "Киана",
+    "text": "Что происходит...",
+    "sprite_right": "Kiana 4.png",
+    "sprite_left": "Mei 1.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "Неужели произошёл сбой электропитания?!",
+    "sprite_left": "Mei 1.png",
+    "sprite_right": "Kiana 4.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Киана",
+    "text": "Ладно, нам нужно поскорее найти Броню, потеряться в таком месте — не шутки.",
+    "sprite_right": "Kiana 4.png",
+    "sprite_left": "Mei 1.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "Нет...",
+    "sprite_left": "Mei 1.png",
+    "sprite_right": "Kiana 4.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Киана",
+    "text": "Э? Что такое? Здесь...",
+    "sprite_right": "Kiana 4.png",
+    "sprite_left": "Mei 1.png",
+    "dim_override": "left"
+  },
+  {
+    "text": "Тусклый свет аварийных ламп, разбитые чашки Петри, словно здесь произошли сильные искажения и взрыв."
+  },
+  {
+    "text": "Открывшаяся перед глазами картина, без сомнения, могла быть названа обломками самой концепции «лаборатории»."
+  },
+  {
+    "text": "После разрушений такого масштаба не было бы странно увидеть на полу множество тел."
+  },
+  {
+    "text": "Но, в сравнении, здесь было гораздо чище, чем в том коридоре."
+  },
+  {
+    "speaker": "Мэй",
+    "text": "Мы... не там, где мы были только что.",
+    "sprite_left": "Mei 1.png",
+    "sprite_right": "Kiana 4.png",
+    "dim_override": "right"
+  },
+  {
+    "background": "seatitle04.jpg",
+    "text": "Эпизод 3: Разрушенное воссоединение"
+  },
+  {
+    "audio": "bronyaandseele.ogg",
+    "background": "inlab02.jpg",
+    "text": "Её руки не могли дотянуться до того силуэта."
+  },
+  {
+    "text": "Она не могла никого изменить и не могла изменить существующее положение вещей."
+  },
+  {
+    "text": "Пожалуй, эта погоня будет продолжаться так до тех пор, пока одна из сторон не остановится."
+  },
+  {
+    "speaker": "Броня",
+    "text": "Зеле——!",
+    "sprite_left": "Bronya 2.png",
+    "sprite_right": "Seele 1.png",
+    "dim_override": "right"
+  },
+  {
+    "text": "Словно услышав её зов, хозяйка силуэта впереди замерла, затем остановилась и обернулась."
+  },
+  {
+    "text": "Обернувшаяся девушка –"
+  },
+  {
+    "speaker": "Зеле",
+    "text": "Сестрица... Это сестрица Броня?..",
+    "sprite_right": "Seele 1.png",
+    "sprite_left": "Bronya 2.png",
+    "dim_override": "left"
+  },
+  {
+    "text": "– промолвила она."
+  },
+  {
+    "speaker": "Броня",
+    "text": "Зеле... Это правда ты...",
+    "sprite_left": "Bronya 2.png",
+    "sprite_right": "Seele 1.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Зеле",
+    "text": "И правда сестра Броня! Зеле, Зеле так по тебе скучала!",
+    "sprite_right": "Seele 1.png",
+    "sprite_left": "Bronya 2.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Броня",
+    "text": "Броня тоже. С тех пор, как полгода назад ты исчезла из приюта... Я думала, больше никогда тебя не увижу.",
+    "sprite_left": "Bronya 2.png",
+    "sprite_right": "Seele 1.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Зеле",
+    "text": "Полгода... Я не знаю, последнее, что я помню, было неделю назад...",
+    "sprite_right": "Seele 1.png",
+    "sprite_left": "Bronya 2.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Зеле",
+    "text": "Тогда проводился эксперимент, он был близок к успеху... Но после этого я ничего не могу вспомнить.",
+    "sprite_right": "Seele 1.png",
+    "sprite_left": "Bronya 2.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Броня",
+    "text": "Неделю назад... Неужели энергия Хоукая здесь исказила время?",
+    "sprite_left": "Bronya 2.png",
+    "sprite_right": "Seele 1.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Зеле",
+    "text": "Не знаю... Кажется, случилось что-то плохое. Каждый раз, когда Зеле пытается вспомнить, у неё сильно болит голова.",
+    "sprite_right": "Seele 1.png",
+    "sprite_left": "Bronya 2.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Броня",
+    "text": "Ничего, стоит только отсюда выбраться, и всё наладится.",
+    "sprite_left": "Bronya 2.png",
+    "sprite_right": "Seele 1.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Зеле",
+    "text": "Сестрица Броня...?",
+    "sprite_right": "Seele 1.png",
+    "sprite_left": "Bronya 2.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Броня",
+    "text": "Всё в порядке, рядом с Зеле... всегда будет Броня.",
+    "sprite_left": "Bronya 2.png",
+    "sprite_right": "Seele 1.png",
+    "dim_override": "right"
+  },
+  {
+    "audio": "blackseele.ogg",
+    "speaker": "Зеле",
+    "text": "С Броней рядом... О-о-о... Ты всё такая же наивная, как и прежде, старшая сестрица~",
+    "sprite_right": "Seele 1.png",
+    "sprite_left": "Bronya 2.png",
+    "dim_override": "left"
+  },
+  {
+    "audio": "seelehahaha.ogg",
+    "speaker": "Зеле",
+    "text": "...Ха-ха-ха-ха-ха-ха...",
+    "sprite_right": "Seele 2.png",
+    "sprite_left": "Bronya 2.png",
+    "dim_override": "left"
+  },
+  {
+    "audio": "blackseele.ogg",
+    "speaker": "Броня",
+    "text": "Зеле?",
+    "sprite_left": "Bronya 2.png",
+    "sprite_right": "Seele 2.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Зеле",
+    "text": "Как же абсурдно.",
+    "sprite_right": "Seele 2.png",
+    "sprite_left": "Bronya 2.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Броня",
+    "text": "Ты...",
+    "sprite_left": "Bronya 2.png",
+    "sprite_right": "Seele 2.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Зеле",
+    "text": "Эх, «не смотря ни на что, рядом с Зеле всегда будет Броня». Как мило.",
+    "sprite_right": "Seele 2.png",
+    "sprite_left": "Bronya 2.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Зеле",
+    "text": "Но, м, моя сестрица, почему в то время, когда Зеле больше всего нуждалась в тебе...",
+    "sprite_right": "Seele 2.png",
+    "sprite_left": "Bronya 2.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Зеле",
+    "text": "Чтобы спасти тебя, она приняла участие в эксперименте по модификации Х-10, получила огромное количество энергии Хоукая, и вытерпела немыслимую боль.",
+    "sprite_right": "Seele 2.png",
+    "sprite_left": "Bronya 2.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Зеле",
+    "text": "Чтобы пройти эксперимент, в тот момент была использована сила Стигматы, которую использовать не стоило, и даже так она была на грани исчезновения.",
+    "sprite_right": "Seele 2.png",
+    "sprite_left": "Bronya 2.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Зеле",
+    "text": "Даже так, она всё ещё продолжать звать тебя.",
+    "sprite_right": "Seele 2.png",
+    "sprite_left": "Bronya 2.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Зеле",
+    "text": "Тем не менее, однажды перейдя в квантовое состояние, она не может поддерживать собственное существование без наблюдателя.",
+    "sprite_right": "Seele 2.png",
+    "sprite_left": "Bronya 2.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Зеле",
+    "text": "Зеле бережёт свои мысли о тебе, как сундук с сокровищами.",
+    "sprite_right": "Seele 2.png",
+    "sprite_left": "Bronya 2.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Зеле",
+    "text": "Итак, моя сестрица, когда Зеле больше всего нуждалась в тебе...",
+    "sprite_right": "Seele 2.png",
+    "sprite_left": "Bronya 2.png",
+    "dim_override": "left"
+  },
+  {
+    "audio": "seelesister.ogg",
+    "speaker": "Зеле",
+    "text": "Где ты была?",
+    "sprite_right": "Seele 2.png",
+    "sprite_left": "Bronya 2.png",
+    "dim_override": "left"
+  },
+  {
+    "audio": null,
+    "background": "seatitle05.jpg",
+    "text": "Эпизод 4: Интерлюдия"
+  },
+  {
+    "audio": "inthelab.ogg",
+    "background": "inlab01.jpg",
+    "speaker": "Киана",
+    "text": "Здесь раньше была лаборатория, да...",
+    "sprite_left": "Kiana 1.png",
+    "sprite_right": "Mei 1.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "Да, но похоже, что её что-то разрушило.",
+    "sprite_right": "Mei 1.png",
+    "sprite_left": "Kiana 1.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Киана",
+    "text": "Неужели это был экспериментальный институт по созданию человекоподобного оружия, эксперимент провалился, оружие вышло из-под контроля и всё здесь разнесло?",
+    "sprite_left": "Kiana 1.png",
+    "sprite_right": "Mei 1.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "Не смешно.",
+    "sprite_right": "Mei 1.png",
+    "sprite_left": "Kiana 1.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Киана",
+    "text": "Кстати, Мэй, что ты ищешь?",
+    "sprite_left": "Kiana 1.png",
+    "sprite_right": "Mei 1.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "Если это эксперимент, то архивы и данные должны сохраниться в ключевой зоне. Взрыв таких масштабов вряд ли их уничтожил. Есть!",
+    "sprite_right": "Mei 1.png",
+    "sprite_left": "Kiana 1.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Киана",
+    "text": "Экспериментальные архивы?",
+    "sprite_left": "Kiana 1.png",
+    "sprite_right": "Mei 1.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "...Код эксперимента X-10... Цель эксперимента: модификация человеческого тела для выдерживания энергии Хоукая и управления тактическими меха.",
+    "sprite_right": "Mei 1.png",
+    "sprite_left": "Kiana 1.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "Пять неудачных экспериментов, подопытные... погибли. Последним подопытным была Зеле Фёллерай...",
+    "sprite_right": "Mei 1.png",
+    "sprite_left": "Kiana 1.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "Девушка по имени Зеле Фёллерай полностью подчинила энергию Хоукая, но эксперимент провалился, энергия Хоукая коллапсировала, подопытная сбежала... преобразовалась в квантовое состояние.",
+    "sprite_right": "Mei 1.png",
+    "sprite_left": "Kiana 1.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Киана",
+    "text": "Квантовое состояние? Что такое квантовое состояние, Мэй...",
+    "sprite_left": "Kiana 1.png",
+    "sprite_right": "Mei 1.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "Если она в квантовом состоянии... это значит, Зеле Фёллерай превратилась в вероятностное облако...",
+    "sprite_right": "Mei 1.png",
+    "sprite_left": "Kiana 1.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "Так она может существовать только при наличии определённого наблюдателя.",
+    "sprite_right": "Mei 1.png",
+    "sprite_left": "Kiana 1.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "Только если заставить её поверить, что за ней наблюдают и она всё ещё существует, она не исчезнет.",
+    "sprite_right": "Mei 1.png",
+    "sprite_left": "Kiana 1.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Киана",
+    "text": "Мэй, нет, нестабильная энергия Хоукая начинает бурлить...",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Mei 1.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Киана",
+    "text": "Это место скоро разрушится!",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Mei 1.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "Понятно, нам нужно срочно добраться до источника Хоукая.",
+    "sprite_right": "Mei 1.png",
+    "sprite_left": "Kiana 4.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Киана",
+    "text": "Источника Хоукая? Разве не стоит сначала выбраться отсюда?",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Mei 1.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "Если внезапная активность энергии Хоукая связана с Броней, мы обязаны пойти.",
+    "sprite_right": "Mei 1.png",
+    "sprite_left": "Kiana 4.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Киана",
+    "text": "Ладно... Дай-ка посмотреть, сейчас весь вихрь энергии Хоукая... его центр в том направлении!",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Mei 1.png",
+    "dim_override": "right"
+  },
+  {
+    "background": "seatitle06.jpg",
+    "text": "Конец: Последняя клятва"
+  },
+  {
+    "audio": "blackseele.ogg",
+    "background": "inlab02.jpg",
+    "speaker": "Зеле",
+    "text": "Только пока ты здесь Зеле может существовать, потому что, сестрица, ты особенная...",
+    "sprite_right": "Seele 2.png",
+    "sprite_left": "Bronya 2.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Зеле",
+    "text": "Пока ты здесь, Зеле будет верить в своё существование и не исчезнет...",
+    "sprite_right": "Seele 2.png",
+    "sprite_left": "Bronya 2.png",
+    "dim_override": "left"
+  },
+  {
+    "audio": "seelegoodie.ogg",
+    "speaker": "Зеле",
+    "text": "Пожалуйся, оставайся здесь навсегда ради Зеле~ Моя сестрица.",
+    "sprite_right": "Seele 2.png",
+    "sprite_left": "Bronya 2.png",
+    "dim_override": "left"
+  },
+  {
+    "audio": "blackseele.ogg",
+    "speaker": "Броня",
+    "text": "...",
+    "sprite_left": "Bronya 2.png",
+    "sprite_right": "Seele 2.png",
+    "dim_override": "right"
+  },
+  {
+    "text": "В чёрной тени парит юная девушка с высоко поднятой косой в руке."
+  },
+  {
+    "text": "А затем взмахнула..."
+  },
+  {
+    "speaker": "Киана",
+    "text": "Остановись!!",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Seele 2.png",
+    "dim_override": "right"
+  },
+  {
+    "background": "kianavsseele.jpg",
+    "text": "Пистолет в руке столкнулся с внешним лезвием косы."
+  },
+  {
+    "text": "Раздался лязг трения металла."
+  },
+  {
+    "text": "В мгновение противостояния тень за спиной Зеле шевельнулась."
+  },
+  {
+    "text": "Занесённая коса в одно мгновение изменила направление, рубя поперёк."
+  },
+  {
+    "text": "Казалось бы неизбежное рассечение не достигло ожидаемого эффекта."
+  },
+  {
+    "text": "Выстрел в упор попал в лезвие косы и в последнюю секунду с огромной ударной силой отбросил её."
+  },
+  {
+    "text": "Отсечено было всего лишь несколько волосков."
+  },
+  {
+    "background": "inlab02.jpg",
+    "speaker": "Зеле",
+    "text": "Ха, у тебя есть помощник?..",
+    "sprite_right": "Seele 2.png",
+    "sprite_left": "Kiana 4.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Киана",
+    "text": "Броня, ты что, одурела?! Вражеская коса уже у тебя у горла, а ты стоишь как вкопанная?",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Seele 2.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Броня",
+    "text": "Это не враг. Это Зеле. Это... моя младшая сестрица.",
+    "sprite_right": "Bronya 2.png",
+    "sprite_left": "Kiana 4.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Киана",
+    "text": "Вау, теперь твои сёстры то и дело норовят убить? Как-то жутковато.",
+    "sprite_left": "Kiana 4.png",
+    "sprite_right": "Bronya 2.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Броня",
+    "text": "Нет, это из-за меня Зеле стала такой.",
+    "sprite_right": "Bronya 2.png",
+    "sprite_left": "Kiana 4.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Броня",
+    "text": "Если бы я осталась, Зеле могла бы жить...",
+    "sprite_right": "Bronya 2.png",
+    "sprite_left": "Kiana 4.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "Не смей так говорить, Броня!",
+    "sprite_left": "Mei 1.png",
+    "sprite_right": "Bronya 2.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Мэй",
+    "text": "Ты прожила всё это время не для того, чтобы умереть сейчас.",
+    "sprite_left": "Mei 1.png",
+    "sprite_right": "Bronya 2.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Броня",
+    "text": "Сестрица Мэй...",
+    "sprite_right": "Bronya 2.png",
+    "sprite_left": "Mei 1.png",
+    "dim_override": "left"
+  },
+  {
+    "speaker": "Зеле",
+    "text": "Просто оставьте Броню здесь... тогда... Зеле будет счастлива.",
+    "sprite_left": "Seele 2.png",
+    "sprite_right": "Bronya 2.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Зеле",
+    "text": "Тогда я смогу полностью завладеть ею...",
+    "sprite_left": "Seele 2.png",
+    "sprite_right": "Bronya 2.png",
+    "dim_override": "right"
+  },
+  {
+    "text": "Чёрная тень внезапно расползлась."
+  },
+  {
+    "text": "Хоукай закружился в вихре в этих чёрных руках, словно пространство и измерения были всего лишь глиной, из которой можно лепить всё, что угодно."
+  },
+  {
+    "text": "Однако вихрь внезапно задрожал."
+  },
+  {
+    "text": "Вместе с ним чёрная тень болезненно изогнулась."
+  },
+  {
+    "speaker": "Зеле",
+    "text": "Нет...",
+    "sprite_left": "Seele 2.png",
+    "sprite_right": "Bronya 2.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Зеле",
+    "text": "Нельзя... нельзя... сестрице... Броне...",
+    "sprite_left": "Seele 2.png",
+    "sprite_right": "Bronya 2.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Зеле",
+    "text": "Чёрт, именно сейчас. Ты правда будешь мне мешать?",
+    "sprite_left": "Seele 2.png",
+    "sprite_right": "Bronya 2.png",
+    "dim_override": "right"
+  },
+  {
+    "text": "Ответа не последовало. Лишь чёрная тень сжалась ещё сильнее."
+  },
+  {
+    "text": "Возможно, этой воли уже было достаточно."
+  },
+  {
+    "speaker": "Зеле",
+    "text": "Ладно... Что ж, Броня, похоже, сегодня я тебя пощажу, но —",
+    "sprite_left": "Seele 2.png",
+    "sprite_right": "Bronya 2.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Зеле",
+    "text": "Когда-нибудь я заставлю тебя остаться с Зеле навсегда —",
+    "sprite_left": "Seele 2.png",
+    "sprite_right": "Bronya 2.png",
+    "dim_override": "right"
+  },
+  {
+    "speaker": "Броня",
+    "text": "Зеле...",
+    "sprite_right": "Bronya 2.png",
+    "sprite_left": "Seele 2.png",
+    "dim_override": "left"
+  },
+  {
+    "audio": "peace.ogg",
+    "background": "black.png",
+    "text": "Фигура девушки утонула во тьме."
+  },
+  {
+    "text": "Из-за хаотичного потока энергии Хоукая вся лаборатория задрожала."
+  },
+  {
+    "text": "Пространство исказилось, тело ощущало, как его с силой тянуло в сторону."
+  },
+  {
+    "text": "Но по сравнению с этой болью, настоящие страдания исходили от тревоги, что таилась в самой глубине сердца."
+  },
+  {
+    "text": "Словно это был сон."
+  },
+  {
+    "text": "Невероятно ужасный сон."
+  },
+  {
+    "text": "И даже пробудившись, в ушах ещё звучал его отзвук."
+  }
+      ]
+}
